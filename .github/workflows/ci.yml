@@ -56,7 +56,7 @@ jobs:
         run: flutter_rust_bridge_codegen generate
 
       - name: Format Dart code
-        run: dart format .
+        run: dart format . --language-version=3.9
 
       - name: Format Rust code
         run: cargo fmt --all
