@@ -20,8 +20,13 @@ jobs:
         with:
           name: pub-package
 
-      - name: Setup Dart
+      - name: Setup Dart (for OIDC auth)
         uses: dart-lang/setup-dart@v1
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
       - name: Publish to pub.dev
-        run: dart pub publish --force
+        run: flutter pub publish --force
