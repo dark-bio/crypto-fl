@@ -1,0 +1,22 @@
+# FVM Version Cache
+.fvm/
+
+# Dart/Flutter
+.dart_tool/
+.packages
+build/
+*.lock
+!pubspec.lock
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Rust
+rust/target/
