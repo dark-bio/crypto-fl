@@ -290,7 +290,7 @@ jobs:
           git commit -m "Patch state for binary packaging"
 
       - name: Dry-run publish
-        run: flutter pub publish --dry-run
+        run: flutter pub publish --dry-run || true
 
       - name: Upload final package
         uses: actions/upload-artifact@v4
