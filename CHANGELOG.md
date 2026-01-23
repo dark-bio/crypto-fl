@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- Remove stale duplicate FRB generated code
+
 ## 0.1.3
 
 - Fix iOS bundle to load statically
