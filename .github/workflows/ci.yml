@@ -46,6 +46,9 @@ jobs:
       - name: Regenerate bridge
         run: flutter_rust_bridge_codegen generate
 
+      - name: Patch FRB symbols for prefixing
+        run: dart run scripts/prefix_frb_symbols.dart
+
       - name: Format Dart code
         run: dart format . --language-version=3.9
 

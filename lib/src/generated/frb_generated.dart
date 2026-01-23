@@ -14,6 +14,7 @@ import 'api/xhpke.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
+import '../frb_prefixed_binding.dart';
 import 'frb_generated.io.dart'
     if (dart.library.js_interop) 'frb_generated.web.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
@@ -38,6 +39,51 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
       externalLibrary: externalLibrary,
       forceSameCodegenVersion: forceSameCodegenVersion,
     );
+  }
+
+  /// Override initImpl to use prefixed symbol lookups.
+  /// This avoids C symbol clashes when the app uses another FRB package.
+  @override
+  Future<void> initImpl({
+    RustLibApi? api,
+    BaseHandler? handler,
+    ExternalLibrary? externalLibrary,
+    bool forceSameCodegenVersion = true,
+  }) async {
+    final lib = externalLibrary ?? await loadExternalLibrary(kDefaultExternalLibraryLoaderConfig);
+    final h = handler ?? BaseHandler();
+    final binding = createPrefixedFrbRustBinding(lib);
+
+    // Sanity check with our prefixed binding
+    if (forceSameCodegenVersion) {
+      final rustHash = binding.getRustContentHash();
+      final dartHash = rustContentHash;
+      if (rustHash != dartHash) {
+        throw StateError(
+          'Content hash on Dart side ($dartHash) '
+          'is different from Rust side ($rustHash), indicating out-of-sync code. '
+          'This may happen when the Dart code is hot-restarted without recompiling Rust.',
+        );
+      }
+    }
+
+    // Initialize the binding
+    binding.storeDartPostCObject();
+    binding.initFrbDartApiDl();
+    binding.initShutdownWatcher();
+
+    final portManager = PortManager(binding, h);
+    final a = api ?? RustLibApiImpl(
+      handler: h,
+      wire: RustLibWire.fromExternalLibrary(lib),
+      generalizedFrbRustBinding: binding,
+      portManager: portManager,
+    );
+
+    // Use initMockImpl to set state without parent's sanity check,
+    // then manually run executeRustInitializers.
+    initMockImpl(api: a);
+    await executeRustInitializers();
   }
 
   /// Initialize flutter_rust_bridge in mock mode.

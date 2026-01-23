@@ -35,6 +35,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Install LLVM (for llvm-objcopy)
+        run: brew install llvm
+
       - name: Install iOS targets
         run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 
@@ -49,6 +52,12 @@ jobs:
       - name: Build iOS simulator (x86_64)
         run: cargo build --release --target x86_64-apple-ios
         working-directory: rust
+
+      - name: Prefix FRB symbols to avoid clashes
+        run: |
+          ./scripts/prefix_frb_symbols.sh rust/target/aarch64-apple-ios/release/lib${{ env.LIB_NAME }}.a
+          ./scripts/prefix_frb_symbols.sh rust/target/aarch64-apple-ios-sim/release/lib${{ env.LIB_NAME }}.a
+          ./scripts/prefix_frb_symbols.sh rust/target/x86_64-apple-ios/release/lib${{ env.LIB_NAME }}.a
 
       - name: Create simulator fat library
         run: |
@@ -77,6 +86,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Install LLVM (for llvm-objcopy)
+        run: brew install llvm
+
       - name: Install macOS targets
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
@@ -87,6 +99,11 @@ jobs:
       - name: Build macOS x86_64
         run: cargo build --release --target x86_64-apple-darwin
         working-directory: rust
+
+      - name: Prefix FRB symbols to avoid clashes
+        run: |
+          ./scripts/prefix_frb_symbols.sh rust/target/aarch64-apple-darwin/release/lib${{ env.LIB_NAME }}.a
+          ./scripts/prefix_frb_symbols.sh rust/target/x86_64-apple-darwin/release/lib${{ env.LIB_NAME }}.a
 
       - name: Create universal binary
         run: |

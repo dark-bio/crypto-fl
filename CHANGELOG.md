@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Patch binary symbol table on iOS/macOS for parallel loading
+
 ## 0.1.4
 
 - Remove stale duplicate FRB generated code
