@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'darkbio_crypto'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'Cryptography wrappers and primitives'
   s.homepage         = 'https://github.com/dark-bio/crypto-fl'
   s.license          = { :file => '../LICENSE' }
