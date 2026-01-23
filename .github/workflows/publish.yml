@@ -15,19 +15,13 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          cache: true
-
       - name: Download package
         uses: actions/download-artifact@v4
         with:
           name: pub-package
-          path: package
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
 
       - name: Publish to pub.dev
-        run: flutter pub publish --force
-        working-directory: package
+        run: dart pub publish --force
