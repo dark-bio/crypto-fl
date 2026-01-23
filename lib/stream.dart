@@ -1,3 +1,9 @@
+// crypto-fl: cryptography primitives and wrappers
+// Copyright 2026 Dark Bio AG. All rights reserved.
+//
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 /// I/O helper structs for age file encryption and decryption.
 ///
 /// The [STREAM](https://eprint.iacr.org/2015/189.pdf) construction for online
