@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Fix iOS bundle to load statically
+
 ## 0.1.2
 
 - Create whole outer wrapper for cleaner docs

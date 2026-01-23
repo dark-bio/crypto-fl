@@ -54,8 +54,18 @@
 /// - **stream**: STREAM encryption with ChaCha20-Poly1305
 library;
 
+import 'dart:io';
+
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+
 import 'src/generated/frb_generated.dart';
 
 /// Initializes the crypto library. Call this once at app startup before
 /// using any crypto functions.
-Future<void> init() => RustLib.init();
+Future<void> init() async {
+  ExternalLibrary? lib;
+  if (Platform.isIOS || Platform.isMacOS) {
+    lib = ExternalLibrary.process(iKnowHowToUseIt: true);
+  }
+  await RustLib.init(externalLibrary: lib);
+}
