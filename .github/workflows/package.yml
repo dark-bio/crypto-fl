@@ -265,6 +265,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Commit patched state to make flutter pub happy
+        run: |
+          git add .
+          git commit -m "Patch state for binary packaging"
+
       - name: Dry-run publish
         run: flutter pub publish --dry-run
 
