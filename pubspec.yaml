@@ -13,7 +13,7 @@ dependencies:
   cbor: ^6.3.7
   flutter:
     sdk: flutter
-  flutter_rust_bridge: 2.11.1
+  flutter_rust_bridge: ^2.11.1
   plugin_platform_interface: ^2.1.8
 
 dev_dependencies:

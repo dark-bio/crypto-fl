@@ -21,10 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter with FVM
+        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
         with:
-          channel: stable
           cache: true
 
       - name: Install dependencies
@@ -42,10 +41,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter with FVM
+        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
         with:
-          channel: stable
           cache: true
 
       - name: Install flutter_rust_bridge_codegen
@@ -90,10 +88,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter with FVM
+        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
         with:
-          channel: stable
           cache: true
 
       - name: Set up Java
@@ -120,10 +117,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter with FVM
+        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
         with:
-          channel: stable
           cache: true
 
       - name: Install iOS targets
