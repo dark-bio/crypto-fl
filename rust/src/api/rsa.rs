@@ -213,10 +213,4 @@ impl RsaFingerprint {
     pub fn to_bytes(&self) -> Vec<u8> {
         self.inner.to_bytes().to_vec()
     }
-
-    /// Returns the fingerprint as a hex string.
-    #[frb(sync)]
-    pub fn to_hex(&self) -> String {
-        hex::encode(self.inner.to_bytes())
-    }
 }

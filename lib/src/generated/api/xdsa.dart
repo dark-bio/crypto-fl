@@ -14,9 +14,6 @@ abstract class XdsaFingerprint implements RustOpaqueInterface {
 
   /// Serializes the fingerprint to a 32-byte array.
   Uint8List toBytes();
-
-  /// Returns the fingerprint as a hex string.
-  String toHex();
 }
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>>

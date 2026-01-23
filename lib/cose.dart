@@ -15,8 +15,24 @@ import 'dart:typed_data';
 import 'package:cbor/simple.dart' as cbor;
 
 import 'src/generated/api/cose.dart' as ffi;
-import 'xdsa.dart' as xdsa show SecretKey, PublicKey, Fingerprint, SecretKeyInternal, PublicKeyInternal, FingerprintInternal;
-import 'xhpke.dart' as xhpke show SecretKey, PublicKey, Fingerprint, SecretKeyInternal, PublicKeyInternal, FingerprintInternal;
+import 'xdsa.dart'
+    as xdsa
+    show
+        SecretKey,
+        PublicKey,
+        Fingerprint,
+        SecretKeyInternal,
+        PublicKeyInternal,
+        FingerprintInternal;
+import 'xhpke.dart'
+    as xhpke
+    show
+        SecretKey,
+        PublicKey,
+        Fingerprint,
+        SecretKeyInternal,
+        PublicKeyInternal,
+        FingerprintInternal;
 
 Uint8List _encode(Object? value) => Uint8List.fromList(cbor.cbor.encode(value));
 Object? _decode(Uint8List bytes) => cbor.cbor.decode(bytes);

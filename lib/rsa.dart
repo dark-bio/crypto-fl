@@ -128,9 +128,6 @@ class Fingerprint {
 
   /// Converts a fingerprint into a 32-byte array.
   Uint8List toBytes() => _inner.toBytes();
-
-  /// Returns the fingerprint as a hex string.
-  String toHex() => _inner.toHex();
 }
 
 // Internal accessors for cross-package use if needed
