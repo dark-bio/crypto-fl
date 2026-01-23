@@ -1,0 +1,16 @@
+name: darkbio_crypto_example
+description: Minimal example app for CI builds
+publish_to: 'none'
+version: 0.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  darkbio_crypto:
+    path: ../
+
+flutter:
+  uses-material-design: true

@@ -35,12 +35,11 @@ Uint8List key({
   int memory = 65536,
   int threads = 4,
   int length = 32,
-}) =>
-    ffi.argon2Key(
-      password: password,
-      salt: salt,
-      time: time,
-      memory: memory,
-      threads: threads,
-      keyLength: BigInt.from(length),
-    );
+}) => ffi.argon2Key(
+  password: password,
+  salt: salt,
+  time: time,
+  memory: memory,
+  threads: threads,
+  keyLength: BigInt.from(length),
+);

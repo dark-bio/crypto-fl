@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/pub/v/darkbio_crypto.svg)](https://pub.dev/packages/darkbio_crypto)
 
-This package is a Flutter/Dart wrapper around the Rust [`darkbio-crypto`](https://crates.io/crates/darkbio-crypto) library. Its purpose isn't to implement primitives, rather to expose the API surface of existing Rust libraries to Flutter; limited to the tiny subset needed by the Dark Bio project.
+This repository is parameter selection and lightweight wrapper around a number of Rust cryptographic libraries. Its purpose isn't to implement primitives, rather to unify the API surface of existing libraries; limited to the tiny subset needed by the Dark Bio project.
 
 The library is opinionated. Parameters and primitives were selected to provide matching levels of security in a post-quantum world. APIs were designed to make the library easy to use and hard to misuse. Flexibility will always be rejected in favor of safety.
 
@@ -28,14 +28,8 @@ The library is opinionated. Parameters and primitives were selected to provide m
   - **CBOR ([RFC-8949](https://datatracker.ietf.org/doc/html/rfc8949))**: restricted to `bool`,`null`, `integer`, `text`, `bytes`, `array`, `map[int]`, `option`
   - **COSE ([RFC-8152](https://datatracker.ietf.org/doc/html/rfc8152))**: `COSE_Sign1`, `COSE_Encrypt0`, `dark-bio-v1:` domain prefix
 
-All cryptographic operations run synchronously via FFI—no async overhead.
-
 ## Acknowledgements
 
 Shoutout to Filippo Valsorda ([@filosottile](https://github.com/filosottile)) for lots of tips and nudges on what kind of cryptographic primitives to use and how to combine them properly; and also for his work in general on cryptography standards.
 
 Naturally, many thanks to the authors of all the libraries this project depends on.
-
-## License
-
-BSD-3-Clause

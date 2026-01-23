@@ -17,13 +17,12 @@ Uint8List key({
   required Uint8List salt,
   required Uint8List info,
   int length = 32,
-}) =>
-    ffi.hkdfKey(
-      secret: secret,
-      salt: salt,
-      info: info,
-      length: BigInt.from(length),
-    );
+}) => ffi.hkdfKey(
+  secret: secret,
+  salt: salt,
+  info: info,
+  length: BigInt.from(length),
+);
 
 /// Generates a pseudorandom key for use with [expand] from an input secret
 /// and an optional independent salt.
@@ -31,10 +30,7 @@ Uint8List key({
 /// Only use this function if you need to reuse the extracted key with multiple
 /// [expand] invocations and different context values. Most common scenarios,
 /// including the generation of multiple keys, should use [key] instead.
-Uint8List extract({
-  required Uint8List secret,
-  required Uint8List salt,
-}) =>
+Uint8List extract({required Uint8List secret, required Uint8List salt}) =>
     ffi.hkdfExtract(secret: secret, salt: salt);
 
 /// Derives a key, using the given pseudorandom key and optional context info,
@@ -47,9 +43,4 @@ Uint8List expand({
   required Uint8List prk,
   required Uint8List info,
   int length = 32,
-}) =>
-    ffi.hkdfExpand(
-      prk: prk,
-      info: info,
-      length: BigInt.from(length),
-    );
+}) => ffi.hkdfExpand(prk: prk, info: info, length: BigInt.from(length));

@@ -64,3 +64,10 @@ android {
         }
     }
 }
+
+apply from: "../cargokit/gradle/plugin.gradle"
+cargokit {
+    manifestDir = "../rust"
+    libname = "darkbio_crypto_ffi"
+    buildMode = "release"
+}

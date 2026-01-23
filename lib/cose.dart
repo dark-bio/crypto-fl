@@ -30,13 +30,12 @@ Uint8List sign({
   required Object? msgToAuth,
   required xdsa.SecretKey signer,
   required Uint8List domain,
-}) =>
-    ffi.coseSign(
-      msgToEmbed: _encode(msgToEmbed),
-      msgToAuth: _encode(msgToAuth),
-      signer: signer,
-      domain: domain,
-    );
+}) => ffi.coseSign(
+  msgToEmbed: _encode(msgToEmbed),
+  msgToAuth: _encode(msgToAuth),
+  signer: signer,
+  domain: domain,
+);
 
 /// Creates a COSE_Sign1 digital signature without an embedded payload
 /// (i.e. payload is empty).
@@ -52,12 +51,11 @@ Uint8List signDetached({
   required Object? msgToAuth,
   required xdsa.SecretKey signer,
   required Uint8List domain,
-}) =>
-    ffi.coseSignDetached(
-      msgToAuth: _encode(msgToAuth),
-      signer: signer,
-      domain: domain,
-    );
+}) => ffi.coseSignDetached(
+  msgToAuth: _encode(msgToAuth),
+  signer: signer,
+  domain: domain,
+);
 
 /// Validates a COSE_Sign1 digital signature and returns the embedded payload.
 ///
@@ -77,13 +75,18 @@ T verify<T>({
   required Uint8List domain,
   int? maxDriftSecs,
 }) =>
-    _decode(ffi.coseVerify(
-      msgToCheck: msgToCheck,
-      msgToAuth: _encode(msgToAuth),
-      verifier: verifier,
-      domain: domain,
-      maxDriftSecs: maxDriftSecs != null ? BigInt.from(maxDriftSecs) : null,
-    )) as T;
+    _decode(
+          ffi.coseVerify(
+            msgToCheck: msgToCheck,
+            msgToAuth: _encode(msgToAuth),
+            verifier: verifier,
+            domain: domain,
+            maxDriftSecs: maxDriftSecs != null
+                ? BigInt.from(maxDriftSecs)
+                : null,
+          ),
+        )
+        as T;
 
 /// Validates a COSE_Sign1 digital signature with a detached payload.
 ///
@@ -100,14 +103,13 @@ void verifyDetached({
   required xdsa.PublicKey verifier,
   required Uint8List domain,
   int? maxDriftSecs,
-}) =>
-    ffi.coseVerifyDetached(
-      msgToCheck: msgToCheck,
-      msgToAuth: _encode(msgToAuth),
-      verifier: verifier,
-      domain: domain,
-      maxDriftSecs: maxDriftSecs != null ? BigInt.from(maxDriftSecs) : null,
-    );
+}) => ffi.coseVerifyDetached(
+  msgToCheck: msgToCheck,
+  msgToAuth: _encode(msgToAuth),
+  verifier: verifier,
+  domain: domain,
+  maxDriftSecs: maxDriftSecs != null ? BigInt.from(maxDriftSecs) : null,
+);
 
 /// Extracts the signer's fingerprint from a COSE_Sign1 signature without
 /// verifying it.
@@ -157,13 +159,12 @@ Uint8List encrypt({
   required Object? msgToAuth,
   required xhpke.PublicKey recipient,
   required Uint8List domain,
-}) =>
-    ffi.coseEncrypt(
-      sign1: sign1,
-      msgToAuth: _encode(msgToAuth),
-      recipient: recipient,
-      domain: domain,
-    );
+}) => ffi.coseEncrypt(
+  sign1: sign1,
+  msgToAuth: _encode(msgToAuth),
+  recipient: recipient,
+  domain: domain,
+);
 
 /// Decrypts a sealed message without verifying the signature.
 ///
@@ -182,13 +183,12 @@ Uint8List decrypt({
   required Object? msgToAuth,
   required xhpke.SecretKey recipient,
   required Uint8List domain,
-}) =>
-    ffi.coseDecrypt(
-      msgToOpen: msgToOpen,
-      msgToAuth: _encode(msgToAuth),
-      recipient: recipient,
-      domain: domain,
-    );
+}) => ffi.coseDecrypt(
+  msgToOpen: msgToOpen,
+  msgToAuth: _encode(msgToAuth),
+  recipient: recipient,
+  domain: domain,
+);
 
 /// Signs a message then encrypts it to a recipient.
 ///
@@ -209,14 +209,13 @@ Uint8List seal({
   required xdsa.SecretKey signer,
   required xhpke.PublicKey recipient,
   required Uint8List domain,
-}) =>
-    ffi.coseSeal(
-      msgToSeal: _encode(msgToSeal),
-      msgToAuth: _encode(msgToAuth),
-      signer: signer,
-      recipient: recipient,
-      domain: domain,
-    );
+}) => ffi.coseSeal(
+  msgToSeal: _encode(msgToSeal),
+  msgToAuth: _encode(msgToAuth),
+  signer: signer,
+  recipient: recipient,
+  domain: domain,
+);
 
 /// Decrypts and verifies a sealed message.
 ///
@@ -238,11 +237,16 @@ T open<T>({
   required Uint8List domain,
   int? maxDriftSecs,
 }) =>
-    _decode(ffi.coseOpen(
-      msgToOpen: msgToOpen,
-      msgToAuth: _encode(msgToAuth),
-      recipient: recipient,
-      sender: sender,
-      domain: domain,
-      maxDriftSecs: maxDriftSecs != null ? BigInt.from(maxDriftSecs) : null,
-    )) as T;
+    _decode(
+          ffi.coseOpen(
+            msgToOpen: msgToOpen,
+            msgToAuth: _encode(msgToAuth),
+            recipient: recipient,
+            sender: sender,
+            domain: domain,
+            maxDriftSecs: maxDriftSecs != null
+                ? BigInt.from(maxDriftSecs)
+                : null,
+          ),
+        )
+        as T;

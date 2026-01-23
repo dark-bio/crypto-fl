@@ -13,17 +13,11 @@ import 'src/generated/api/stream.dart' as ffi;
 /// Wraps `STREAM` encryption under the given [key].
 ///
 /// [key] must **never** be repeated across multiple streams.
-Uint8List encrypt({
-  required Uint8List key,
-  required Uint8List plaintext,
-}) =>
+Uint8List encrypt({required Uint8List key, required Uint8List plaintext}) =>
     ffi.streamEncrypt(key: key, plaintext: plaintext);
 
 /// Wraps `STREAM` decryption under the given [key].
 ///
 /// [key] must **never** be repeated across multiple streams.
-Uint8List decrypt({
-  required Uint8List key,
-  required Uint8List ciphertext,
-}) =>
+Uint8List decrypt({required Uint8List key, required Uint8List ciphertext}) =>
     ffi.streamDecrypt(key: key, ciphertext: ciphertext);

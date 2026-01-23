@@ -11,6 +11,7 @@ apply plugin: CargoKitPlugin
 class CargoKitExtension {
     String manifestDir; // Relative path to folder containing Cargo.toml
     String libname; // Library name within Cargo.toml. Must be a cdylib
+    String buildMode; // Optional: force build mode (e.g., "release" to always build release)
 }
 
 abstract class CargoKitBuildTask extends DefaultTask {
@@ -154,7 +155,7 @@ class CargoKitPlugin implements Plugin<Project> {
                 }
 
                 def task = project.tasks.create(taskName, CargoKitBuildTask.class) {
-                    buildMode = variant.buildType.name
+                    buildMode = project.cargokit.buildMode ?: variant.buildType.name
                     buildDir = cargoBuildDir
                     outputDir = cargoOutputDir
                     ndkVersion = plugin.project.android.ndkVersion

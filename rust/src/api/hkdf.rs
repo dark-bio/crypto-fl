@@ -21,5 +21,7 @@ pub fn hkdf_expand(prk: Vec<u8>, info: Vec<u8>, length: usize) -> Result<Vec<u8>
         .try_into()
         .map_err(|_| "Invalid PRK length, expected 32 bytes".to_string())?;
 
-    Ok(darkbio_crypto::hkdf::expand_with_len(prk_array, &info, length))
+    Ok(darkbio_crypto::hkdf::expand_with_len(
+        prk_array, &info, length,
+    ))
 }

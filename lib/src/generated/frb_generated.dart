@@ -77,7 +77,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
-        stem: 'darkbio_crypto_flutter',
+        stem: 'darkbio_crypto_ffi',
         ioDirectory: 'rust/target/release/',
         webPrefix: 'pkg/',
       );
