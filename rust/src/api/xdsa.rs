@@ -171,6 +171,7 @@ impl XdsaPublicKey {
     /// - `is_ca`: Whether this is a CA certificate
     /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
     #[frb(sync)]
+    #[allow(clippy::too_many_arguments)]
     pub fn to_cert_der(
         &self,
         signer: &super::xdsa::XdsaSecretKey,
@@ -205,6 +206,7 @@ impl XdsaPublicKey {
     /// - `is_ca`: Whether this is a CA certificate
     /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
     #[frb(sync)]
+    #[allow(clippy::too_many_arguments)]
     pub fn to_cert_pem(
         &self,
         signer: &super::xdsa::XdsaSecretKey,

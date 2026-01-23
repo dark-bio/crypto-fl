@@ -26,9 +26,6 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -49,9 +46,6 @@ jobs:
         with:
           channel: stable
           cache: true
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
 
       - name: Install flutter_rust_bridge_codegen
         run: cargo install flutter_rust_bridge_codegen
@@ -107,9 +101,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Install Android targets
         run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
 
@@ -133,9 +124,6 @@ jobs:
         with:
           channel: stable
           cache: true
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
 
       - name: Install iOS targets
         run: rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
