@@ -1,0 +1,270 @@
+name: package
+
+on:
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+  LIB_NAME: darkbio_crypto_ffi
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Android targets
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Build Android libraries
+        run: cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 --platform 24 -o ./jniLibs build --release
+        working-directory: rust
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-libs
+          path: rust/jniLibs
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install iOS targets
+        run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
+
+      - name: Build iOS device
+        run: cargo build --release --target aarch64-apple-ios
+        working-directory: rust
+
+      - name: Build iOS simulator (arm64)
+        run: cargo build --release --target aarch64-apple-ios-sim
+        working-directory: rust
+
+      - name: Build iOS simulator (x86_64)
+        run: cargo build --release --target x86_64-apple-ios
+        working-directory: rust
+
+      - name: Create simulator fat library
+        run: |
+          mkdir -p ios-sim-universal
+          lipo -create \
+            rust/target/aarch64-apple-ios-sim/release/lib${{ env.LIB_NAME }}.a \
+            rust/target/x86_64-apple-ios/release/lib${{ env.LIB_NAME }}.a \
+            -output ios-sim-universal/lib${{ env.LIB_NAME }}.a
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -library rust/target/aarch64-apple-ios/release/lib${{ env.LIB_NAME }}.a \
+            -library ios-sim-universal/lib${{ env.LIB_NAME }}.a \
+            -output ${{ env.LIB_NAME }}.xcframework
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-xcframework
+          path: ${{ env.LIB_NAME }}.xcframework
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install macOS targets
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Build macOS arm64
+        run: cargo build --release --target aarch64-apple-darwin
+        working-directory: rust
+
+      - name: Build macOS x86_64
+        run: cargo build --release --target x86_64-apple-darwin
+        working-directory: rust
+
+      - name: Create universal binary
+        run: |
+          mkdir -p macos-lib
+          lipo -create \
+            rust/target/aarch64-apple-darwin/release/lib${{ env.LIB_NAME }}.a \
+            rust/target/x86_64-apple-darwin/release/lib${{ env.LIB_NAME }}.a \
+            -output macos-lib/lib${{ env.LIB_NAME }}.a
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-lib
+          path: macos-lib
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build Linux x86_64
+        run: cargo build --release --target x86_64-unknown-linux-gnu
+        working-directory: rust
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p linux-lib
+          cp rust/target/x86_64-unknown-linux-gnu/release/lib${{ env.LIB_NAME }}.so linux-lib/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-lib
+          path: linux-lib
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build Windows x86_64
+        run: cargo build --release --target x86_64-pc-windows-msvc
+        working-directory: rust
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p windows-lib
+          cp rust/target/x86_64-pc-windows-msvc/release/${{ env.LIB_NAME }}.dll windows-lib/
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-lib
+          path: windows-lib
+
+  dry-run:
+    needs: [android, ios, macos, linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download Android libs
+        uses: actions/download-artifact@v4
+        with:
+          name: android-libs
+          path: android/src/main/jniLibs
+
+      - name: Download iOS xcframework
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-xcframework
+          path: ios/${{ env.LIB_NAME }}.xcframework
+
+      - name: Download macOS lib
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-lib
+          path: macos/Libs
+
+      - name: Download Linux lib
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-lib
+          path: linux/libs
+
+      - name: Download Windows lib
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-lib
+          path: windows/libs
+
+      - name: Remove cargokit and rust source
+        run: rm -rf cargokit rust
+
+      - name: Patch iOS podspec
+        run: |
+          cat > ios/darkbio_crypto.podspec << 'EOF'
+          Pod::Spec.new do |s|
+            s.name             = 'darkbio_crypto'
+            s.version          = '0.1.0'
+            s.summary          = 'Cryptography wrappers and primitives'
+            s.homepage         = 'https://github.com/dark-bio/crypto-fl'
+            s.license          = { :file => '../LICENSE' }
+            s.author           = { 'Dark Bio AG' => 'peter@dark.bio' }
+            s.source           = { :path => '.' }
+            s.source_files     = 'Classes/**/*'
+            s.dependency 'Flutter'
+            s.platform         = :ios, '13.0'
+            s.swift_version    = '5.0'
+            s.vendored_frameworks = 'darkbio_crypto_ffi.xcframework'
+            s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
+          end
+          EOF
+
+      - name: Patch macOS podspec
+        run: |
+          cat > macos/darkbio_crypto.podspec << 'EOF'
+          Pod::Spec.new do |s|
+            s.name             = 'darkbio_crypto'
+            s.version          = '0.1.0'
+            s.summary          = 'Cryptography wrappers and primitives'
+            s.homepage         = 'https://github.com/dark-bio/crypto-fl'
+            s.license          = { :file => '../LICENSE' }
+            s.author           = { 'Dark Bio AG' => 'peter@dark.bio' }
+            s.source           = { :path => '.' }
+            s.source_files     = 'Classes/**/*'
+            s.dependency 'FlutterMacOS'
+            s.platform         = :osx, '10.11'
+            s.swift_version    = '5.0'
+            s.vendored_libraries = 'Libs/libdarkbio_crypto_ffi.a'
+            s.pod_target_xcconfig = {
+              'DEFINES_MODULE' => 'YES',
+              'OTHER_LDFLAGS' => '-force_load $(PODS_TARGET_SRCROOT)/Libs/libdarkbio_crypto_ffi.a',
+            }
+          end
+          EOF
+
+      - name: Patch Linux CMakeLists
+        run: |
+          cat > linux/CMakeLists.txt << 'EOF'
+          cmake_minimum_required(VERSION 3.10)
+          set(PROJECT_NAME "darkbio_crypto")
+          project(${PROJECT_NAME} LANGUAGES CXX)
+          set(darkbio_crypto_bundled_libraries
+            "${CMAKE_CURRENT_SOURCE_DIR}/libs/libdarkbio_crypto_ffi.so"
+            PARENT_SCOPE
+          )
+          EOF
+
+      - name: Patch Windows CMakeLists
+        run: |
+          cat > windows/CMakeLists.txt << 'EOF'
+          cmake_minimum_required(VERSION 3.14)
+          set(PROJECT_NAME "darkbio_crypto")
+          project(${PROJECT_NAME} LANGUAGES CXX)
+          set(darkbio_crypto_bundled_libraries
+            "${CMAKE_CURRENT_SOURCE_DIR}/libs/darkbio_crypto_ffi.dll"
+            PARENT_SCOPE
+          )
+          EOF
+
+      - name: Patch Android build.gradle
+        run: |
+          sed -i '/apply from:.*cargokit/d' android/build.gradle
+          sed -i '/^cargokit {/,/^}/d' android/build.gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dry-run publish
+        run: flutter pub publish --dry-run
+
+      - name: Upload final package
+        uses: actions/upload-artifact@v4
+        with:
+          name: pub-package
+          path: |
+            .
+            !.git

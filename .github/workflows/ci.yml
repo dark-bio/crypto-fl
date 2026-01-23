@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  LIB_NAME: darkbio_crypto_ffi
 
 jobs:
   build:
@@ -138,3 +139,6 @@ jobs:
       - name: Build iOS (simulator)
         run: flutter build ios --debug --no-codesign --simulator
         working-directory: example
+
+  package:
+    uses: ./.github/workflows/package.yml

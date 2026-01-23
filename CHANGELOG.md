@@ -1,0 +1,5 @@
+# Changelog
+
+## 0.1.0
+
+- Test release wrapping the darkbio-crypto v0.11.4 Rust crate
