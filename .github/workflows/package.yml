@@ -267,6 +267,8 @@ jobs:
 
       - name: Commit patched state to make flutter pub happy
         run: |
+          git config user.name "cibot"
+          git config user.email "cibot@dark.bio"
           git add .
           git commit -m "Patch state for binary packaging"
 
