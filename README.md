@@ -7,7 +7,7 @@ This repository is parameter selection and lightweight wrapper around a number o
 
 The library is opinionated. Parameters and primitives were selected to provide matching levels of security in a post-quantum world. APIs were designed to make the library easy to use and hard to misuse. Flexibility will always be rejected in favor of safety.
 
-![](./doc/overview.png)
+![](doc/overview.png)
 
 - Certificates
   - **x509 ([RFC-5280](https://datatracker.ietf.org/doc/html/rfc5280))**: `xDSA`, `xHPKE`
