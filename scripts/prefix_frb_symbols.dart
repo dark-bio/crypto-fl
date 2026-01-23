@@ -11,7 +11,7 @@ const prefix = 'darkbio_crypto_';
 
 void main() {
   patchDart();
-  print('Done. FRB Dart code patched to use prefixed symbols.');
+  stderr.writeln('Done. FRB Dart code patched to use prefixed symbols.');
 }
 
 void patchDart() {
@@ -111,5 +111,5 @@ void patchDart() {
   }
 
   file.writeAsStringSync(content);
-  print('Patched: ${file.path}');
+  stderr.writeln('Patched: ${file.path}');
 }
