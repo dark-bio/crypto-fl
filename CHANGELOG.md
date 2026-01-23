@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Create whole outer wrapper for cleaner docs
+
 ## 0.1.1
 
 - Version bump for pub.dev publishing

@@ -15,8 +15,8 @@ import 'dart:typed_data';
 import 'package:cbor/simple.dart' as cbor;
 
 import 'src/generated/api/cose.dart' as ffi;
-import 'xdsa.dart' as xdsa;
-import 'xhpke.dart' as xhpke;
+import 'xdsa.dart' as xdsa show SecretKey, PublicKey, Fingerprint, SecretKeyInternal, PublicKeyInternal, FingerprintInternal;
+import 'xhpke.dart' as xhpke show SecretKey, PublicKey, Fingerprint, SecretKeyInternal, PublicKeyInternal, FingerprintInternal;
 
 Uint8List _encode(Object? value) => Uint8List.fromList(cbor.cbor.encode(value));
 Object? _decode(Uint8List bytes) => cbor.cbor.decode(bytes);
@@ -39,7 +39,7 @@ Uint8List sign({
 }) => ffi.coseSign(
   msgToEmbed: _encode(msgToEmbed),
   msgToAuth: _encode(msgToAuth),
-  signer: signer,
+  signer: signer.inner,
   domain: domain,
 );
 
@@ -59,7 +59,7 @@ Uint8List signDetached({
   required Uint8List domain,
 }) => ffi.coseSignDetached(
   msgToAuth: _encode(msgToAuth),
-  signer: signer,
+  signer: signer.inner,
   domain: domain,
 );
 
@@ -85,7 +85,7 @@ T verify<T>({
           ffi.coseVerify(
             msgToCheck: msgToCheck,
             msgToAuth: _encode(msgToAuth),
-            verifier: verifier,
+            verifier: verifier.inner,
             domain: domain,
             maxDriftSecs: maxDriftSecs != null
                 ? BigInt.from(maxDriftSecs)
@@ -112,7 +112,7 @@ void verifyDetached({
 }) => ffi.coseVerifyDetached(
   msgToCheck: msgToCheck,
   msgToAuth: _encode(msgToAuth),
-  verifier: verifier,
+  verifier: verifier.inner,
   domain: domain,
   maxDriftSecs: maxDriftSecs != null ? BigInt.from(maxDriftSecs) : null,
 );
@@ -125,7 +125,7 @@ void verifyDetached({
 ///
 /// Returns the signer's fingerprint from the protected header's `kid` field.
 xdsa.Fingerprint signer({required Uint8List signature}) =>
-    ffi.coseSigner(signature: signature);
+    xdsa.FingerprintInternal.wrap(ffi.coseSigner(signature: signature));
 
 /// Extracts the embedded payload from a COSE_Sign1 signature without
 /// verifying it.
@@ -146,7 +146,7 @@ T peek<T>({required Uint8List signature}) =>
 ///
 /// Returns the recipient's fingerprint from the protected header's `kid` field.
 xhpke.Fingerprint recipient({required Uint8List ciphertext}) =>
-    ffi.coseRecipient(ciphertext: ciphertext);
+    xhpke.FingerprintInternal.wrap(ffi.coseRecipient(ciphertext: ciphertext));
 
 /// Encrypts an already-signed COSE_Sign1 to a recipient.
 ///
@@ -168,7 +168,7 @@ Uint8List encrypt({
 }) => ffi.coseEncrypt(
   sign1: sign1,
   msgToAuth: _encode(msgToAuth),
-  recipient: recipient,
+  recipient: recipient.inner,
   domain: domain,
 );
 
@@ -192,7 +192,7 @@ Uint8List decrypt({
 }) => ffi.coseDecrypt(
   msgToOpen: msgToOpen,
   msgToAuth: _encode(msgToAuth),
-  recipient: recipient,
+  recipient: recipient.inner,
   domain: domain,
 );
 
@@ -218,8 +218,8 @@ Uint8List seal({
 }) => ffi.coseSeal(
   msgToSeal: _encode(msgToSeal),
   msgToAuth: _encode(msgToAuth),
-  signer: signer,
-  recipient: recipient,
+  signer: signer.inner,
+  recipient: recipient.inner,
   domain: domain,
 );
 
@@ -247,8 +247,8 @@ T open<T>({
           ffi.coseOpen(
             msgToOpen: msgToOpen,
             msgToAuth: _encode(msgToAuth),
-            recipient: recipient,
-            sender: sender,
+            recipient: recipient.inner,
+            sender: sender.inner,
             domain: domain,
             maxDriftSecs: maxDriftSecs != null
                 ? BigInt.from(maxDriftSecs)
