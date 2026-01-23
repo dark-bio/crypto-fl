@@ -11,13 +11,8 @@ env:
   LIB_NAME: darkbio_crypto_ffi
 
 jobs:
-  build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macOS-latest ]
-
+  analyze:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
@@ -31,10 +26,6 @@ jobs:
 
       - name: Analyze Dart code
         run: flutter analyze
-
-      - name: Build Rust library
-        run: cargo build --verbose
-        working-directory: rust
 
   generate:
     runs-on: ubuntu-latest
@@ -82,59 +73,6 @@ jobs:
       - name: Build Rust docs
         run: cargo doc --all-features --no-deps
         working-directory: rust
-
-  android:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          cache: true
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Install Android targets
-        run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
-
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build Android APK
-        run: flutter build apk --debug
-        working-directory: example
-
-  ios:
-    runs-on: macOS-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Setup Flutter with FVM
-        uses: kuhnroyal/flutter-fvm-config-action/setup@v3
-        with:
-          cache: true
-
-      - name: Install iOS targets
-        run: rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build iOS (device)
-        run: flutter build ios --debug --no-codesign
-        working-directory: example
-
-      - name: Build iOS (simulator)
-        run: flutter build ios --debug --no-codesign --simulator
-        working-directory: example
 
   package:
     uses: ./.github/workflows/package.yml
