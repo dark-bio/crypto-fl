@@ -50,7 +50,9 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
     ExternalLibrary? externalLibrary,
     bool forceSameCodegenVersion = true,
   }) async {
-    final lib = externalLibrary ?? await loadExternalLibrary(kDefaultExternalLibraryLoaderConfig);
+    final lib =
+        externalLibrary ??
+        await loadExternalLibrary(kDefaultExternalLibraryLoaderConfig);
     final h = handler ?? BaseHandler();
     final binding = createPrefixedFrbRustBinding(lib);
 
@@ -73,12 +75,14 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
     binding.initShutdownWatcher();
 
     final portManager = PortManager(binding, h);
-    final a = api ?? RustLibApiImpl(
-      handler: h,
-      wire: RustLibWire.fromExternalLibrary(lib),
-      generalizedFrbRustBinding: binding,
-      portManager: portManager,
-    );
+    final a =
+        api ??
+        RustLibApiImpl(
+          handler: h,
+          wire: RustLibWire.fromExternalLibrary(lib),
+          generalizedFrbRustBinding: binding,
+          portManager: portManager,
+        );
 
     // Use initMockImpl to set state without parent's sanity check,
     // then manually run executeRustInitializers.

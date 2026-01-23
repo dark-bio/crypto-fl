@@ -3,6 +3,7 @@
 ## 0.2.0
 
 - Patch binary symbol table on iOS/macOS for parallel loading
+- Wrap darkbio-crypto v0.11.5 to fix an upstream version issue
 
 ## 0.1.4
 

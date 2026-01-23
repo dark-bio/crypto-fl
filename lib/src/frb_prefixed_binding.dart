@@ -55,10 +55,9 @@ ffi.Pointer<T> _prefixedLookup<T extends ffi.NativeType>(
   ffi.DynamicLibrary lib,
   String symbolName,
 ) {
-  final name =
-      _usePrefixedSymbols && _symbolsToPrefix.contains(symbolName)
-          ? '$_prefix$symbolName'
-          : symbolName;
+  final name = _usePrefixedSymbols && _symbolsToPrefix.contains(symbolName)
+      ? '$_prefix$symbolName'
+      : symbolName;
   return lib.lookup<T>(name);
 }
 
@@ -82,7 +81,7 @@ class _PrefixedGeneralizedFrbRustBinding extends GeneralizedFrbRustBinding {
   static _ShutdownWatcherPrefixed? _prefixedShutdownWatcher;
 
   _PrefixedGeneralizedFrbRustBinding(super.externalLibrary)
-      : _lib = externalLibrary.ffiDynamicLibrary {
+    : _lib = externalLibrary.ffiDynamicLibrary {
     _prefixedBinding = MultiPackageCBinding.fromLookup(
       <T extends ffi.NativeType>(String name) => _prefixedLookup<T>(_lib, name),
     );
@@ -99,8 +98,9 @@ class _PrefixedGeneralizedFrbRustBinding extends GeneralizedFrbRustBinding {
 
   @override
   void initFrbDartApiDl() {
-    _prefixedBinding
-        .frb_init_frb_dart_api_dl(ffi.NativeApi.initializeApiDLData);
+    _prefixedBinding.frb_init_frb_dart_api_dl(
+      ffi.NativeApi.initializeApiDLData,
+    );
   }
 
   @override
@@ -215,7 +215,7 @@ final class _ShutdownWatcherPrefixed implements ffi.Finalizable {
   final ffi.NativeFinalizer _finalizer;
 
   _ShutdownWatcherPrefixed(ffi.Pointer<ffi.NativeFinalizerFunction> callback)
-      : _finalizer = ffi.NativeFinalizer(callback) {
+    : _finalizer = ffi.NativeFinalizer(callback) {
     _finalizer.attach(this, ffi.Pointer.fromAddress(0));
   }
 }
