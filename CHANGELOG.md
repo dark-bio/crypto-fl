@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Fix iOS symbol stripping in published package
+- Wrap darkbio-crypto v0.11.6
+
 ## 0.2.0
 
 - Patch binary symbol table on iOS/macOS for parallel loading

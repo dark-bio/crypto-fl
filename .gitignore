@@ -5,7 +5,6 @@
 .dart_tool/
 .packages
 build/
-*.lock
 !pubspec.lock
 
 # IDE
@@ -17,6 +16,3 @@ build/
 
 # macOS
 .DS_Store
-
-# Rust
-rust/target/
