@@ -7,6 +7,7 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api/argon2.dart';
+import 'api/cbor.dart';
 import 'api/cose.dart';
 import 'api/hkdf.dart';
 import 'api/rand.dart';

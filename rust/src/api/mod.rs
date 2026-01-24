@@ -5,6 +5,7 @@
 // license that can be found in the LICENSE file.
 
 pub mod argon2;
+pub mod cbor;
 pub mod cose;
 pub mod hkdf;
 pub mod rand;
