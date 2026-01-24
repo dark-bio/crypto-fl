@@ -3,7 +3,7 @@
 [![](https://img.shields.io/pub/v/darkbio_crypto.svg)](https://pub.dev/packages/darkbio_crypto)
 [![tests](https://github.com/dark-bio/crypto-fl/actions/workflows/ci.yml/badge.svg)](https://github.com/dark-bio/crypto-fl/actions/workflows/ci.yml)
 
-This repository is parameter selection and lightweight wrapper around a number of Rust cryptographic libraries. Its purpose isn't to implement primitives, rather to unify the API surface of existing libraries; limited to the tiny subset needed by the Dark Bio project.
+This repository is parameter selection and lightweight wrapper around a number of (FFI wrapped) Rust cryptographic libraries. Its purpose isn't to implement primitives, rather to unify the API surface of existing libraries; limited to the tiny subset needed by the Dark Bio project.
 
 The library is opinionated. Parameters and primitives were selected to provide matching levels of security in a post-quantum world. APIs were designed to make the library easy to use and hard to misuse. Flexibility will always be rejected in favor of safety.
 
@@ -26,8 +26,17 @@ The library is opinionated. Parameters and primitives were selected to provide m
   - **Argon2 ([RFC-9106](https://datatracker.ietf.org/doc/html/rfc9106))**: `id` variant
   - **HKDF ([RFC-5869](https://datatracker.ietf.org/doc/html/rfc5869))**: `SHA256`
 - Serialization
-  - **CBOR ([RFC-8949](https://datatracker.ietf.org/doc/html/rfc8949))**: restricted to `bool`,`null`, `integer`, `text`, `bytes`, `array`, `map[int]`, `option`
+  - **CBOR¹ ([RFC-8949](https://datatracker.ietf.org/doc/html/rfc8949))**: restricted to `bool`,`null`, `integer`, `text`, `bytes`, `array`, `map[int]`, `option`
   - **COSE ([RFC-8152](https://datatracker.ietf.org/doc/html/rfc8152))**: `COSE_Sign1`, `COSE_Encrypt0`, `dark-bio-v1:` domain prefix
+
+*¹ As CBOR encoding/decoding would require a full reimplementation in Dart, that is delegated to any preferred 3rd party library. To ensure correctness, this package provides a `cbor.verify`, which it also implicitly enforces that when crossing through `cose`.*
+
+## Native packages
+
+The underlying implementation exists in two sibling repos, which track the same feature set and API surfaces, released at corresponding version points.
+
+- Rust [`github.com/dark-bio/crypto-rs`](https://github.com/dark-bio/crypto-rs)
+- Go [`github.com/dark-bio/crypto-go`](https://github.com/dark-bio/crypto-go)
 
 ## Acknowledgements
 

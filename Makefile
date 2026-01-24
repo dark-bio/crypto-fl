@@ -1,4 +1,4 @@
-.PHONY: generate format build-ios prefix-frb-symbols
+.PHONY: generate format version
 
 format:
 	fvm dart format . --language-version=3.9
@@ -10,12 +10,12 @@ generate:
 	fvm dart format . --language-version=3.9
 	cargo fmt --all --manifest-path rust/Cargo.toml
 
-# Build iOS static libraries with prefixed FRB symbols to avoid clashes
-build-ios:
-	cd rust && cargo build --release --target aarch64-apple-ios
-	cd rust && cargo build --release --target aarch64-apple-ios-sim
-	./scripts/prefix_frb_symbols.sh
-
-# Prefix FRB symbols in already-built iOS static libraries
-prefix-frb-symbols:
-	./scripts/prefix_frb_symbols.sh
+version:
+ifndef VERSION
+	$(error VERSION is not set. Usage: make version VERSION=x.y.z)
+endif
+	@echo "Setting version to $(VERSION)"
+	sed -i '' 's/^version: .*/version: $(VERSION)/' pubspec.yaml
+	sed -i '' "s/^version = .*/version = \"$(VERSION)\"/" rust/Cargo.toml
+	sed -i '' "s/s\.version .*/s.version          = '$(VERSION)'/" ios/darkbio_crypto.podspec
+	sed -i '' "s/s\.version .*/s.version          = '$(VERSION)'/" macos/darkbio_crypto.podspec

@@ -1,13 +1,13 @@
 [package]
 name = "darkbio_crypto_ffi"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-darkbio-crypto = { version = "0.11.6", features = ["argon2", "cbor", "cose", "hkdf", "rand", "rsa", "stream", "xdsa", "xhpke"] }
+darkbio-crypto = { version = "0.11.7", features = ["argon2", "cbor", "cose", "hkdf", "rand", "rsa", "stream", "xdsa", "xhpke"] }
 flutter_rust_bridge = "=2.11.1"
 hex = "0.4"
 

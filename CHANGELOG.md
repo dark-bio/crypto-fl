@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- Expose CBOR verification, enforce it through COSE
+- Wrap darkbio-crypto v0.11.7
+
 ## 0.2.1
 
 - Fix iOS symbol stripping in published package
