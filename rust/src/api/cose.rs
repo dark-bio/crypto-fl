@@ -21,13 +21,16 @@ pub fn cose_sign(
     msg_to_auth: Vec<u8>,
     signer: &XdsaSecretKey,
     domain: Vec<u8>,
-) -> Vec<u8> {
-    darkbio_crypto::cose::sign(
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_embed).map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    Ok(darkbio_crypto::cose::sign(
         darkbio_crypto::cbor::Raw(msg_to_embed),
         darkbio_crypto::cbor::Raw(msg_to_auth),
         &signer.inner,
         &domain,
-    )
+    ))
 }
 
 /// Creates a COSE_Sign1 signature without an embedded payload (detached mode).
@@ -40,12 +43,14 @@ pub fn cose_sign_detached(
     msg_to_auth: Vec<u8>,
     signer: &XdsaSecretKey,
     domain: Vec<u8>,
-) -> Vec<u8> {
-    darkbio_crypto::cose::sign_detached(
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    Ok(darkbio_crypto::cose::sign_detached(
         darkbio_crypto::cbor::Raw(msg_to_auth),
         &signer.inner,
         &domain,
-    )
+    ))
 }
 
 /// Verifies a COSE_Sign1 signature and returns the embedded payload.
@@ -63,6 +68,8 @@ pub fn cose_verify(
     domain: Vec<u8>,
     max_drift_secs: Option<u64>,
 ) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
     let raw: darkbio_crypto::cbor::Raw = darkbio_crypto::cose::verify(
         &msg_to_check,
         darkbio_crypto::cbor::Raw(msg_to_auth),
@@ -89,6 +96,8 @@ pub fn cose_verify_detached(
     domain: Vec<u8>,
     max_drift_secs: Option<u64>,
 ) -> Result<(), String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
     darkbio_crypto::cose::verify_detached(
         &msg_to_check,
         darkbio_crypto::cbor::Raw(msg_to_auth),
@@ -141,6 +150,8 @@ pub fn cose_encrypt(
     recipient: &XhpkePublicKey,
     domain: Vec<u8>,
 ) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
     darkbio_crypto::cose::encrypt(
         &sign1,
         darkbio_crypto::cbor::Raw(msg_to_auth),
@@ -168,6 +179,8 @@ pub fn cose_decrypt(
     recipient: &XhpkeSecretKey,
     domain: Vec<u8>,
 ) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
     darkbio_crypto::cose::decrypt(
         &msg_to_open,
         darkbio_crypto::cbor::Raw(msg_to_auth),
@@ -192,6 +205,9 @@ pub fn cose_seal(
     recipient: &XhpkePublicKey,
     domain: Vec<u8>,
 ) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_seal).map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
     darkbio_crypto::cose::seal(
         darkbio_crypto::cbor::Raw(msg_to_seal),
         darkbio_crypto::cbor::Raw(msg_to_auth),
@@ -219,6 +235,8 @@ pub fn cose_open(
     domain: Vec<u8>,
     max_drift_secs: Option<u64>,
 ) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
     let raw: darkbio_crypto::cbor::Raw = darkbio_crypto::cose::open(
         &msg_to_open,
         darkbio_crypto::cbor::Raw(msg_to_auth),

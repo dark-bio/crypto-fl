@@ -3552,7 +3552,7 @@ fn wire__crate__api__cose__cose_sign_impl(
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, ()>((move || {
+            transform_result_sse::<_, String>((move || {
                 let mut api_signer_guard = None;
                 let decode_indices_ =
                     flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -3569,12 +3569,12 @@ fn wire__crate__api__cose__cose_sign_impl(
                     }
                 }
                 let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok = Result::<_, ()>::Ok(crate::api::cose::cose_sign(
+                let output_ok = crate::api::cose::cose_sign(
                     api_msg_to_embed,
                     api_msg_to_auth,
                     &*api_signer_guard,
                     api_domain,
-                ))?;
+                )?;
                 Ok(output_ok)
             })())
         },
@@ -3607,7 +3607,7 @@ fn wire__crate__api__cose__cose_sign_detached_impl(
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, ()>((move || {
+            transform_result_sse::<_, String>((move || {
                 let mut api_signer_guard = None;
                 let decode_indices_ =
                     flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -3624,11 +3624,11 @@ fn wire__crate__api__cose__cose_sign_detached_impl(
                     }
                 }
                 let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok = Result::<_, ()>::Ok(crate::api::cose::cose_sign_detached(
+                let output_ok = crate::api::cose::cose_sign_detached(
                     api_msg_to_auth,
                     &*api_signer_guard,
                     api_domain,
-                ))?;
+                )?;
                 Ok(output_ok)
             })())
         },
