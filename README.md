@@ -38,6 +38,11 @@ The underlying implementation exists in two sibling repos, which track the same 
 - Rust [`github.com/dark-bio/crypto-rs`](https://github.com/dark-bio/crypto-rs)
 - Go [`github.com/dark-bio/crypto-go`](https://github.com/dark-bio/crypto-go)
 
+Sibling wrapper exists in one other repo:
+
+- TypeScript [`github.com/dark-bio/crypto-ts`](https://github.com/dark-bio/crypto-ts)
+
+
 ## Acknowledgements
 
 Shoutout to Filippo Valsorda ([@filosottile](https://github.com/filosottile)) for lots of tips and nudges on what kind of cryptographic primitives to use and how to combine them properly; and also for his work in general on cryptography standards.

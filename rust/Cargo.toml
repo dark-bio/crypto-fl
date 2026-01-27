@@ -7,7 +7,7 @@ edition = "2024"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-darkbio-crypto = { version = "0.11.7", features = ["argon2", "cbor", "cose", "hkdf", "rand", "rsa", "stream", "xdsa", "xhpke"] }
+darkbio-crypto = { version = "0.11.9", features = ["argon2", "cbor", "cose", "hkdf", "rand", "rsa", "stream", "xdsa", "xhpke"] }
 flutter_rust_bridge = "=2.11.1"
 hex = "0.4"
 
