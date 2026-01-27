@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Wrap darkbio-crypto v0.11.9
+
 ## 0.3.0
 
 - Expose CBOR verification, enforce it through COSE
