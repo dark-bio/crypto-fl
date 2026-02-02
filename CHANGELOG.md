@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- Fix build script that was referencing old podfile
+
 ## 0.3.1
 
 - Wrap darkbio-crypto v0.11.9

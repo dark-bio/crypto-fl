@@ -1,6 +1,6 @@
 name: darkbio_crypto
 description: "Post-quantum cryptography in Flutter, backed by Rust FFI"
-version: 0.3.1
+version: 0.3.2
 homepage: https://github.com/dark-bio/crypto-fl
 repository: https://github.com/dark-bio/crypto-fl
 issue_tracker: https://github.com/dark-bio/crypto-fl/issues
