@@ -202,12 +202,18 @@ jobs:
       - name: Remove cargokit and rust source
         run: rm -rf cargokit rust
 
+      - name: Extract version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Patch iOS podspec
         run: |
-          cat > ios/darkbio_crypto.podspec << 'EOF'
+          cat > ios/darkbio_crypto.podspec << EOF
           Pod::Spec.new do |s|
             s.name             = 'darkbio_crypto'
-            s.version          = '0.2.1'
+            s.version          = '${{ steps.version.outputs.VERSION }}'
             s.summary          = 'Cryptography wrappers and primitives'
             s.homepage         = 'https://github.com/dark-bio/crypto-fl'
             s.license          = { :file => '../LICENSE' }
@@ -227,10 +233,10 @@ jobs:
 
       - name: Patch macOS podspec
         run: |
-          cat > macos/darkbio_crypto.podspec << 'EOF'
+          cat > macos/darkbio_crypto.podspec << EOF
           Pod::Spec.new do |s|
             s.name             = 'darkbio_crypto'
-            s.version          = '0.2.1'
+            s.version          = '${{ steps.version.outputs.VERSION }}'
             s.summary          = 'Cryptography wrappers and primitives'
             s.homepage         = 'https://github.com/dark-bio/crypto-fl'
             s.license          = { :file => '../LICENSE' }
@@ -243,7 +249,7 @@ jobs:
             s.vendored_libraries = 'Libs/libdarkbio_crypto_ffi.a'
             s.pod_target_xcconfig = {
               'DEFINES_MODULE' => 'YES',
-              'OTHER_LDFLAGS' => '-force_load $(PODS_TARGET_SRCROOT)/Libs/libdarkbio_crypto_ffi.a',
+              'OTHER_LDFLAGS' => '-force_load \$(PODS_TARGET_SRCROOT)/Libs/libdarkbio_crypto_ffi.a',
             }
           end
           EOF
