@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.11
+
+- Wrap darkbio-crypto v0.11.11
+- Bring version number into sync with ecosystem
+
 ## 0.3.2
 
 - Fix build script that was referencing old podfile
