@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 63586538;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1951440738;
 
 // Section: executor
 
@@ -2415,6 +2415,54 @@ fn wire__crate__api__xhpke__XhpkePublicKey_from_pem_impl(
         },
     )
 }
+fn wire__crate__api__xhpke__XhpkePublicKey_new_sender_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "XhpkePublicKey_new_sender",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
+            >>::sse_decode(&mut deserializer);
+            let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
+                    }
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok =
+                    crate::api::xhpke::XhpkePublicKey::new_sender(&*api_that_guard, api_domain)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__xhpke__XhpkePublicKey_seal_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -2757,6 +2805,58 @@ fn wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(
         },
     )
 }
+fn wire__crate__api__xhpke__XhpkeReceiver_open_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "XhpkeReceiver_open",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>,
+            >>::sse_decode(&mut deserializer);
+            let api_msg_to_open = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_msg_to_auth = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, true,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                        _ => unreachable!(),
+                    }
+                }
+                let mut api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::xhpke::XhpkeReceiver::open(
+                    &mut *api_that_guard,
+                    api_msg_to_open,
+                    api_msg_to_auth,
+                )?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -2919,6 +3019,58 @@ fn wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
                 let output_ok = Result::<_, ()>::Ok(crate::api::xhpke::XhpkeSecretKey::generate())?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__xhpke__XhpkeSecretKey_new_receiver_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "XhpkeSecretKey_new_receiver",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>,
+            >>::sse_decode(&mut deserializer);
+            let api_encap_key = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
+                    }
+                }
+                let api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::xhpke::XhpkeSecretKey::new_receiver(
+                    &*api_that_guard,
+                    api_encap_key,
+                    api_domain,
+                )?;
                 Ok(output_ok)
             })())
         },
@@ -3167,6 +3319,58 @@ fn wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(
                 let output_ok = Result::<_, ()>::Ok(crate::api::xhpke::XhpkeSecretKey::to_pem(
                     &*api_that_guard,
                 ))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__xhpke__XhpkeSender_seal_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "XhpkeSender_seal",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>,
+            >>::sse_decode(&mut deserializer);
+            let api_msg_to_seal = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_msg_to_auth = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let mut api_that_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_that, 0, true,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                        _ => unreachable!(),
+                    }
+                }
+                let mut api_that_guard = api_that_guard.unwrap();
+                let output_ok = crate::api::xhpke::XhpkeSender::seal(
+                    &mut *api_that_guard,
+                    api_msg_to_seal,
+                    api_msg_to_auth,
+                )?;
                 Ok(output_ok)
             })())
         },
@@ -4069,7 +4273,13 @@ flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>
 );
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
+    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>
+);
+flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>
+);
+flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
+    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>
 );
 
 // Section: dart2rust
@@ -4174,11 +4384,31 @@ impl SseDecode for XhpkePublicKey {
     }
 }
 
+impl SseDecode for XhpkeReceiver {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <RustOpaqueMoi<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>,
+        >>::sse_decode(deserializer);
+        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+    }
+}
+
 impl SseDecode for XhpkeSecretKey {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <RustOpaqueMoi<
             flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>,
+        >>::sse_decode(deserializer);
+        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+    }
+}
+
+impl SseDecode for XhpkeSender {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <RustOpaqueMoi<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>,
         >>::sse_decode(deserializer);
         return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
     }
@@ -4285,7 +4515,27 @@ impl SseDecode
 }
 
 impl SseDecode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <usize>::sse_decode(deserializer);
+        return decode_rust_opaque_moi(inner);
+    }
+}
+
+impl SseDecode
     for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <usize>::sse_decode(deserializer);
+        return decode_rust_opaque_moi(inner);
+    }
+}
+
+impl SseDecode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4363,6 +4613,15 @@ impl SseDecode for (XhpkePublicKey, u64, u64) {
     }
 }
 
+impl SseDecode for (XhpkeSender, Vec<u8>) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_field0 = <XhpkeSender>::sse_decode(deserializer);
+        let mut var_field1 = <Vec<u8>>::sse_decode(deserializer);
+        return (var_field0, var_field1);
+    }
+}
+
 impl SseDecode for (Vec<u8>, Vec<u8>) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4421,7 +4680,7 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        89 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        93 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4496,41 +4755,47 @@ fn pde_ffi_dispatcher_sync_impl(
         }
         55 => wire__crate__api__xhpke__XhpkePublicKey_from_der_impl(ptr, rust_vec_len, data_len),
         56 => wire__crate__api__xhpke__XhpkePublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        57 => wire__crate__api__xhpke__XhpkePublicKey_seal_impl(ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__xhpke__XhpkePublicKey_to_cert_der_impl(ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__xhpke__XhpkePublicKey_to_cert_pem_impl(ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__xhpke__XhpkePublicKey_to_der_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        64 => wire__crate__api__xhpke__XhpkeSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__xhpke__XhpkeSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
-        66 => wire__crate__api__xhpke__XhpkeSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        67 => wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__xhpke__XhpkeSecretKey_open_impl(ptr, rust_vec_len, data_len),
-        69 => wire__crate__api__xhpke__XhpkeSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
-        70 => wire__crate__api__xhpke__XhpkeSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        71 => wire__crate__api__xhpke__XhpkeSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
-        72 => wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        73 => wire__crate__api__argon2__argon2_key_impl(ptr, rust_vec_len, data_len),
-        74 => wire__crate__api__cbor__cbor_verify_impl(ptr, rust_vec_len, data_len),
-        75 => wire__crate__api__cose__cose_decrypt_impl(ptr, rust_vec_len, data_len),
-        76 => wire__crate__api__cose__cose_encrypt_impl(ptr, rust_vec_len, data_len),
-        77 => wire__crate__api__cose__cose_open_impl(ptr, rust_vec_len, data_len),
-        78 => wire__crate__api__cose__cose_peek_impl(ptr, rust_vec_len, data_len),
-        79 => wire__crate__api__cose__cose_recipient_impl(ptr, rust_vec_len, data_len),
-        80 => wire__crate__api__cose__cose_seal_impl(ptr, rust_vec_len, data_len),
-        81 => wire__crate__api__cose__cose_sign_impl(ptr, rust_vec_len, data_len),
-        82 => wire__crate__api__cose__cose_sign_detached_impl(ptr, rust_vec_len, data_len),
-        83 => wire__crate__api__cose__cose_signer_impl(ptr, rust_vec_len, data_len),
-        84 => wire__crate__api__cose__cose_verify_impl(ptr, rust_vec_len, data_len),
-        85 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
-        86 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
-        87 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
-        88 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
-        90 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
-        91 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__xhpke__XhpkePublicKey_new_sender_impl(ptr, rust_vec_len, data_len),
+        58 => wire__crate__api__xhpke__XhpkePublicKey_seal_impl(ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__xhpke__XhpkePublicKey_to_cert_der_impl(ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__xhpke__XhpkePublicKey_to_cert_pem_impl(ptr, rust_vec_len, data_len),
+        62 => wire__crate__api__xhpke__XhpkePublicKey_to_der_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        64 => wire__crate__api__xhpke__XhpkeReceiver_open_impl(ptr, rust_vec_len, data_len),
+        65 => wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        66 => wire__crate__api__xhpke__XhpkeSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        67 => wire__crate__api__xhpke__XhpkeSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
+        68 => wire__crate__api__xhpke__XhpkeSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        69 => wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(ptr, rust_vec_len, data_len),
+        70 => {
+            wire__crate__api__xhpke__XhpkeSecretKey_new_receiver_impl(ptr, rust_vec_len, data_len)
+        }
+        71 => wire__crate__api__xhpke__XhpkeSecretKey_open_impl(ptr, rust_vec_len, data_len),
+        72 => wire__crate__api__xhpke__XhpkeSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
+        73 => wire__crate__api__xhpke__XhpkeSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        74 => wire__crate__api__xhpke__XhpkeSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
+        75 => wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        76 => wire__crate__api__xhpke__XhpkeSender_seal_impl(ptr, rust_vec_len, data_len),
+        77 => wire__crate__api__argon2__argon2_key_impl(ptr, rust_vec_len, data_len),
+        78 => wire__crate__api__cbor__cbor_verify_impl(ptr, rust_vec_len, data_len),
+        79 => wire__crate__api__cose__cose_decrypt_impl(ptr, rust_vec_len, data_len),
+        80 => wire__crate__api__cose__cose_encrypt_impl(ptr, rust_vec_len, data_len),
+        81 => wire__crate__api__cose__cose_open_impl(ptr, rust_vec_len, data_len),
+        82 => wire__crate__api__cose__cose_peek_impl(ptr, rust_vec_len, data_len),
+        83 => wire__crate__api__cose__cose_recipient_impl(ptr, rust_vec_len, data_len),
+        84 => wire__crate__api__cose__cose_seal_impl(ptr, rust_vec_len, data_len),
+        85 => wire__crate__api__cose__cose_sign_impl(ptr, rust_vec_len, data_len),
+        86 => wire__crate__api__cose__cose_sign_detached_impl(ptr, rust_vec_len, data_len),
+        87 => wire__crate__api__cose__cose_signer_impl(ptr, rust_vec_len, data_len),
+        88 => wire__crate__api__cose__cose_verify_impl(ptr, rust_vec_len, data_len),
+        89 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
+        90 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
+        91 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
+        92 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
+        94 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
+        95 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
+        96 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4688,6 +4953,21 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<XhpkePublicKey>> for XhpkePubl
 }
 
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<XhpkeReceiver> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
+            .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<XhpkeReceiver> {}
+
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<XhpkeReceiver>> for XhpkeReceiver {
+    fn into_into_dart(self) -> FrbWrapper<XhpkeReceiver> {
+        self.into()
+    }
+}
+
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<XhpkeSecretKey> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
@@ -4698,6 +4978,21 @@ impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<
 
 impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<XhpkeSecretKey>> for XhpkeSecretKey {
     fn into_into_dart(self) -> FrbWrapper<XhpkeSecretKey> {
+        self.into()
+    }
+}
+
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<XhpkeSender> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
+            .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<XhpkeSender> {}
+
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<XhpkeSender>> for XhpkeSender {
+    fn into_into_dart(self) -> FrbWrapper<XhpkeSender> {
         self.into()
     }
 }
@@ -4772,10 +5067,24 @@ impl SseEncode for XhpkePublicKey {
     }
 }
 
+impl SseEncode for XhpkeReceiver {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
+    }
+}
+
 impl SseEncode for XhpkeSecretKey {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
+    }
+}
+
+impl SseEncode for XhpkeSender {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
     }
 }
 
@@ -4890,7 +5199,29 @@ impl SseEncode
 }
 
 impl SseEncode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        let (ptr, size) = self.sse_encode_raw();
+        <usize>::sse_encode(ptr, serializer);
+        <i32>::sse_encode(size, serializer);
+    }
+}
+
+impl SseEncode
     for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        let (ptr, size) = self.sse_encode_raw();
+        <usize>::sse_encode(ptr, serializer);
+        <i32>::sse_encode(size, serializer);
+    }
+}
+
+impl SseEncode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -4959,6 +5290,14 @@ impl SseEncode for (XhpkePublicKey, u64, u64) {
         <XhpkePublicKey>::sse_encode(self.0, serializer);
         <u64>::sse_encode(self.1, serializer);
         <u64>::sse_encode(self.2, serializer);
+    }
+}
+
+impl SseEncode for (XhpkeSender, Vec<u8>) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <XhpkeSender>::sse_encode(self.0, serializer);
+        <Vec<u8>>::sse_encode(self.1, serializer);
     }
 }
 
@@ -5175,6 +5514,20 @@ mod io {
     }
 
     #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_darkbio_crypto_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeReceiver(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>::increment_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_darkbio_crypto_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeReceiver(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>::decrement_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_darkbio_crypto_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSecretKey(
         ptr: *const std::ffi::c_void,
     ) {
@@ -5186,6 +5539,20 @@ mod io {
         ptr: *const std::ffi::c_void,
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>>::decrement_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_darkbio_crypto_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSender(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>::increment_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_darkbio_crypto_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSender(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>::decrement_strong_count(ptr as _);
     }
 }
 #[cfg(not(target_family = "wasm"))]
@@ -5356,6 +5723,20 @@ mod web {
     }
 
     #[wasm_bindgen]
+    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeReceiver(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>::increment_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeReceiver(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>::decrement_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
     pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSecretKey(
         ptr: *const std::ffi::c_void,
     ) {
@@ -5367,6 +5748,20 @@ mod web {
         ptr: *const std::ffi::c_void,
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>>::decrement_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSender(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>::increment_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSender(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>::decrement_strong_count(ptr as _);
     }
 }
 #[cfg(target_family = "wasm")]

@@ -25,13 +25,13 @@ pub fn cose_sign(
     darkbio_crypto::cbor::verify(&msg_to_embed).map_err(|e| e.to_string())?;
     darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
-    Ok(darkbio_crypto::cose::sign(
+    darkbio_crypto::cose::sign(
         darkbio_crypto::cbor::Raw(msg_to_embed),
         darkbio_crypto::cbor::Raw(msg_to_auth),
         &signer.inner,
         &domain,
     )
-    .map_err(|e| e.to_string())?)
+    .map_err(|e| e.to_string())
 }
 
 /// Creates a COSE_Sign1 signature without an embedded payload (detached mode).
@@ -47,12 +47,12 @@ pub fn cose_sign_detached(
 ) -> Result<Vec<u8>, String> {
     darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
-    Ok(darkbio_crypto::cose::sign_detached(
+    darkbio_crypto::cose::sign_detached(
         darkbio_crypto::cbor::Raw(msg_to_auth),
         &signer.inner,
         &domain,
     )
-    .map_err(|e| e.to_string())?)
+    .map_err(|e| e.to_string())
 }
 
 /// Verifies a COSE_Sign1 signature and returns the embedded payload.
