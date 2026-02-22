@@ -3,6 +3,8 @@
 ## 0.13.0
 
 - Wrap darkbio-crypto v0.13.0
+- Add xHPKE Sender/Receiver multi-message encryption contexts
+- Add CWT (CBOR Web Token) support with typed CWT and EAT claims
 
 ## 0.11.11
 
