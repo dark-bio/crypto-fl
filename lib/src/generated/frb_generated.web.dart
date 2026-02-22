@@ -9,6 +9,7 @@
 import 'api/argon2.dart';
 import 'api/cbor.dart';
 import 'api/cose.dart';
+import 'api/cwt.dart';
 import 'api/hkdf.dart';
 import 'api/rand.dart';
 import 'api/rsa.dart';

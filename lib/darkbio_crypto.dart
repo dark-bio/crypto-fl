@@ -47,6 +47,7 @@
 /// - **xdsa**: Composite ML-DSA-65 + Ed25519 signatures (quantum-resistant)
 /// - **xhpke**: X-Wing (X25519 + ML-KEM-768) hybrid encryption
 /// - **rsa**: RSA-2048 signatures with SHA-256
+/// - **cwt**: CBOR Web Tokens with CWT and EAT claims
 /// - **cose**: COSE sign, verify, seal, open operations
 /// - **hkdf**: HKDF-SHA256 key derivation
 /// - **argon2**: Password-based key derivation
