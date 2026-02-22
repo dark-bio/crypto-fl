@@ -7,6 +7,7 @@
 pub mod argon2;
 pub mod cbor;
 pub mod cose;
+pub mod cwt;
 pub mod hkdf;
 pub mod rand;
 pub mod rsa;

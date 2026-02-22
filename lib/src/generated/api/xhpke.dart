@@ -54,6 +54,14 @@ abstract class XhpkePublicKey implements RustOpaqueInterface {
   static XhpkePublicKey fromPem({required String pem}) =>
       RustLib.instance.api.crateApiXhpkeXhpkePublicKeyFromPem(pem: pem);
 
+  /// Creates an HPKE sender context for multi-message encryption to this
+  /// public key. Returns the sender context and the 1120-byte encapsulated
+  /// key that must be transmitted to the recipient.
+  ///
+  /// Messages encrypted with the returned context must be decrypted in order
+  /// by the corresponding receiver context.
+  (XhpkeSender, Uint8List) newSender({required List<int> domain});
+
   /// Encrypts a message to this public key.
   ///
   /// Returns a tuple of (1120-byte session key, ciphertext).
@@ -117,6 +125,12 @@ abstract class XhpkePublicKey implements RustOpaqueInterface {
   String toPem();
 }
 
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeReceiver>>
+abstract class XhpkeReceiver implements RustOpaqueInterface {
+  /// Decrypts a message using the next nonce in the sequence.
+  Uint8List open({required List<int> msgToOpen, required List<int> msgToAuth});
+}
+
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSecretKey>>
 abstract class XhpkeSecretKey implements RustOpaqueInterface {
   /// Returns a 32-byte fingerprint uniquely identifying this key.
@@ -137,6 +151,14 @@ abstract class XhpkeSecretKey implements RustOpaqueInterface {
   /// Generates a new random private key.
   static XhpkeSecretKey generate() =>
       RustLib.instance.api.crateApiXhpkeXhpkeSecretKeyGenerate();
+
+  /// Creates an HPKE receiver context for multi-message decryption using
+  /// the given encapsulated key. Messages must be decrypted in the same
+  /// order they were encrypted by the corresponding sender.
+  XhpkeReceiver newReceiver({
+    required List<int> encapKey,
+    required List<int> domain,
+  });
 
   /// Decrypts a message that was encrypted to this key's public counterpart.
   ///
@@ -162,4 +184,10 @@ abstract class XhpkeSecretKey implements RustOpaqueInterface {
 
   /// Serializes the private key to PEM format.
   String toPem();
+}
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>
+abstract class XhpkeSender implements RustOpaqueInterface {
+  /// Encrypts a message using the next nonce in the sequence.
+  Uint8List seal({required List<int> msgToSeal, required List<int> msgToAuth});
 }

@@ -68,6 +68,18 @@ class SecretKey {
     domain: domain,
   );
 
+  /// Creates an HPKE receiver context for multi-message decryption using
+  /// the encapsulated key from [PublicKey.newSender].
+  ///
+  /// Messages must be decrypted in the same order they were encrypted.
+  ///
+  /// - [encapKey]: The 1120-byte encapsulated key from [PublicKey.newSender]
+  /// - [domain]: Application-specific domain separator
+  Receiver newReceiver({
+    required Uint8List encapKey,
+    required Uint8List domain,
+  }) => Receiver._(_inner.newReceiver(encapKey: encapKey, domain: domain));
+
   /// Converts a private key into a 32-byte seed.
   Uint8List toBytes() => _inner.toBytes();
 
@@ -130,6 +142,20 @@ class PublicKey {
   /// Returns a 256-bit unique identifier for this key. For HPKE, that is the
   /// SHA256 hash of the raw public key.
   Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
+
+  /// Creates an HPKE sender context for multi-message encryption.
+  ///
+  /// Returns the sender context and a 1120-byte encapsulated key that must
+  /// be transmitted to the recipient for [SecretKey.newReceiver].
+  ///
+  /// Messages encrypted with the returned context must be decrypted in order
+  /// by the corresponding receiver.
+  ///
+  /// - [domain]: Application-specific domain separator
+  (Sender, Uint8List) newSender({required Uint8List domain}) {
+    final (sender, encapKey) = _inner.newSender(domain: domain);
+    return (Sender._(sender), encapKey);
+  }
 
   /// Encrypts a message to this public key.
   ///
@@ -223,6 +249,40 @@ class Fingerprint {
 
   /// Converts a fingerprint into a 32-byte array.
   Uint8List toBytes() => _inner.toBytes();
+}
+
+/// A stateful HPKE sender context for multi-message encryption.
+///
+/// Each call to [seal] encrypts a message using an auto-incrementing nonce,
+/// ensuring unique ciphertexts even for identical plaintexts.
+///
+/// The corresponding [Receiver] must process messages in the same order
+/// they were sealed.
+class Sender {
+  final ffi.XhpkeSender _inner;
+  Sender._(this._inner);
+
+  /// Encrypts a message using the next nonce in the sequence.
+  Uint8List seal({
+    required Uint8List msgToSeal,
+    required Uint8List msgToAuth,
+  }) => _inner.seal(msgToSeal: msgToSeal, msgToAuth: msgToAuth);
+}
+
+/// A stateful HPKE receiver context for multi-message decryption.
+///
+/// Each call to [open] decrypts a message using an auto-incrementing nonce.
+/// Messages must be provided in the same order they were sealed by the
+/// corresponding [Sender].
+class Receiver {
+  final ffi.XhpkeReceiver _inner;
+  Receiver._(this._inner);
+
+  /// Decrypts a message using the next nonce in the sequence.
+  Uint8List open({
+    required Uint8List msgToOpen,
+    required Uint8List msgToAuth,
+  }) => _inner.open(msgToOpen: msgToOpen, msgToAuth: msgToAuth);
 }
 
 // Internal accessors for cross-package use (e.g., cose.dart)

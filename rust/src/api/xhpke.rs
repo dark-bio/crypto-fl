@@ -85,6 +85,25 @@ impl XhpkeSecretKey {
         }
     }
 
+    /// Creates an HPKE receiver context for multi-message decryption using
+    /// the given encapsulated key. Messages must be decrypted in the same
+    /// order they were encrypted by the corresponding sender.
+    #[frb(sync)]
+    pub fn new_receiver(
+        &self,
+        encap_key: Vec<u8>,
+        domain: Vec<u8>,
+    ) -> Result<XhpkeReceiver, String> {
+        let encap_key_array: [u8; 1120] = encap_key
+            .try_into()
+            .map_err(|_| "Invalid encapsulated key length, expected 1120 bytes".to_string())?;
+        let receiver = self
+            .inner
+            .new_receiver(&encap_key_array, &domain)
+            .map_err(|e| e.to_string())?;
+        Ok(XhpkeReceiver { inner: receiver })
+    }
+
     /// Decrypts a message that was encrypted to this key's public counterpart.
     ///
     /// - `session_key`: The 1120-byte encapsulated session key
@@ -148,20 +167,38 @@ impl XhpkePublicKey {
     /// Returns the key along with validity start and end timestamps (Unix seconds).
     #[frb(sync)]
     pub fn from_cert_der(der: Vec<u8>, signer: &XdsaPublicKey) -> Result<(Self, u64, u64), String> {
-        let (key, start, until) =
-            darkbio_crypto::xhpke::PublicKey::from_cert_der(&der, signer.inner.clone())
-                .map_err(|e| e.to_string())?;
-        Ok((Self { inner: key }, start, until))
+        let verified = darkbio_crypto::xhpke::verify_cert_der(
+            &der,
+            &signer.inner,
+            darkbio_crypto::x509::ValidityCheck::Disabled,
+        )
+        .map_err(|e| e.to_string())?;
+        Ok((
+            Self {
+                inner: verified.public_key,
+            },
+            verified.cert.not_before,
+            verified.cert.not_after,
+        ))
     }
 
     /// Parses a public key from a PEM-encoded certificate, verifying the xDSA signature.
     /// Returns the key along with validity start and end timestamps (Unix seconds).
     #[frb(sync)]
     pub fn from_cert_pem(pem: String, signer: &XdsaPublicKey) -> Result<(Self, u64, u64), String> {
-        let (key, start, until) =
-            darkbio_crypto::xhpke::PublicKey::from_cert_pem(&pem, signer.inner.clone())
-                .map_err(|e| e.to_string())?;
-        Ok((Self { inner: key }, start, until))
+        let verified = darkbio_crypto::xhpke::verify_cert_pem(
+            &pem,
+            &signer.inner,
+            darkbio_crypto::x509::ValidityCheck::Disabled,
+        )
+        .map_err(|e| e.to_string())?;
+        Ok((
+            Self {
+                inner: verified.public_key,
+            },
+            verified.cert.not_before,
+            verified.cert.not_after,
+        ))
     }
 
     /// Serializes the public key to a 1216-byte array.
@@ -204,16 +241,19 @@ impl XhpkePublicKey {
         is_ca: bool,
         path_len: Option<u8>,
     ) -> Result<Vec<u8>, String> {
-        let params = darkbio_crypto::x509::Params {
-            subject_name: &subject_name,
-            issuer_name: &issuer_name,
+        let template = darkbio_crypto::x509::Certificate {
+            subject: darkbio_crypto::x509::Name::new().cn(subject_name),
+            issuer: darkbio_crypto::x509::Name::new().cn(issuer_name),
             not_before,
             not_after,
-            is_ca,
-            path_len,
+            role: if is_ca {
+                darkbio_crypto::x509::Role::Authority { path_len }
+            } else {
+                darkbio_crypto::x509::Role::Leaf
+            },
+            extensions: Vec::new(),
         };
-        self.inner
-            .to_cert_der(&signer.inner, &params)
+        darkbio_crypto::xhpke::issue_cert_der(&self.inner, &signer.inner, &template)
             .map_err(|e| e.to_string())
     }
 
@@ -239,16 +279,19 @@ impl XhpkePublicKey {
         is_ca: bool,
         path_len: Option<u8>,
     ) -> Result<String, String> {
-        let params = darkbio_crypto::x509::Params {
-            subject_name: &subject_name,
-            issuer_name: &issuer_name,
+        let template = darkbio_crypto::x509::Certificate {
+            subject: darkbio_crypto::x509::Name::new().cn(subject_name),
+            issuer: darkbio_crypto::x509::Name::new().cn(issuer_name),
             not_before,
             not_after,
-            is_ca,
-            path_len,
+            role: if is_ca {
+                darkbio_crypto::x509::Role::Authority { path_len }
+            } else {
+                darkbio_crypto::x509::Role::Leaf
+            },
+            extensions: Vec::new(),
         };
-        self.inner
-            .to_cert_pem(&signer.inner, &params)
+        darkbio_crypto::xhpke::issue_cert_pem(&self.inner, &signer.inner, &template)
             .map_err(|e| e.to_string())
     }
 
@@ -258,6 +301,18 @@ impl XhpkePublicKey {
         XhpkeFingerprint {
             inner: self.inner.fingerprint(),
         }
+    }
+
+    /// Creates an HPKE sender context for multi-message encryption to this
+    /// public key. Returns the sender context and the 1120-byte encapsulated
+    /// key that must be transmitted to the recipient.
+    ///
+    /// Messages encrypted with the returned context must be decrypted in order
+    /// by the corresponding receiver context.
+    #[frb(sync)]
+    pub fn new_sender(&self, domain: Vec<u8>) -> Result<(XhpkeSender, Vec<u8>), String> {
+        let (sender, encap_key) = self.inner.new_sender(&domain).map_err(|e| e.to_string())?;
+        Ok((XhpkeSender { inner: sender }, encap_key.to_vec()))
     }
 
     /// Encrypts a message to this public key.
@@ -279,6 +334,49 @@ impl XhpkePublicKey {
             .seal(&msg_to_seal, &msg_to_auth, &domain)
             .map_err(|e| e.to_string())?;
         Ok((session_key.to_vec(), ciphertext))
+    }
+}
+
+/// XhpkeSender wraps an HPKE sender encryption context for multi-message
+/// communication. Each call to `seal` encrypts a message using an
+/// auto-incrementing nonce, ensuring unique ciphertexts even for identical
+/// plaintexts.
+///
+/// The corresponding `XhpkeReceiver` must process messages in the same order
+/// they were sealed.
+#[frb(opaque)]
+pub struct XhpkeSender {
+    inner: darkbio_crypto::xhpke::Sender,
+}
+
+impl XhpkeSender {
+    /// Encrypts a message using the next nonce in the sequence.
+    #[frb(sync)]
+    pub fn seal(&mut self, msg_to_seal: Vec<u8>, msg_to_auth: Vec<u8>) -> Result<Vec<u8>, String> {
+        self.inner
+            .seal(&msg_to_seal, &msg_to_auth)
+            .map_err(|e| e.to_string())
+    }
+}
+
+/// XhpkeReceiver wraps an HPKE receiver decryption context for multi-message
+/// communication. Each call to `open` decrypts a message using an
+/// auto-incrementing nonce.
+///
+/// Messages must be provided in the same order they were sealed by the
+/// corresponding `XhpkeSender`.
+#[frb(opaque)]
+pub struct XhpkeReceiver {
+    inner: darkbio_crypto::xhpke::Receiver,
+}
+
+impl XhpkeReceiver {
+    /// Decrypts a message using the next nonce in the sequence.
+    #[frb(sync)]
+    pub fn open(&mut self, msg_to_open: Vec<u8>, msg_to_auth: Vec<u8>) -> Result<Vec<u8>, String> {
+        self.inner
+            .open(&msg_to_open, &msg_to_auth)
+            .map_err(|e| e.to_string())
     }
 }
 
