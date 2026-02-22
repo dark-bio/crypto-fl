@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.0
+
+- Wrap darkbio-crypto v0.13.0
+
 ## 0.11.11
 
 - Wrap darkbio-crypto v0.11.11
