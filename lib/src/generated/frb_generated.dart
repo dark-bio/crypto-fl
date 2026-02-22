@@ -482,7 +482,7 @@ abstract class RustLibApi extends BaseApi {
   Uint8List crateApiCwtCwtIssue({
     required List<int> claimsCbor,
     required XdsaSecretKey signer,
-    required String domain,
+    required List<int> domain,
   });
 
   Uint8List crateApiCwtCwtPeek({required List<int> token});
@@ -492,7 +492,7 @@ abstract class RustLibApi extends BaseApi {
   Uint8List crateApiCwtCwtVerify({
     required List<int> token,
     required XdsaPublicKey verifier,
-    required String domain,
+    required List<int> domain,
     BigInt? now,
   });
 
@@ -3517,7 +3517,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List crateApiCwtCwtIssue({
     required List<int> claimsCbor,
     required XdsaSecretKey signer,
-    required String domain,
+    required List<int> domain,
   }) {
     return handler.executeSync(
       SyncTask(
@@ -3528,7 +3528,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             signer,
             serializer,
           );
-          sse_encode_String(domain, serializer);
+          sse_encode_list_prim_u_8_loose(domain, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 90)!;
         },
         codec: SseCodec(
@@ -3598,7 +3598,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List crateApiCwtCwtVerify({
     required List<int> token,
     required XdsaPublicKey verifier,
-    required String domain,
+    required List<int> domain,
     BigInt? now,
   }) {
     return handler.executeSync(
@@ -3610,7 +3610,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             verifier,
             serializer,
           );
-          sse_encode_String(domain, serializer);
+          sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(now, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 93)!;
         },

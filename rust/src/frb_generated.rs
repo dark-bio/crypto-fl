@@ -4039,7 +4039,7 @@ fn wire__crate__api__cwt__cwt_issue_impl(
             let api_signer = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaSecretKey>,
             >>::sse_decode(&mut deserializer);
-            let api_domain = <String>::sse_decode(&mut deserializer);
+            let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let mut api_signer_guard = None;
@@ -4150,7 +4150,7 @@ fn wire__crate__api__cwt__cwt_verify_impl(
             let api_verifier = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
             >>::sse_decode(&mut deserializer);
-            let api_domain = <String>::sse_decode(&mut deserializer);
+            let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
             let api_now = <Option<u64>>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {

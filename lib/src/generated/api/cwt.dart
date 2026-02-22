@@ -15,7 +15,7 @@ import 'xdsa.dart';
 Uint8List cwtIssue({
   required List<int> claimsCbor,
   required XdsaSecretKey signer,
-  required String domain,
+  required List<int> domain,
 }) => RustLib.instance.api.crateApiCwtCwtIssue(
   claimsCbor: claimsCbor,
   signer: signer,
@@ -36,7 +36,7 @@ Uint8List cwtIssue({
 Uint8List cwtVerify({
   required List<int> token,
   required XdsaPublicKey verifier,
-  required String domain,
+  required List<int> domain,
   BigInt? now,
 }) => RustLib.instance.api.crateApiCwtCwtVerify(
   token: token,

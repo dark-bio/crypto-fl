@@ -28,17 +28,18 @@
 ///   ..expiration = 2000000
 ///   ..setConfirmXdsa(deviceKey.publicKey());
 ///
+/// final domain = Uint8List.fromList('device-cert'.codeUnits);
 /// final token = cwt.issue(
 ///   claims: claims,
 ///   signer: issuerKey,
-///   domain: 'device-cert',
+///   domain: domain,
 /// );
 ///
 /// // Verify a token
 /// final verified = cwt.verify(
 ///   token: token,
 ///   verifier: issuerKey.publicKey(),
-///   domain: 'device-cert',
+///   domain: domain,
 ///   now: 1500000,
 /// );
 /// print(verified.subject); // 'device-abc'
@@ -164,13 +165,17 @@ class Claims {
 
   /// Sets OEMID to a 16-byte random manufacturer identifier.
   void setOemidRandom(Uint8List id) {
-    assert(id.length == 16);
+    if (id.length != 16) {
+      throw ArgumentError.value(id.length, 'id.length', 'must be 16 bytes');
+    }
     _map[258] = id;
   }
 
   /// Sets OEMID to a 3-byte IEEE OUI/MA-L.
   void setOemidIeee(Uint8List id) {
-    assert(id.length == 3);
+    if (id.length != 3) {
+      throw ArgumentError.value(id.length, 'id.length', 'must be 3 bytes');
+    }
     _map[258] = id;
   }
 
@@ -265,9 +270,12 @@ class Claims {
     }
     final map = <int, Object?>{};
     for (final entry in decoded.entries) {
-      if (entry.key is int) {
-        map[entry.key as int] = entry.value;
+      if (entry.key is! int) {
+        throw FormatException(
+          'CWT claim key must be an integer, got ${entry.key.runtimeType}',
+        );
       }
+      map[entry.key as int] = entry.value;
     }
     return Claims._(map);
   }
@@ -319,7 +327,7 @@ enum IntendedUse {
 Uint8List issue({
   required Claims claims,
   required xdsa.SecretKey signer,
-  required String domain,
+  required Uint8List domain,
 }) => ffi.cwtIssue(
   claimsCbor: claims._encode(),
   signer: signer.inner,
@@ -340,16 +348,25 @@ Uint8List issue({
 Claims verify({
   required Uint8List token,
   required xdsa.PublicKey verifier,
-  required String domain,
+  required Uint8List domain,
   int? now,
-}) => Claims._decode(
-  ffi.cwtVerify(
-    token: token,
-    verifier: verifier.inner,
-    domain: domain,
-    now: now != null ? BigInt.from(now) : null,
-  ),
-);
+}) {
+  if (now != null && now < 0) {
+    throw ArgumentError.value(
+      now,
+      'now',
+      'must be a non-negative Unix timestamp',
+    );
+  }
+  return Claims._decode(
+    ffi.cwtVerify(
+      token: token,
+      verifier: verifier.inner,
+      domain: domain,
+      now: now != null ? BigInt.from(now) : null,
+    ),
+  );
+}
 
 /// Extracts the signer's fingerprint from a CWT without verifying.
 ///
