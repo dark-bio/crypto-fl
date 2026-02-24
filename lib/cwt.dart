@@ -107,7 +107,7 @@ class Claims {
   set issuedAt(int? value) => _set(6, value);
 
   /// TokenID: a unique identifier for the token (key 7).
-  Uint8List? get tokenId => _map[7] as Uint8List?;
+  Uint8List? get tokenId => _asBytes(_map[7]);
   set tokenId(Uint8List? value) => _set(7, value);
 
   /// Sets the Confirm claim to bind an xDSA public key to this token.
@@ -148,13 +148,25 @@ class Claims {
     final coseKey = cnf[1];
     if (coseKey is! Map) return (null, null);
     final kty = coseKey[1];
-    final x = coseKey[-2];
-    if (kty is! int || x is! Uint8List) return (null, null);
+    if (kty is! int) return (null, null);
+    final x = _asBytes(coseKey[-2]);
+    if (x == null) return (null, null);
     return (kty, x);
   }
 
+  /// Reads a byte-string claim, normalizing to [Uint8List].
+  ///
+  /// Workaround for https://github.com/shamblett/cbor/issues/88:
+  /// package:cbor decodes CBOR byte strings (major type 2) as `Uint8Buffer`
+  /// (a `List<int>`) instead of [Uint8List].
+  static Uint8List? _asBytes(Object? v) {
+    if (v is Uint8List) return v;
+    if (v is List<int>) return Uint8List.fromList(v);
+    return null;
+  }
+
   /// UEID: a globally unique device identifier (key 256).
-  Uint8List? get ueid => _map[256] as Uint8List?;
+  Uint8List? get ueid => _asBytes(_map[256]);
   set ueid(Uint8List? value) => _set(256, value);
 
   /// OEMID: hardware manufacturer identifier (key 258).
@@ -183,7 +195,7 @@ class Claims {
   void setOemidPen(int pen) => _map[258] = pen;
 
   /// HwModel: product or board model identifier (key 259).
-  Uint8List? get hwModel => _map[259] as Uint8List?;
+  Uint8List? get hwModel => _asBytes(_map[259]);
   set hwModel(Uint8List? value) => _set(259, value);
 
   /// HwVersion: hardware revision identifier (key 260).
@@ -218,7 +230,7 @@ class Claims {
   set bootCount(int? value) => _set(267, value);
 
   /// BootSeed: random value unique to the current boot cycle (key 268).
-  Uint8List? get bootSeed => _map[268] as Uint8List?;
+  Uint8List? get bootSeed => _asBytes(_map[268]);
   set bootSeed(Uint8List? value) => _set(268, value);
 
   /// SwName: name of the firmware or software (key 270).

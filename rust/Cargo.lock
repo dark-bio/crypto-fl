@@ -500,7 +500,7 @@ dependencies = [
 
 [[package]]
 name = "darkbio_crypto_ffi"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "darkbio-crypto",
  "flutter_rust_bridge",
