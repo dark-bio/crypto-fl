@@ -21,11 +21,10 @@ pub fn cwt_issue(
 ) -> Result<Vec<u8>, String> {
     darkbio_crypto::cbor::verify(&claims_cbor).map_err(|e| e.to_string())?;
 
-    let domain = std::str::from_utf8(&domain).map_err(|e| e.to_string())?;
     darkbio_crypto::cwt::issue(
         &darkbio_crypto::cbor::Raw(claims_cbor),
         &signer.inner,
-        domain,
+        &domain,
     )
     .map_err(|e| e.to_string())
 }
@@ -48,9 +47,8 @@ pub fn cwt_verify(
     domain: Vec<u8>,
     now: Option<u64>,
 ) -> Result<Vec<u8>, String> {
-    let domain = std::str::from_utf8(&domain).map_err(|e| e.to_string())?;
     let raw: darkbio_crypto::cbor::Raw =
-        darkbio_crypto::cwt::verify(&token, &verifier.inner, domain, now)
+        darkbio_crypto::cwt::verify(&token, &verifier.inner, &domain, now)
             .map_err(|e| e.to_string())?;
     Ok(raw.0)
 }

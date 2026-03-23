@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.0
+
+- Wrap darkbio-crypto v0.15.0
+
 ## 0.13.1
 
 - Fix CWT verification issue due to CBOR package bug
