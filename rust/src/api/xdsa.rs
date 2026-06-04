@@ -58,13 +58,13 @@ impl XdsaSecretKey {
     /// Serializes the private key to DER format.
     #[frb(sync)]
     pub fn to_der(&self) -> Vec<u8> {
-        self.inner.to_der()
+        self.inner.to_der().to_vec()
     }
 
     /// Serializes the private key to PEM format.
     #[frb(sync)]
     pub fn to_pem(&self) -> String {
-        self.inner.to_pem()
+        self.inner.to_pem().to_string()
     }
 
     /// Returns the public key corresponding to this private key.
@@ -128,44 +128,6 @@ impl XdsaPublicKey {
         })
     }
 
-    /// Parses a public key from a DER-encoded certificate, verifying the signature.
-    /// Returns the key along with validity start and end timestamps (Unix seconds).
-    #[frb(sync)]
-    pub fn from_cert_der(der: Vec<u8>, signer: &XdsaPublicKey) -> Result<(Self, u64, u64), String> {
-        let verified = darkbio_crypto::xdsa::verify_cert_der(
-            &der,
-            &signer.inner,
-            darkbio_crypto::x509::ValidityCheck::Disabled,
-        )
-        .map_err(|e| e.to_string())?;
-        Ok((
-            Self {
-                inner: verified.public_key,
-            },
-            verified.cert.not_before,
-            verified.cert.not_after,
-        ))
-    }
-
-    /// Parses a public key from a PEM-encoded certificate, verifying the signature.
-    /// Returns the key along with validity start and end timestamps (Unix seconds).
-    #[frb(sync)]
-    pub fn from_cert_pem(pem: String, signer: &XdsaPublicKey) -> Result<(Self, u64, u64), String> {
-        let verified = darkbio_crypto::xdsa::verify_cert_pem(
-            &pem,
-            &signer.inner,
-            darkbio_crypto::x509::ValidityCheck::Disabled,
-        )
-        .map_err(|e| e.to_string())?;
-        Ok((
-            Self {
-                inner: verified.public_key,
-            },
-            verified.cert.not_before,
-            verified.cert.not_after,
-        ))
-    }
-
     /// Serializes the public key to a 1984-byte array.
     #[frb(sync)]
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -182,82 +144,6 @@ impl XdsaPublicKey {
     #[frb(sync)]
     pub fn to_pem(&self) -> String {
         self.inner.to_pem()
-    }
-
-    /// Generates a DER-encoded X.509 certificate for this public key,
-    /// signed by the given xDSA secret key with the specified validity period.
-    ///
-    /// - `signer`: The xDSA secret key to sign the certificate
-    /// - `subject_name`: The subject's common name (CN)
-    /// - `issuer_name`: The issuer's common name (CN)
-    /// - `not_before`: Certificate validity start time (Unix timestamp)
-    /// - `not_after`: Certificate validity end time (Unix timestamp)
-    /// - `is_ca`: Whether this is a CA certificate
-    /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-    #[frb(sync)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn to_cert_der(
-        &self,
-        signer: &super::xdsa::XdsaSecretKey,
-        subject_name: String,
-        issuer_name: String,
-        not_before: u64,
-        not_after: u64,
-        is_ca: bool,
-        path_len: Option<u8>,
-    ) -> Result<Vec<u8>, String> {
-        let template = darkbio_crypto::x509::Certificate {
-            subject: darkbio_crypto::x509::Name::new().cn(subject_name),
-            issuer: darkbio_crypto::x509::Name::new().cn(issuer_name),
-            not_before,
-            not_after,
-            role: if is_ca {
-                darkbio_crypto::x509::Role::Authority { path_len }
-            } else {
-                darkbio_crypto::x509::Role::Leaf
-            },
-            extensions: Vec::new(),
-        };
-        darkbio_crypto::xdsa::issue_cert_der(&self.inner, &signer.inner, &template)
-            .map_err(|e| e.to_string())
-    }
-
-    /// Generates a PEM-encoded X.509 certificate for this public key,
-    /// signed by the given xDSA secret key with the specified validity period.
-    ///
-    /// - `signer`: The xDSA secret key to sign the certificate
-    /// - `subject_name`: The subject's common name (CN)
-    /// - `issuer_name`: The issuer's common name (CN)
-    /// - `not_before`: Certificate validity start time (Unix timestamp)
-    /// - `not_after`: Certificate validity end time (Unix timestamp)
-    /// - `is_ca`: Whether this is a CA certificate
-    /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-    #[frb(sync)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn to_cert_pem(
-        &self,
-        signer: &super::xdsa::XdsaSecretKey,
-        subject_name: String,
-        issuer_name: String,
-        not_before: u64,
-        not_after: u64,
-        is_ca: bool,
-        path_len: Option<u8>,
-    ) -> Result<String, String> {
-        let template = darkbio_crypto::x509::Certificate {
-            subject: darkbio_crypto::x509::Name::new().cn(subject_name),
-            issuer: darkbio_crypto::x509::Name::new().cn(issuer_name),
-            not_before,
-            not_after,
-            role: if is_ca {
-                darkbio_crypto::x509::Role::Authority { path_len }
-            } else {
-                darkbio_crypto::x509::Role::Leaf
-            },
-            extensions: Vec::new(),
-        };
-        darkbio_crypto::xdsa::issue_cert_pem(&self.inner, &signer.inner, &template)
-            .map_err(|e| e.to_string())
     }
 
     /// Returns a 32-byte fingerprint uniquely identifying this key.

@@ -5,7 +5,6 @@
 
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'xdsa.dart';
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeFingerprint>>
 abstract class XhpkeFingerprint implements RustOpaqueInterface {
@@ -25,26 +24,6 @@ abstract class XhpkePublicKey implements RustOpaqueInterface {
   /// Creates a public key from a 1216-byte array.
   static XhpkePublicKey fromBytes({required List<int> bytes}) =>
       RustLib.instance.api.crateApiXhpkeXhpkePublicKeyFromBytes(bytes: bytes);
-
-  /// Parses a public key from a DER-encoded certificate, verifying the xDSA signature.
-  /// Returns the key along with validity start and end timestamps (Unix seconds).
-  static (XhpkePublicKey, BigInt, BigInt) fromCertDer({
-    required List<int> der,
-    required XdsaPublicKey signer,
-  }) => RustLib.instance.api.crateApiXhpkeXhpkePublicKeyFromCertDer(
-    der: der,
-    signer: signer,
-  );
-
-  /// Parses a public key from a PEM-encoded certificate, verifying the xDSA signature.
-  /// Returns the key along with validity start and end timestamps (Unix seconds).
-  static (XhpkePublicKey, BigInt, BigInt) fromCertPem({
-    required String pem,
-    required XdsaPublicKey signer,
-  }) => RustLib.instance.api.crateApiXhpkeXhpkePublicKeyFromCertPem(
-    pem: pem,
-    signer: signer,
-  );
 
   /// Parses a DER-encoded public key.
   static XhpkePublicKey fromDer({required List<int> der}) =>
@@ -77,46 +56,6 @@ abstract class XhpkePublicKey implements RustOpaqueInterface {
 
   /// Serializes the public key to a 1216-byte array.
   Uint8List toBytes();
-
-  /// Generates a DER-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  Uint8List toCertDer({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
-
-  /// Generates a PEM-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  String toCertPem({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
 
   /// Serializes the public key to DER format.
   Uint8List toDer();

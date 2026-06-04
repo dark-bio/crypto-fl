@@ -72,36 +72,6 @@ class PublicKey {
   static PublicKey fromPem(String pem) =>
       PublicKey._(ffi.XdsaPublicKey.fromPem(pem: pem));
 
-  /// Parses a public key from a DER-encoded certificate, verifying the signature.
-  ///
-  /// Returns a tuple of (key, notBefore, notAfter) where notBefore and notAfter
-  /// are Unix timestamps in seconds defining the certificate validity period.
-  static (PublicKey, BigInt, BigInt) fromCertDer(
-    Uint8List der, {
-    required PublicKey signer,
-  }) {
-    final (key, notBefore, notAfter) = ffi.XdsaPublicKey.fromCertDer(
-      der: der,
-      signer: signer._inner,
-    );
-    return (PublicKey._(key), notBefore, notAfter);
-  }
-
-  /// Parses a public key from a PEM-encoded certificate, verifying the signature.
-  ///
-  /// Returns a tuple of (key, notBefore, notAfter) where notBefore and notAfter
-  /// are Unix timestamps in seconds defining the certificate validity period.
-  static (PublicKey, BigInt, BigInt) fromCertPem(
-    String pem, {
-    required PublicKey signer,
-  }) {
-    final (key, notBefore, notAfter) = ffi.XdsaPublicKey.fromCertPem(
-      pem: pem,
-      signer: signer._inner,
-    );
-    return (PublicKey._(key), notBefore, notAfter);
-  }
-
   /// Returns a 256-bit unique identifier for this key.
   Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
 
@@ -117,62 +87,6 @@ class PublicKey {
 
   /// Serializes a public key into a PEM string.
   String toPem() => _inner.toPem();
-
-  /// Generates a DER-encoded X.509 certificate for this public key, signed by
-  /// the given xDSA secret key with the specified validity period.
-  ///
-  /// - [signer]: The xDSA secret key to sign the certificate
-  /// - [subjectName]: The subject's common name (CN)
-  /// - [issuerName]: The issuer's common name (CN)
-  /// - [notBefore]: Certificate validity start time (Unix timestamp)
-  /// - [notAfter]: Certificate validity end time (Unix timestamp)
-  /// - [isCa]: Whether this is a CA certificate
-  /// - [pathLen]: Maximum intermediate CAs allowed (only if isCa is true)
-  Uint8List toCertDer({
-    required SecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => _inner.toCertDer(
-    signer: signer._inner,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
-
-  /// Generates a PEM-encoded X.509 certificate for this public key, signed by
-  /// the given xDSA secret key with the specified validity period.
-  ///
-  /// - [signer]: The xDSA secret key to sign the certificate
-  /// - [subjectName]: The subject's common name (CN)
-  /// - [issuerName]: The issuer's common name (CN)
-  /// - [notBefore]: Certificate validity start time (Unix timestamp)
-  /// - [notAfter]: Certificate validity end time (Unix timestamp)
-  /// - [isCa]: Whether this is a CA certificate
-  /// - [pathLen]: Maximum intermediate CAs allowed (only if isCa is true)
-  String toCertPem({
-    required SecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => _inner.toCertPem(
-    signer: signer._inner,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
 }
 
 /// A composite ML-DSA-65 + Ed25519 digital signature (3373 bytes).

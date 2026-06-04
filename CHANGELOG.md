@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.16.0
+
+- Wrap darkbio-crypto v0.16.0
+- Remove X.509 certificate APIs (xDSA/xHPKE `fromCertDer`/`fromCertPem`/`toCertDer`/`toCertPem`)
+
 ## 0.15.0
 
 - Wrap darkbio-crypto v0.15.0
