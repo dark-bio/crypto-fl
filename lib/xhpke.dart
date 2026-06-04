@@ -15,7 +15,6 @@ library;
 import 'dart:typed_data';
 
 import 'src/generated/api/xhpke.dart' as ffi;
-import 'xdsa.dart' as xdsa;
 
 /// A private key of the X-Wing hybrid KEM (X25519 + ML-KEM-768).
 class SecretKey {
@@ -107,38 +106,6 @@ class PublicKey {
   static PublicKey fromPem(String pem) =>
       PublicKey._(ffi.XhpkePublicKey.fromPem(pem: pem));
 
-  /// Parses a public key from a DER-encoded certificate, verifying the xDSA
-  /// signature.
-  ///
-  /// Returns a tuple of (key, notBefore, notAfter) where notBefore and notAfter
-  /// are Unix timestamps in seconds defining the certificate validity period.
-  static (PublicKey, BigInt, BigInt) fromCertDer(
-    Uint8List der, {
-    required xdsa.PublicKey signer,
-  }) {
-    final (key, notBefore, notAfter) = ffi.XhpkePublicKey.fromCertDer(
-      der: der,
-      signer: signer.inner,
-    );
-    return (PublicKey._(key), notBefore, notAfter);
-  }
-
-  /// Parses a public key from a PEM-encoded certificate, verifying the xDSA
-  /// signature.
-  ///
-  /// Returns a tuple of (key, notBefore, notAfter) where notBefore and notAfter
-  /// are Unix timestamps in seconds defining the certificate validity period.
-  static (PublicKey, BigInt, BigInt) fromCertPem(
-    String pem, {
-    required xdsa.PublicKey signer,
-  }) {
-    final (key, notBefore, notAfter) = ffi.XhpkePublicKey.fromCertPem(
-      pem: pem,
-      signer: signer.inner,
-    );
-    return (PublicKey._(key), notBefore, notAfter);
-  }
-
   /// Returns a 256-bit unique identifier for this key. For HPKE, that is the
   /// SHA256 hash of the raw public key.
   Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
@@ -180,62 +147,6 @@ class PublicKey {
 
   /// Serializes a public key into a PEM string.
   String toPem() => _inner.toPem();
-
-  /// Generates a DER-encoded X.509 certificate for this public key, signed by
-  /// the given xDSA secret key with the specified validity period.
-  ///
-  /// - [signer]: The xDSA secret key to sign the certificate
-  /// - [subjectName]: The subject's common name (CN)
-  /// - [issuerName]: The issuer's common name (CN)
-  /// - [notBefore]: Certificate validity start time (Unix timestamp)
-  /// - [notAfter]: Certificate validity end time (Unix timestamp)
-  /// - [isCa]: Whether this is a CA certificate
-  /// - [pathLen]: Maximum intermediate CAs allowed (only if isCa is true)
-  Uint8List toCertDer({
-    required xdsa.SecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => _inner.toCertDer(
-    signer: signer.inner,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
-
-  /// Generates a PEM-encoded X.509 certificate for this public key, signed by
-  /// the given xDSA secret key with the specified validity period.
-  ///
-  /// - [signer]: The xDSA secret key to sign the certificate
-  /// - [subjectName]: The subject's common name (CN)
-  /// - [issuerName]: The issuer's common name (CN)
-  /// - [notBefore]: Certificate validity start time (Unix timestamp)
-  /// - [notAfter]: Certificate validity end time (Unix timestamp)
-  /// - [isCa]: Whether this is a CA certificate
-  /// - [pathLen]: Maximum intermediate CAs allowed (only if isCa is true)
-  String toCertPem({
-    required xdsa.SecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => _inner.toCertPem(
-    signer: signer.inner,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
 }
 
 /// A 32-byte unique identifier for an xHPKE key.

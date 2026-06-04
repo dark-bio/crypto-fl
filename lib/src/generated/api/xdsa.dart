@@ -25,26 +25,6 @@ abstract class XdsaPublicKey implements RustOpaqueInterface {
   static XdsaPublicKey fromBytes({required List<int> bytes}) =>
       RustLib.instance.api.crateApiXdsaXdsaPublicKeyFromBytes(bytes: bytes);
 
-  /// Parses a public key from a DER-encoded certificate, verifying the signature.
-  /// Returns the key along with validity start and end timestamps (Unix seconds).
-  static (XdsaPublicKey, BigInt, BigInt) fromCertDer({
-    required List<int> der,
-    required XdsaPublicKey signer,
-  }) => RustLib.instance.api.crateApiXdsaXdsaPublicKeyFromCertDer(
-    der: der,
-    signer: signer,
-  );
-
-  /// Parses a public key from a PEM-encoded certificate, verifying the signature.
-  /// Returns the key along with validity start and end timestamps (Unix seconds).
-  static (XdsaPublicKey, BigInt, BigInt) fromCertPem({
-    required String pem,
-    required XdsaPublicKey signer,
-  }) => RustLib.instance.api.crateApiXdsaXdsaPublicKeyFromCertPem(
-    pem: pem,
-    signer: signer,
-  );
-
   /// Parses a DER-encoded public key.
   static XdsaPublicKey fromDer({required List<int> der}) =>
       RustLib.instance.api.crateApiXdsaXdsaPublicKeyFromDer(der: der);
@@ -55,46 +35,6 @@ abstract class XdsaPublicKey implements RustOpaqueInterface {
 
   /// Serializes the public key to a 1984-byte array.
   Uint8List toBytes();
-
-  /// Generates a DER-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  Uint8List toCertDer({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
-
-  /// Generates a PEM-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  String toCertPem({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
 
   /// Serializes the public key to DER format.
   Uint8List toDer();

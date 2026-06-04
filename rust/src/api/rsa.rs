@@ -60,13 +60,13 @@ impl RsaSecretKey {
     /// Serializes the private key to DER format.
     #[frb(sync)]
     pub fn to_der(&self) -> Vec<u8> {
-        self.inner.to_der()
+        self.inner.to_der().to_vec()
     }
 
     /// Serializes the private key to PEM format.
     #[frb(sync)]
     pub fn to_pem(&self) -> String {
-        self.inner.to_pem()
+        self.inner.to_pem().to_string()
     }
 
     /// Returns the public key corresponding to this private key.

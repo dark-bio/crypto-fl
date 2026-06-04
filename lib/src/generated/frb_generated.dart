@@ -125,7 +125,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1684258094;
+  int get rustContentHash => -1198124067;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -203,43 +203,11 @@ abstract class RustLibApi extends BaseApi {
 
   XdsaPublicKey crateApiXdsaXdsaPublicKeyFromBytes({required List<int> bytes});
 
-  (XdsaPublicKey, BigInt, BigInt) crateApiXdsaXdsaPublicKeyFromCertDer({
-    required List<int> der,
-    required XdsaPublicKey signer,
-  });
-
-  (XdsaPublicKey, BigInt, BigInt) crateApiXdsaXdsaPublicKeyFromCertPem({
-    required String pem,
-    required XdsaPublicKey signer,
-  });
-
   XdsaPublicKey crateApiXdsaXdsaPublicKeyFromDer({required List<int> der});
 
   XdsaPublicKey crateApiXdsaXdsaPublicKeyFromPem({required String pem});
 
   Uint8List crateApiXdsaXdsaPublicKeyToBytes({required XdsaPublicKey that});
-
-  Uint8List crateApiXdsaXdsaPublicKeyToCertDer({
-    required XdsaPublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
-
-  String crateApiXdsaXdsaPublicKeyToCertPem({
-    required XdsaPublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
 
   Uint8List crateApiXdsaXdsaPublicKeyToDer({required XdsaPublicKey that});
 
@@ -298,16 +266,6 @@ abstract class RustLibApi extends BaseApi {
     required List<int> bytes,
   });
 
-  (XhpkePublicKey, BigInt, BigInt) crateApiXhpkeXhpkePublicKeyFromCertDer({
-    required List<int> der,
-    required XdsaPublicKey signer,
-  });
-
-  (XhpkePublicKey, BigInt, BigInt) crateApiXhpkeXhpkePublicKeyFromCertPem({
-    required String pem,
-    required XdsaPublicKey signer,
-  });
-
   XhpkePublicKey crateApiXhpkeXhpkePublicKeyFromDer({required List<int> der});
 
   XhpkePublicKey crateApiXhpkeXhpkePublicKeyFromPem({required String pem});
@@ -325,28 +283,6 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Uint8List crateApiXhpkeXhpkePublicKeyToBytes({required XhpkePublicKey that});
-
-  Uint8List crateApiXhpkeXhpkePublicKeyToCertDer({
-    required XhpkePublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
-
-  String crateApiXhpkeXhpkePublicKeyToCertPem({
-    required XhpkePublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  });
 
   Uint8List crateApiXhpkeXhpkePublicKeyToDer({required XhpkePublicKey that});
 
@@ -1397,81 +1333,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  (XdsaPublicKey, BigInt, BigInt) crateApiXdsaXdsaPublicKeyFromCertDer({
-    required List<int> der,
-    required XdsaPublicKey signer,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(der, serializer);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-            signer,
-            serializer,
-          );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xdsa_public_key_u_64_u_64,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXdsaXdsaPublicKeyFromCertDerConstMeta,
-        argValues: [der, signer],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXdsaXdsaPublicKeyFromCertDerConstMeta =>
-      const TaskConstMeta(
-        debugName: "XdsaPublicKey_from_cert_der",
-        argNames: ["der", "signer"],
-      );
-
-  @override
-  (XdsaPublicKey, BigInt, BigInt) crateApiXdsaXdsaPublicKeyFromCertPem({
-    required String pem,
-    required XdsaPublicKey signer,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(pem, serializer);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-            signer,
-            serializer,
-          );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 28)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xdsa_public_key_u_64_u_64,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXdsaXdsaPublicKeyFromCertPemConstMeta,
-        argValues: [pem, signer],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXdsaXdsaPublicKeyFromCertPemConstMeta =>
-      const TaskConstMeta(
-        debugName: "XdsaPublicKey_from_cert_pem",
-        argNames: ["pem", "signer"],
-      );
-
-  @override
   XdsaPublicKey crateApiXdsaXdsaPublicKeyFromDer({required List<int> der}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(der, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 29)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1498,7 +1366,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pem, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 30)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 28)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1528,7 +1396,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 31)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 29)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -1548,138 +1416,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Uint8List crateApiXdsaXdsaPublicKeyToCertDer({
-    required XdsaPublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-            that,
-            serializer,
-          );
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
-            signer,
-            serializer,
-          );
-          sse_encode_String(subjectName, serializer);
-          sse_encode_String(issuerName, serializer);
-          sse_encode_u_64(notBefore, serializer);
-          sse_encode_u_64(notAfter, serializer);
-          sse_encode_bool(isCa, serializer);
-          sse_encode_opt_box_autoadd_u_8(pathLen, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 32)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXdsaXdsaPublicKeyToCertDerConstMeta,
-        argValues: [
-          that,
-          signer,
-          subjectName,
-          issuerName,
-          notBefore,
-          notAfter,
-          isCa,
-          pathLen,
-        ],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXdsaXdsaPublicKeyToCertDerConstMeta =>
-      const TaskConstMeta(
-        debugName: "XdsaPublicKey_to_cert_der",
-        argNames: [
-          "that",
-          "signer",
-          "subjectName",
-          "issuerName",
-          "notBefore",
-          "notAfter",
-          "isCa",
-          "pathLen",
-        ],
-      );
-
-  @override
-  String crateApiXdsaXdsaPublicKeyToCertPem({
-    required XdsaPublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-            that,
-            serializer,
-          );
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
-            signer,
-            serializer,
-          );
-          sse_encode_String(subjectName, serializer);
-          sse_encode_String(issuerName, serializer);
-          sse_encode_u_64(notBefore, serializer);
-          sse_encode_u_64(notAfter, serializer);
-          sse_encode_bool(isCa, serializer);
-          sse_encode_opt_box_autoadd_u_8(pathLen, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 33)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXdsaXdsaPublicKeyToCertPemConstMeta,
-        argValues: [
-          that,
-          signer,
-          subjectName,
-          issuerName,
-          notBefore,
-          notAfter,
-          isCa,
-          pathLen,
-        ],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXdsaXdsaPublicKeyToCertPemConstMeta =>
-      const TaskConstMeta(
-        debugName: "XdsaPublicKey_to_cert_pem",
-        argNames: [
-          "that",
-          "signer",
-          "subjectName",
-          "issuerName",
-          "notBefore",
-          "notAfter",
-          "isCa",
-          "pathLen",
-        ],
-      );
-
-  @override
   Uint8List crateApiXdsaXdsaPublicKeyToDer({required XdsaPublicKey that}) {
     return handler.executeSync(
       SyncTask(
@@ -1689,7 +1425,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 34)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 30)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -1718,7 +1454,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 35)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 31)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -1756,7 +1492,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             signature,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 36)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 32)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1787,7 +1523,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 37)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 33)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1814,7 +1550,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(bytes, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 38)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 34)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1841,7 +1577,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(der, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 39)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 35)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1868,7 +1604,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pem, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 40)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 36)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1894,7 +1630,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 41)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 37)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1923,7 +1659,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 42)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 38)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1957,7 +1693,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(message, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 43)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 39)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1987,7 +1723,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 44)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 40)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2016,7 +1752,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 45)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 41)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2045,7 +1781,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 46)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 42)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -2071,7 +1807,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(bytes, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 47)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 43)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2101,7 +1837,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 48)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 44)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2129,7 +1865,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(bytes, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 49)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 45)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2161,7 +1897,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 50)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 46)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2192,7 +1928,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 51)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 47)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2221,7 +1957,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(bytes, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 52)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 48)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2242,81 +1978,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  (XhpkePublicKey, BigInt, BigInt) crateApiXhpkeXhpkePublicKeyFromCertDer({
-    required List<int> der,
-    required XdsaPublicKey signer,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(der, serializer);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-            signer,
-            serializer,
-          );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 53)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xhpke_public_key_u_64_u_64,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXhpkeXhpkePublicKeyFromCertDerConstMeta,
-        argValues: [der, signer],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXhpkeXhpkePublicKeyFromCertDerConstMeta =>
-      const TaskConstMeta(
-        debugName: "XhpkePublicKey_from_cert_der",
-        argNames: ["der", "signer"],
-      );
-
-  @override
-  (XhpkePublicKey, BigInt, BigInt) crateApiXhpkeXhpkePublicKeyFromCertPem({
-    required String pem,
-    required XdsaPublicKey signer,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(pem, serializer);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-            signer,
-            serializer,
-          );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 54)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xhpke_public_key_u_64_u_64,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXhpkeXhpkePublicKeyFromCertPemConstMeta,
-        argValues: [pem, signer],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXhpkeXhpkePublicKeyFromCertPemConstMeta =>
-      const TaskConstMeta(
-        debugName: "XhpkePublicKey_from_cert_pem",
-        argNames: ["pem", "signer"],
-      );
-
-  @override
   XhpkePublicKey crateApiXhpkeXhpkePublicKeyFromDer({required List<int> der}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(der, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 55)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 49)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2343,7 +2011,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pem, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 56)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 50)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2377,7 +2045,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 57)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 51)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2415,7 +2083,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(msgToSeal, serializer);
           sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 58)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 52)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2445,7 +2113,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 59)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 53)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2465,138 +2133,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Uint8List crateApiXhpkeXhpkePublicKeyToCertDer({
-    required XhpkePublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkePublicKey(
-            that,
-            serializer,
-          );
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
-            signer,
-            serializer,
-          );
-          sse_encode_String(subjectName, serializer);
-          sse_encode_String(issuerName, serializer);
-          sse_encode_u_64(notBefore, serializer);
-          sse_encode_u_64(notAfter, serializer);
-          sse_encode_bool(isCa, serializer);
-          sse_encode_opt_box_autoadd_u_8(pathLen, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 60)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXhpkeXhpkePublicKeyToCertDerConstMeta,
-        argValues: [
-          that,
-          signer,
-          subjectName,
-          issuerName,
-          notBefore,
-          notAfter,
-          isCa,
-          pathLen,
-        ],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXhpkeXhpkePublicKeyToCertDerConstMeta =>
-      const TaskConstMeta(
-        debugName: "XhpkePublicKey_to_cert_der",
-        argNames: [
-          "that",
-          "signer",
-          "subjectName",
-          "issuerName",
-          "notBefore",
-          "notAfter",
-          "isCa",
-          "pathLen",
-        ],
-      );
-
-  @override
-  String crateApiXhpkeXhpkePublicKeyToCertPem({
-    required XhpkePublicKey that,
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkePublicKey(
-            that,
-            serializer,
-          );
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
-            signer,
-            serializer,
-          );
-          sse_encode_String(subjectName, serializer);
-          sse_encode_String(issuerName, serializer);
-          sse_encode_u_64(notBefore, serializer);
-          sse_encode_u_64(notAfter, serializer);
-          sse_encode_bool(isCa, serializer);
-          sse_encode_opt_box_autoadd_u_8(pathLen, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 61)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiXhpkeXhpkePublicKeyToCertPemConstMeta,
-        argValues: [
-          that,
-          signer,
-          subjectName,
-          issuerName,
-          notBefore,
-          notAfter,
-          isCa,
-          pathLen,
-        ],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiXhpkeXhpkePublicKeyToCertPemConstMeta =>
-      const TaskConstMeta(
-        debugName: "XhpkePublicKey_to_cert_pem",
-        argNames: [
-          "that",
-          "signer",
-          "subjectName",
-          "issuerName",
-          "notBefore",
-          "notAfter",
-          "isCa",
-          "pathLen",
-        ],
-      );
-
-  @override
   Uint8List crateApiXhpkeXhpkePublicKeyToDer({required XhpkePublicKey that}) {
     return handler.executeSync(
       SyncTask(
@@ -2606,7 +2142,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 62)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 54)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2635,7 +2171,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 63)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 55)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -2670,7 +2206,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(msgToOpen, serializer);
           sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 64)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 56)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2701,7 +2237,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 65)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 57)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2730,7 +2266,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(bytes, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 66)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 58)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2757,7 +2293,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(der, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 67)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 59)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2784,7 +2320,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(pem, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 68)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 60)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2810,7 +2346,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 69)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 61)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2843,7 +2379,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(encapKey, serializer);
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 70)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 62)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2883,7 +2419,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(msgToOpen, serializer);
           sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 71)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 63)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2914,7 +2450,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 72)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 64)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2944,7 +2480,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 73)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 65)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2973,7 +2509,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 74)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 66)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3002,7 +2538,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 75)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 67)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -3037,7 +2573,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(msgToSeal, serializer);
           sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 76)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 68)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3075,7 +2611,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_u_32(memory, serializer);
           sse_encode_u_32(threads, serializer);
           sse_encode_usize(keyLength, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 77)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 69)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3100,7 +2636,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(data, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 78)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 70)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -3134,7 +2670,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 79)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 71)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3170,7 +2706,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 80)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 72)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3213,7 +2749,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 81)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 73)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3252,7 +2788,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(signature, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 82)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 74)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3275,7 +2811,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(ciphertext, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 83)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 75)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -3317,7 +2853,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 84)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 76)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3353,7 +2889,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 85)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 77)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3387,7 +2923,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 86)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 78)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3413,7 +2949,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(signature, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 87)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 79)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -3450,7 +2986,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 88)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 80)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3488,7 +3024,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 89)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 81)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -3529,7 +3065,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 90)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 82)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3554,7 +3090,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 91)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 83)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3577,7 +3113,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 92)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 84)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -3612,7 +3148,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(now, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 93)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 85)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3643,7 +3179,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(prk, serializer);
           sse_encode_list_prim_u_8_loose(info, serializer);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 94)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 86)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3672,7 +3208,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(secret, serializer);
           sse_encode_list_prim_u_8_loose(salt, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 95)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 87)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3705,7 +3241,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(salt, serializer);
           sse_encode_list_prim_u_8_loose(info, serializer);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 96)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 88)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3732,7 +3268,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 97,
+            funcId: 89,
             port: port_,
           );
         },
@@ -3757,7 +3293,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 98)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 90)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3784,7 +3320,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(key, serializer);
           sse_encode_list_prim_u_8_loose(ciphertext, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 99)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 91)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3814,11 +3350,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(key, serializer);
           sse_encode_list_prim_u_8_loose(plaintext, serializer);
-          return pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 100,
-          )!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 92)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -4299,21 +3831,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool dco_decode_bool(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as bool;
-  }
-
-  @protected
   BigInt dco_decode_box_autoadd_u_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_u_64(raw);
-  }
-
-  @protected
-  int dco_decode_box_autoadd_u_8(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw as int;
   }
 
   @protected
@@ -4332,50 +3852,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_u_64(raw);
-  }
-
-  @protected
-  int? dco_decode_opt_box_autoadd_u_8(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return raw == null ? null : dco_decode_box_autoadd_u_8(raw);
-  }
-
-  @protected
-  (XdsaPublicKey, BigInt, BigInt)
-  dco_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xdsa_public_key_u_64_u_64(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 3) {
-      throw Exception('Expected 3 elements, got ${arr.length}');
-    }
-    return (
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-        arr[0],
-      ),
-      dco_decode_u_64(arr[1]),
-      dco_decode_u_64(arr[2]),
-    );
-  }
-
-  @protected
-  (XhpkePublicKey, BigInt, BigInt)
-  dco_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xhpke_public_key_u_64_u_64(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 3) {
-      throw Exception('Expected 3 elements, got ${arr.length}');
-    }
-    return (
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkePublicKey(
-        arr[0],
-      ),
-      dco_decode_u_64(arr[1]),
-      dco_decode_u_64(arr[2]),
-    );
   }
 
   @protected
@@ -4916,21 +4392,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
-  }
-
-  @protected
   BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_u_64(deserializer));
-  }
-
-  @protected
-  int sse_decode_box_autoadd_u_8(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return (sse_decode_u_8(deserializer));
   }
 
   @protected
@@ -4956,47 +4420,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     } else {
       return null;
     }
-  }
-
-  @protected
-  int? sse_decode_opt_box_autoadd_u_8(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    if (sse_decode_bool(deserializer)) {
-      return (sse_decode_box_autoadd_u_8(deserializer));
-    } else {
-      return null;
-    }
-  }
-
-  @protected
-  (XdsaPublicKey, BigInt, BigInt)
-  sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xdsa_public_key_u_64_u_64(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_field0 =
-        sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-          deserializer,
-        );
-    var var_field1 = sse_decode_u_64(deserializer);
-    var var_field2 = sse_decode_u_64(deserializer);
-    return (var_field0, var_field1, var_field2);
-  }
-
-  @protected
-  (XhpkePublicKey, BigInt, BigInt)
-  sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xhpke_public_key_u_64_u_64(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_field0 =
-        sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkePublicKey(
-          deserializer,
-        );
-    var var_field1 = sse_decode_u_64(deserializer);
-    var var_field2 = sse_decode_u_64(deserializer);
-    return (var_field0, var_field1, var_field2);
   }
 
   @protected
@@ -5057,6 +4480,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
+  }
+
+  @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
   }
 
   @protected
@@ -5573,21 +5002,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
-  }
-
-  @protected
   void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_64(self, serializer);
-  }
-
-  @protected
-  void sse_encode_box_autoadd_u_8(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_u_8(self, serializer);
   }
 
   @protected
@@ -5620,46 +5037,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     if (self != null) {
       sse_encode_box_autoadd_u_64(self, serializer);
     }
-  }
-
-  @protected
-  void sse_encode_opt_box_autoadd_u_8(int? self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    sse_encode_bool(self != null, serializer);
-    if (self != null) {
-      sse_encode_box_autoadd_u_8(self, serializer);
-    }
-  }
-
-  @protected
-  void
-  sse_encode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xdsa_public_key_u_64_u_64(
-    (XdsaPublicKey, BigInt, BigInt) self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
-      self.$1,
-      serializer,
-    );
-    sse_encode_u_64(self.$2, serializer);
-    sse_encode_u_64(self.$3, serializer);
-  }
-
-  @protected
-  void
-  sse_encode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_xhpke_public_key_u_64_u_64(
-    (XhpkePublicKey, BigInt, BigInt) self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkePublicKey(
-      self.$1,
-      serializer,
-    );
-    sse_encode_u_64(self.$2, serializer);
-    sse_encode_u_64(self.$3, serializer);
   }
 
   @protected
@@ -5719,6 +5096,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
+  }
+
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
   }
 }
 
@@ -5909,64 +5292,6 @@ class XdsaPublicKeyImpl extends RustOpaque implements XdsaPublicKey {
   Uint8List toBytes() =>
       RustLib.instance.api.crateApiXdsaXdsaPublicKeyToBytes(that: this);
 
-  /// Generates a DER-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  Uint8List toCertDer({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => RustLib.instance.api.crateApiXdsaXdsaPublicKeyToCertDer(
-    that: this,
-    signer: signer,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
-
-  /// Generates a PEM-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  String toCertPem({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => RustLib.instance.api.crateApiXdsaXdsaPublicKeyToCertPem(
-    that: this,
-    signer: signer,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
-
   /// Serializes the public key to DER format.
   Uint8List toDer() =>
       RustLib.instance.api.crateApiXdsaXdsaPublicKeyToDer(that: this);
@@ -6135,64 +5460,6 @@ class XhpkePublicKeyImpl extends RustOpaque implements XhpkePublicKey {
   /// Serializes the public key to a 1216-byte array.
   Uint8List toBytes() =>
       RustLib.instance.api.crateApiXhpkeXhpkePublicKeyToBytes(that: this);
-
-  /// Generates a DER-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  Uint8List toCertDer({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => RustLib.instance.api.crateApiXhpkeXhpkePublicKeyToCertDer(
-    that: this,
-    signer: signer,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
-
-  /// Generates a PEM-encoded X.509 certificate for this public key,
-  /// signed by the given xDSA secret key with the specified validity period.
-  ///
-  /// - `signer`: The xDSA secret key to sign the certificate
-  /// - `subject_name`: The subject's common name (CN)
-  /// - `issuer_name`: The issuer's common name (CN)
-  /// - `not_before`: Certificate validity start time (Unix timestamp)
-  /// - `not_after`: Certificate validity end time (Unix timestamp)
-  /// - `is_ca`: Whether this is a CA certificate
-  /// - `path_len`: Maximum intermediate CAs allowed (only if is_ca is true)
-  String toCertPem({
-    required XdsaSecretKey signer,
-    required String subjectName,
-    required String issuerName,
-    required BigInt notBefore,
-    required BigInt notAfter,
-    required bool isCa,
-    int? pathLen,
-  }) => RustLib.instance.api.crateApiXhpkeXhpkePublicKeyToCertPem(
-    that: this,
-    signer: signer,
-    subjectName: subjectName,
-    issuerName: issuerName,
-    notBefore: notBefore,
-    notAfter: notAfter,
-    isCa: isCa,
-    pathLen: pathLen,
-  );
 
   /// Serializes the public key to DER format.
   Uint8List toDer() =>

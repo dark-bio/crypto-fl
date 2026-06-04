@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1684258094;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1198124067;
 
 // Section: executor
 
@@ -1106,106 +1106,6 @@ fn wire__crate__api__xdsa__XdsaPublicKey_from_bytes_impl(
         },
     )
 }
-fn wire__crate__api__xdsa__XdsaPublicKey_from_cert_der_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XdsaPublicKey_from_cert_der",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_der = <Vec<u8>>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
-            >>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            0,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok =
-                    crate::api::xdsa::XdsaPublicKey::from_cert_der(api_der, &*api_signer_guard)?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__xdsa__XdsaPublicKey_from_cert_pem_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XdsaPublicKey_from_cert_pem",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_pem = <String>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
-            >>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            0,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok =
-                    crate::api::xdsa::XdsaPublicKey::from_cert_pem(api_pem, &*api_signer_guard)?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
 fn wire__crate__api__xdsa__XdsaPublicKey_from_der_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -1309,150 +1209,6 @@ fn wire__crate__api__xdsa__XdsaPublicKey_to_bytes_impl(
                 let output_ok = Result::<_, ()>::Ok(crate::api::xdsa::XdsaPublicKey::to_bytes(
                     &*api_that_guard,
                 ))?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__xdsa__XdsaPublicKey_to_cert_der_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XdsaPublicKey_to_cert_der",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaSecretKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_subject_name = <String>::sse_decode(&mut deserializer);
-            let api_issuer_name = <String>::sse_decode(&mut deserializer);
-            let api_not_before = <u64>::sse_decode(&mut deserializer);
-            let api_not_after = <u64>::sse_decode(&mut deserializer);
-            let api_is_ca = <bool>::sse_decode(&mut deserializer);
-            let api_path_len = <Option<u8>>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_that_guard = None;
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_that, 0, false,
-                        ),
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            1,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                        1 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_that_guard = api_that_guard.unwrap();
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok = crate::api::xdsa::XdsaPublicKey::to_cert_der(
-                    &*api_that_guard,
-                    &*api_signer_guard,
-                    api_subject_name,
-                    api_issuer_name,
-                    api_not_before,
-                    api_not_after,
-                    api_is_ca,
-                    api_path_len,
-                )?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__xdsa__XdsaPublicKey_to_cert_pem_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XdsaPublicKey_to_cert_pem",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaSecretKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_subject_name = <String>::sse_decode(&mut deserializer);
-            let api_issuer_name = <String>::sse_decode(&mut deserializer);
-            let api_not_before = <u64>::sse_decode(&mut deserializer);
-            let api_not_after = <u64>::sse_decode(&mut deserializer);
-            let api_is_ca = <bool>::sse_decode(&mut deserializer);
-            let api_path_len = <Option<u8>>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_that_guard = None;
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_that, 0, false,
-                        ),
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            1,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                        1 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_that_guard = api_that_guard.unwrap();
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok = crate::api::xdsa::XdsaPublicKey::to_cert_pem(
-                    &*api_that_guard,
-                    &*api_signer_guard,
-                    api_subject_name,
-                    api_issuer_name,
-                    api_not_before,
-                    api_not_after,
-                    api_is_ca,
-                    api_path_len,
-                )?;
                 Ok(output_ok)
             })())
         },
@@ -2255,106 +2011,6 @@ fn wire__crate__api__xhpke__XhpkePublicKey_from_bytes_impl(
         },
     )
 }
-fn wire__crate__api__xhpke__XhpkePublicKey_from_cert_der_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XhpkePublicKey_from_cert_der",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_der = <Vec<u8>>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
-            >>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            0,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok =
-                    crate::api::xhpke::XhpkePublicKey::from_cert_der(api_der, &*api_signer_guard)?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__xhpke__XhpkePublicKey_from_cert_pem_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XhpkePublicKey_from_cert_pem",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_pem = <String>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaPublicKey>,
-            >>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            0,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok =
-                    crate::api::xhpke::XhpkePublicKey::from_cert_pem(api_pem, &*api_signer_guard)?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
 fn wire__crate__api__xhpke__XhpkePublicKey_from_der_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -2560,150 +2216,6 @@ fn wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(
                 let output_ok = Result::<_, ()>::Ok(crate::api::xhpke::XhpkePublicKey::to_bytes(
                     &*api_that_guard,
                 ))?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__xhpke__XhpkePublicKey_to_cert_der_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XhpkePublicKey_to_cert_der",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaSecretKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_subject_name = <String>::sse_decode(&mut deserializer);
-            let api_issuer_name = <String>::sse_decode(&mut deserializer);
-            let api_not_before = <u64>::sse_decode(&mut deserializer);
-            let api_not_after = <u64>::sse_decode(&mut deserializer);
-            let api_is_ca = <bool>::sse_decode(&mut deserializer);
-            let api_path_len = <Option<u8>>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_that_guard = None;
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_that, 0, false,
-                        ),
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            1,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                        1 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_that_guard = api_that_guard.unwrap();
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok = crate::api::xhpke::XhpkePublicKey::to_cert_der(
-                    &*api_that_guard,
-                    &*api_signer_guard,
-                    api_subject_name,
-                    api_issuer_name,
-                    api_not_before,
-                    api_not_after,
-                    api_is_ca,
-                    api_path_len,
-                )?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
-fn wire__crate__api__xhpke__XhpkePublicKey_to_cert_pem_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "XhpkePublicKey_to_cert_pem",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_signer = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaSecretKey>,
-            >>::sse_decode(&mut deserializer);
-            let api_subject_name = <String>::sse_decode(&mut deserializer);
-            let api_issuer_name = <String>::sse_decode(&mut deserializer);
-            let api_not_before = <u64>::sse_decode(&mut deserializer);
-            let api_not_after = <u64>::sse_decode(&mut deserializer);
-            let api_is_ca = <bool>::sse_decode(&mut deserializer);
-            let api_path_len = <Option<u8>>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, String>((move || {
-                let mut api_that_guard = None;
-                let mut api_signer_guard = None;
-                let decode_indices_ =
-                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_that, 0, false,
-                        ),
-                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                            &api_signer,
-                            1,
-                            false,
-                        ),
-                    ]);
-                for i in decode_indices_ {
-                    match i {
-                        0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
-                        1 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
-                        _ => unreachable!(),
-                    }
-                }
-                let api_that_guard = api_that_guard.unwrap();
-                let api_signer_guard = api_signer_guard.unwrap();
-                let output_ok = crate::api::xhpke::XhpkePublicKey::to_cert_pem(
-                    &*api_that_guard,
-                    &*api_signer_guard,
-                    api_subject_name,
-                    api_issuer_name,
-                    api_not_before,
-                    api_not_after,
-                    api_is_ca,
-                    api_path_len,
-                )?;
                 Ok(output_ok)
             })())
         },
@@ -4719,13 +4231,6 @@ impl SseDecode for String {
     }
 }
 
-impl SseDecode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_u8().unwrap() != 0
-    }
-}
-
 impl SseDecode for Vec<u8> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4746,37 +4251,6 @@ impl SseDecode for Option<u64> {
         } else {
             return None;
         }
-    }
-}
-
-impl SseDecode for Option<u8> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        if (<bool>::sse_decode(deserializer)) {
-            return Some(<u8>::sse_decode(deserializer));
-        } else {
-            return None;
-        }
-    }
-}
-
-impl SseDecode for (XdsaPublicKey, u64, u64) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_field0 = <XdsaPublicKey>::sse_decode(deserializer);
-        let mut var_field1 = <u64>::sse_decode(deserializer);
-        let mut var_field2 = <u64>::sse_decode(deserializer);
-        return (var_field0, var_field1, var_field2);
-    }
-}
-
-impl SseDecode for (XhpkePublicKey, u64, u64) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_field0 = <XhpkePublicKey>::sse_decode(deserializer);
-        let mut var_field1 = <u64>::sse_decode(deserializer);
-        let mut var_field2 = <u64>::sse_decode(deserializer);
-        return (var_field0, var_field1, var_field2);
     }
 }
 
@@ -4838,6 +4312,13 @@ impl SseDecode for i32 {
     }
 }
 
+impl SseDecode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u8().unwrap() != 0
+    }
+}
+
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -4847,7 +4328,7 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        97 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        89 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4886,87 +4367,75 @@ fn pde_ffi_dispatcher_sync_impl(
         24 => wire__crate__api__xdsa__XdsaFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
         25 => wire__crate__api__xdsa__XdsaPublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
         26 => wire__crate__api__xdsa__XdsaPublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        27 => wire__crate__api__xdsa__XdsaPublicKey_from_cert_der_impl(ptr, rust_vec_len, data_len),
-        28 => wire__crate__api__xdsa__XdsaPublicKey_from_cert_pem_impl(ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__xdsa__XdsaPublicKey_from_der_impl(ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__xdsa__XdsaPublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__xdsa__XdsaPublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__xdsa__XdsaPublicKey_to_cert_der_impl(ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__xdsa__XdsaPublicKey_to_cert_pem_impl(ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__xdsa__XdsaPublicKey_to_der_impl(ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__xdsa__XdsaPublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__xdsa__XdsaPublicKey_verify_impl(ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__xdsa__XdsaSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        38 => wire__crate__api__xdsa__XdsaSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__xdsa__XdsaSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__xdsa__XdsaSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__xdsa__XdsaSecretKey_generate_impl(ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__xdsa__XdsaSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__xdsa__XdsaSecretKey_sign_impl(ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__xdsa__XdsaSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        45 => wire__crate__api__xdsa__XdsaSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__xdsa__XdsaSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__xdsa__XdsaSignature_from_bytes_impl(ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__xdsa__XdsaSignature_to_bytes_impl(ptr, rust_vec_len, data_len),
-        49 => {
+        27 => wire__crate__api__xdsa__XdsaPublicKey_from_der_impl(ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__xdsa__XdsaPublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__xdsa__XdsaPublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__xdsa__XdsaPublicKey_to_der_impl(ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__xdsa__XdsaPublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__xdsa__XdsaPublicKey_verify_impl(ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__xdsa__XdsaSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__xdsa__XdsaSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__xdsa__XdsaSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__xdsa__XdsaSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__xdsa__XdsaSecretKey_generate_impl(ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__xdsa__XdsaSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__xdsa__XdsaSecretKey_sign_impl(ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__xdsa__XdsaSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__xdsa__XdsaSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__xdsa__XdsaSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__xdsa__XdsaSignature_from_bytes_impl(ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__xdsa__XdsaSignature_to_bytes_impl(ptr, rust_vec_len, data_len),
+        45 => {
             wire__crate__api__xhpke__XhpkeFingerprint_from_bytes_impl(ptr, rust_vec_len, data_len)
         }
-        50 => wire__crate__api__xhpke__XhpkeFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__xhpke__XhpkePublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__xhpke__XhpkePublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        53 => {
-            wire__crate__api__xhpke__XhpkePublicKey_from_cert_der_impl(ptr, rust_vec_len, data_len)
-        }
-        54 => {
-            wire__crate__api__xhpke__XhpkePublicKey_from_cert_pem_impl(ptr, rust_vec_len, data_len)
-        }
-        55 => wire__crate__api__xhpke__XhpkePublicKey_from_der_impl(ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__xhpke__XhpkePublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        57 => wire__crate__api__xhpke__XhpkePublicKey_new_sender_impl(ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__xhpke__XhpkePublicKey_seal_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__xhpke__XhpkePublicKey_to_cert_der_impl(ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__xhpke__XhpkePublicKey_to_cert_pem_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__xhpke__XhpkePublicKey_to_der_impl(ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        64 => wire__crate__api__xhpke__XhpkeReceiver_open_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        66 => wire__crate__api__xhpke__XhpkeSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        67 => wire__crate__api__xhpke__XhpkeSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__xhpke__XhpkeSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        69 => wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(ptr, rust_vec_len, data_len),
-        70 => {
+        46 => wire__crate__api__xhpke__XhpkeFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__xhpke__XhpkePublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__xhpke__XhpkePublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__xhpke__XhpkePublicKey_from_der_impl(ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__xhpke__XhpkePublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__xhpke__XhpkePublicKey_new_sender_impl(ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__xhpke__XhpkePublicKey_seal_impl(ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__xhpke__XhpkePublicKey_to_der_impl(ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        56 => wire__crate__api__xhpke__XhpkeReceiver_open_impl(ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        58 => wire__crate__api__xhpke__XhpkeSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__xhpke__XhpkeSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__xhpke__XhpkeSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(ptr, rust_vec_len, data_len),
+        62 => {
             wire__crate__api__xhpke__XhpkeSecretKey_new_receiver_impl(ptr, rust_vec_len, data_len)
         }
-        71 => wire__crate__api__xhpke__XhpkeSecretKey_open_impl(ptr, rust_vec_len, data_len),
-        72 => wire__crate__api__xhpke__XhpkeSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
-        73 => wire__crate__api__xhpke__XhpkeSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        74 => wire__crate__api__xhpke__XhpkeSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
-        75 => wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        76 => wire__crate__api__xhpke__XhpkeSender_seal_impl(ptr, rust_vec_len, data_len),
-        77 => wire__crate__api__argon2__argon2_key_impl(ptr, rust_vec_len, data_len),
-        78 => wire__crate__api__cbor__cbor_verify_impl(ptr, rust_vec_len, data_len),
-        79 => wire__crate__api__cose__cose_decrypt_impl(ptr, rust_vec_len, data_len),
-        80 => wire__crate__api__cose__cose_encrypt_impl(ptr, rust_vec_len, data_len),
-        81 => wire__crate__api__cose__cose_open_impl(ptr, rust_vec_len, data_len),
-        82 => wire__crate__api__cose__cose_peek_impl(ptr, rust_vec_len, data_len),
-        83 => wire__crate__api__cose__cose_recipient_impl(ptr, rust_vec_len, data_len),
-        84 => wire__crate__api__cose__cose_seal_impl(ptr, rust_vec_len, data_len),
-        85 => wire__crate__api__cose__cose_sign_impl(ptr, rust_vec_len, data_len),
-        86 => wire__crate__api__cose__cose_sign_detached_impl(ptr, rust_vec_len, data_len),
-        87 => wire__crate__api__cose__cose_signer_impl(ptr, rust_vec_len, data_len),
-        88 => wire__crate__api__cose__cose_verify_impl(ptr, rust_vec_len, data_len),
-        89 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
-        90 => wire__crate__api__cwt__cwt_issue_impl(ptr, rust_vec_len, data_len),
-        91 => wire__crate__api__cwt__cwt_peek_impl(ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__cwt__cwt_signer_impl(ptr, rust_vec_len, data_len),
-        93 => wire__crate__api__cwt__cwt_verify_impl(ptr, rust_vec_len, data_len),
-        94 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
-        95 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
-        96 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
-        98 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
-        99 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
-        100 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__xhpke__XhpkeSecretKey_open_impl(ptr, rust_vec_len, data_len),
+        64 => wire__crate__api__xhpke__XhpkeSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
+        65 => wire__crate__api__xhpke__XhpkeSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        66 => wire__crate__api__xhpke__XhpkeSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
+        67 => wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        68 => wire__crate__api__xhpke__XhpkeSender_seal_impl(ptr, rust_vec_len, data_len),
+        69 => wire__crate__api__argon2__argon2_key_impl(ptr, rust_vec_len, data_len),
+        70 => wire__crate__api__cbor__cbor_verify_impl(ptr, rust_vec_len, data_len),
+        71 => wire__crate__api__cose__cose_decrypt_impl(ptr, rust_vec_len, data_len),
+        72 => wire__crate__api__cose__cose_encrypt_impl(ptr, rust_vec_len, data_len),
+        73 => wire__crate__api__cose__cose_open_impl(ptr, rust_vec_len, data_len),
+        74 => wire__crate__api__cose__cose_peek_impl(ptr, rust_vec_len, data_len),
+        75 => wire__crate__api__cose__cose_recipient_impl(ptr, rust_vec_len, data_len),
+        76 => wire__crate__api__cose__cose_seal_impl(ptr, rust_vec_len, data_len),
+        77 => wire__crate__api__cose__cose_sign_impl(ptr, rust_vec_len, data_len),
+        78 => wire__crate__api__cose__cose_sign_detached_impl(ptr, rust_vec_len, data_len),
+        79 => wire__crate__api__cose__cose_signer_impl(ptr, rust_vec_len, data_len),
+        80 => wire__crate__api__cose__cose_verify_impl(ptr, rust_vec_len, data_len),
+        81 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
+        82 => wire__crate__api__cwt__cwt_issue_impl(ptr, rust_vec_len, data_len),
+        83 => wire__crate__api__cwt__cwt_peek_impl(ptr, rust_vec_len, data_len),
+        84 => wire__crate__api__cwt__cwt_signer_impl(ptr, rust_vec_len, data_len),
+        85 => wire__crate__api__cwt__cwt_verify_impl(ptr, rust_vec_len, data_len),
+        86 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
+        87 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
+        88 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
+        90 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
+        91 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
+        92 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -5409,13 +4878,6 @@ impl SseEncode for String {
     }
 }
 
-impl SseEncode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_u8(self as _).unwrap();
-    }
-}
-
 impl SseEncode for Vec<u8> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -5433,34 +4895,6 @@ impl SseEncode for Option<u64> {
         if let Some(value) = self {
             <u64>::sse_encode(value, serializer);
         }
-    }
-}
-
-impl SseEncode for Option<u8> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <bool>::sse_encode(self.is_some(), serializer);
-        if let Some(value) = self {
-            <u8>::sse_encode(value, serializer);
-        }
-    }
-}
-
-impl SseEncode for (XdsaPublicKey, u64, u64) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <XdsaPublicKey>::sse_encode(self.0, serializer);
-        <u64>::sse_encode(self.1, serializer);
-        <u64>::sse_encode(self.2, serializer);
-    }
-}
-
-impl SseEncode for (XhpkePublicKey, u64, u64) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <XhpkePublicKey>::sse_encode(self.0, serializer);
-        <u64>::sse_encode(self.1, serializer);
-        <u64>::sse_encode(self.2, serializer);
     }
 }
 
@@ -5520,6 +4954,13 @@ impl SseEncode for i32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u8(self as _).unwrap();
     }
 }
 
