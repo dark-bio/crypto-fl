@@ -335,9 +335,9 @@ dependencies = [
 
 [[package]]
 name = "darkbio-crypto"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19181209bd9395b8c78b7599277ef91a139d722c58c8697ecc29c5ff797f25dc"
+checksum = "d240122ae8e22e5d7e354331ac5b9cbb265a263ceacb762413e47b4fe5b1539f"
 dependencies = [
  "argon2",
  "base64",
@@ -366,9 +366,9 @@ dependencies = [
 
 [[package]]
 name = "darkbio-crypto-cbor-derive"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76a7a733a697d6a939474a679146cff5d8ab6deb59dce957a5f9d652f119febb"
+checksum = "3fa0bfe17ff7f79c67a47f5658db32303c10cbd1b37d806d031ce6169545aa94"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -377,7 +377,7 @@ dependencies = [
 
 [[package]]
 name = "darkbio_crypto_ffi"
-version = "0.17.0"
+version = "0.17.1"
 dependencies = [
  "darkbio-crypto",
  "flutter_rust_bridge",
