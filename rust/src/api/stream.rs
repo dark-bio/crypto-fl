@@ -15,7 +15,7 @@ pub fn stream_encrypt(key: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, Strin
         .try_into()
         .map_err(|_| "Invalid key length, expected 32 bytes".to_string())?;
 
-    let payload_key = darkbio_crypto::stream::PayloadKey(key_array.into());
+    let payload_key = darkbio_crypto::stream::PayloadKey::from_bytes(&key_array);
 
     let mut ciphertext = Vec::new();
     let mut writer = darkbio_crypto::stream::Stream::encrypt(payload_key, &mut ciphertext);
@@ -39,7 +39,7 @@ pub fn stream_decrypt(key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, Stri
         .try_into()
         .map_err(|_| "Invalid key length, expected 32 bytes".to_string())?;
 
-    let payload_key = darkbio_crypto::stream::PayloadKey(key_array.into());
+    let payload_key = darkbio_crypto::stream::PayloadKey::from_bytes(&key_array);
 
     let mut reader = darkbio_crypto::stream::Stream::decrypt(payload_key, ciphertext.as_slice());
 

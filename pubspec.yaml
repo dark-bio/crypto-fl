@@ -1,6 +1,6 @@
 name: darkbio_crypto
 description: "Post-quantum cryptography in Flutter, backed by Rust FFI"
-version: 0.16.0
+version: 0.17.0
 homepage: https://github.com/dark-bio/crypto-fl
 repository: https://github.com/dark-bio/crypto-fl
 issue_tracker: https://github.com/dark-bio/crypto-fl/issues
@@ -10,7 +10,7 @@ environment:
   flutter: '>=3.35.0'
 
 dependencies:
-  cbor: ^6.3.7
+  cbor: ^6.5.1
   flutter:
     sdk: flutter
   flutter_rust_bridge: 2.11.1  # Pinned: frb_prefixed_binding.dart relies on internal APIs
