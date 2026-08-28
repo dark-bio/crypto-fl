@@ -3,6 +3,8 @@
 ## 0.17.0
 
 - Wrap darkbio-crypto v0.17.0
+- Bump flutter_rust_bridge to 2.13.0
+- Refresh vendored cargokit (Android 16KB page size support)
 
 ## 0.16.0
 
