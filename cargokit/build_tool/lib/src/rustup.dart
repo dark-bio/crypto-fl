@@ -21,6 +21,17 @@ class Rustup {
     return targets != null ? List.unmodifiable(targets) : null;
   }
 
+  String resolveToolchain(String toolchain) =>
+      _installedToolchains
+          .firstWhereOrNull(
+            (e) => _matchesRequestedToolchain(
+              installedName: e.name,
+              requestedToolchain: toolchain,
+            ),
+          )
+          ?.name ??
+      toolchain;
+
   void installToolchain(String toolchain) {
     log.info("Installing Rust toolchain: $toolchain");
     runCommand("rustup", ['toolchain', 'install', toolchain]);
@@ -35,13 +46,42 @@ class Rustup {
     _installedTargets(toolchain)?.add(target);
   }
 
+  bool _didInstallZigBuild = false;
+
+  void installZigBuild(String toolchain) {
+    if (_didInstallZigBuild) {
+      return;
+    }
+
+    log.info("Installing Zig build");
+    runCommand("rustup", [
+      'run',
+      toolchain,
+      'cargo',
+      'install',
+      '--locked',
+      'cargo-zigbuild',
+    ]);
+    _didInstallZigBuild = true;
+  }
+
   final List<_Toolchain> _installedToolchains;
 
   Rustup() : _installedToolchains = _getInstalledToolchains();
 
+  bool _matchesRequestedToolchain({
+    required String installedName,
+    required String requestedToolchain,
+  }) =>
+      installedName == requestedToolchain ||
+      installedName.startsWith('$requestedToolchain-');
+
   List<String>? _installedTargets(String toolchain) => _installedToolchains
       .firstWhereOrNull(
-        (e) => e.name == toolchain || e.name.startsWith('$toolchain-'),
+        (e) => _matchesRequestedToolchain(
+          installedName: e.name,
+          requestedToolchain: toolchain,
+        ),
       )
       ?.targets;
 
@@ -56,11 +96,11 @@ class Rustup {
 
     // To list all non-custom toolchains, we need to filter out lines that
     // don't start with "stable", "beta", or "nightly".
-    Pattern nonCustom = RegExp(r"^(stable|beta|nightly)");
+    final nonCustom = RegExp(r'^(stable|beta|nightly)');
     final lines = res.stdout
         .toString()
         .split('\n')
-        .where((e) => e.isNotEmpty && e.startsWith(nonCustom))
+        .where((e) => e.isNotEmpty && nonCustom.hasMatch(e))
         .map(extractToolchainName)
         .toList(growable: true);
 
@@ -87,7 +127,7 @@ class Rustup {
 
   bool _didInstallRustSrcForNightly = false;
 
-  void installRustSrcForNightly() {
+  void installRustSrcForNightly({String toolchain = 'nightly'}) {
     if (_didInstallRustSrcForNightly) {
       return;
     }
@@ -97,7 +137,7 @@ class Rustup {
       'add',
       'rust-src',
       '--toolchain',
-      'nightly',
+      toolchain,
     ]);
     _didInstallRustSrcForNightly = true;
   }

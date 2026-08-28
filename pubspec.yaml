@@ -13,7 +13,7 @@ dependencies:
   cbor: ^6.5.1
   flutter:
     sdk: flutter
-  flutter_rust_bridge: 2.11.1  # Pinned: frb_prefixed_binding.dart relies on internal APIs
+  flutter_rust_bridge: 2.13.0  # Pinned: frb_prefixed_binding.dart relies on internal APIs
   plugin_platform_interface: ^2.1.8
 
 dev_dependencies:
