@@ -11,7 +11,7 @@ jobs:
   android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install Android targets
         run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
@@ -24,7 +24,7 @@ jobs:
         working-directory: rust
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-libs
           path: rust/jniLibs
@@ -33,7 +33,7 @@ jobs:
   ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install LLVM (for llvm-objcopy)
         run: brew install llvm
@@ -75,7 +75,7 @@ jobs:
             -output ${{ env.LIB_NAME }}.xcframework
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ios-xcframework
           path: ${{ env.LIB_NAME }}.xcframework
@@ -84,7 +84,7 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install LLVM (for llvm-objcopy)
         run: brew install llvm
@@ -114,7 +114,7 @@ jobs:
             -output macos-lib/lib${{ env.LIB_NAME }}.a
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: macos-lib
           path: macos-lib
@@ -123,7 +123,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Build Linux x86_64
         run: cargo build --release --target x86_64-unknown-linux-gnu
@@ -135,7 +135,7 @@ jobs:
           cp rust/target/x86_64-unknown-linux-gnu/release/lib${{ env.LIB_NAME }}.so linux-lib/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-lib
           path: linux-lib
@@ -144,7 +144,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Build Windows x86_64
         run: cargo build --release --target x86_64-pc-windows-msvc
@@ -157,7 +157,7 @@ jobs:
         shell: bash
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-lib
           path: windows-lib
@@ -167,34 +167,34 @@ jobs:
     needs: [android, ios, macos, linux, windows]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Download Android libs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: android-libs
           path: android/src/main/jniLibs
 
       - name: Download iOS xcframework
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ios-xcframework
           path: ios/${{ env.LIB_NAME }}.xcframework
 
       - name: Download macOS lib
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: macos-lib
           path: macos/Libs
 
       - name: Download Linux lib
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: linux-lib
           path: linux/libs
 
       - name: Download Windows lib
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: windows-lib
           path: windows/libs
@@ -302,7 +302,7 @@ jobs:
         run: flutter pub publish --dry-run || true
 
       - name: Upload final package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pub-package
           path: |
