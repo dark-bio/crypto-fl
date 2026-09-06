@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.18.0
+
+- Wrap darkbio-crypto v0.18.0
+- Refresh dependency locks
+
 ## 0.17.2
 
 - Wrap darkbio-crypto v0.17.2

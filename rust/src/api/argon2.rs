@@ -26,4 +26,5 @@ pub fn argon2_key(
     key_length: usize,
 ) -> Vec<u8> {
     darkbio_crypto::argon2::key_with_len(&password, &salt, time, memory, threads, key_length)
+        .to_vec()
 }

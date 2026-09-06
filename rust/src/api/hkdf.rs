@@ -9,7 +9,7 @@ use flutter_rust_bridge::frb;
 /// Derives a key of the specified length from the secret, salt, and info using HKDF-SHA256.
 #[frb(sync)]
 pub fn hkdf_key(secret: Vec<u8>, salt: Vec<u8>, info: Vec<u8>, length: usize) -> Vec<u8> {
-    darkbio_crypto::hkdf::key_with_len(&secret, &salt, &info, length)
+    darkbio_crypto::hkdf::key_with_len(&secret, &salt, &info, length).to_vec()
 }
 
 /// Extracts a 32-byte pseudorandom key from the secret and salt using HKDF-SHA256.
@@ -27,7 +27,5 @@ pub fn hkdf_expand(prk: Vec<u8>, info: Vec<u8>, length: usize) -> Result<Vec<u8>
         .try_into()
         .map_err(|_| "Invalid PRK length, expected 32 bytes".to_string())?;
 
-    Ok(darkbio_crypto::hkdf::expand_with_len(
-        prk_array, &info, length,
-    ))
+    Ok(darkbio_crypto::hkdf::expand_with_len(&prk_array, &info, length).to_vec())
 }
