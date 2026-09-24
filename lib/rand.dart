@@ -4,12 +4,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/// Cryptographically secure random number generation.
+/// Random bytes from the operating system's secure source.
+///
+/// ```dart
+/// import 'package:darkbio_crypto/rand.dart' as rand;
+///
+/// void example() {
+///   final nonce = rand.bytes(32);
+///   assert(nonce.length == 32);
+/// }
+/// ```
 library;
 
 import 'dart:typed_data';
 
 import 'src/generated/api/rand.dart' as ffi;
 
-/// Creates an arbitrarily large buffer filled with randomness.
+/// Creates a buffer of [length] bytes filled with randomness.
 Uint8List bytes(int length) => ffi.randomBytes(length: BigInt.from(length));
