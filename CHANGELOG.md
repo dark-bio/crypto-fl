@@ -6,6 +6,13 @@
 - Document every public API, with an example per library
 - Sort CWT claim keys, so claims can be set in any order
 - Compare key fingerprints by their bytes
+- Check COSE payloads and CWT claims against the CBOR subset when reading them
+- Encode CBOR lists and maps of any size with a definite length
+- Decode CWT claims into the types they are set with, so they issue again unchanged
+- Reject a negative COSE drift and out-of-range `argon2`, `hkdf` and `rand` integers
+- Reject text holding a lone surrogate, instead of encoding it as U+FFFD
+- Name the native library correctly in the macOS, Linux and Windows source builds
+- Add a Dart test suite with the shared test vectors, run in CI
 - Refresh dependency locks
 
 ## 0.18.0

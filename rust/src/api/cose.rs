@@ -80,6 +80,7 @@ pub fn cose_verify(
         max_drift_secs,
     )
     .map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
     Ok(raw.0)
 }
 
@@ -125,6 +126,7 @@ pub fn cose_signer(signature: Vec<u8>) -> Result<XdsaFingerprint, String> {
 pub fn cose_peek(signature: Vec<u8>) -> Result<Vec<u8>, String> {
     let raw: darkbio_crypto::cbor::Raw =
         darkbio_crypto::cose::peek(&signature).map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
     Ok(raw.0)
 }
 
@@ -248,5 +250,6 @@ pub fn cose_open(
         max_drift_secs,
     )
     .map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
     Ok(raw.0)
 }

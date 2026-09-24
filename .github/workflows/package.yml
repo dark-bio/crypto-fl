@@ -20,7 +20,7 @@ jobs:
         run: cargo install cargo-ndk
 
       - name: Build Android libraries
-        run: cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 --platform 24 -o ./jniLibs build --release
+        run: cargo ndk -t armeabi-v7a -t arm64-v8a -t x86 -t x86_64 --platform 24 -o ./jniLibs build --release --locked
         working-directory: rust
 
       - name: Upload artifacts
@@ -42,15 +42,15 @@ jobs:
         run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 
       - name: Build iOS device
-        run: cargo build --release --target aarch64-apple-ios
+        run: cargo build --release --locked --target aarch64-apple-ios
         working-directory: rust
 
       - name: Build iOS simulator (arm64)
-        run: cargo build --release --target aarch64-apple-ios-sim
+        run: cargo build --release --locked --target aarch64-apple-ios-sim
         working-directory: rust
 
       - name: Build iOS simulator (x86_64)
-        run: cargo build --release --target x86_64-apple-ios
+        run: cargo build --release --locked --target x86_64-apple-ios
         working-directory: rust
 
       - name: Prefix FRB symbols to avoid clashes
@@ -93,11 +93,11 @@ jobs:
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
       - name: Build macOS arm64
-        run: cargo build --release --target aarch64-apple-darwin
+        run: cargo build --release --locked --target aarch64-apple-darwin
         working-directory: rust
 
       - name: Build macOS x86_64
-        run: cargo build --release --target x86_64-apple-darwin
+        run: cargo build --release --locked --target x86_64-apple-darwin
         working-directory: rust
 
       - name: Prefix FRB symbols to avoid clashes
@@ -126,7 +126,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build Linux x86_64
-        run: cargo build --release --target x86_64-unknown-linux-gnu
+        run: cargo build --release --locked --target x86_64-unknown-linux-gnu
         working-directory: rust
 
       - name: Prepare artifact
@@ -147,7 +147,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build Windows x86_64
-        run: cargo build --release --target x86_64-pc-windows-msvc
+        run: cargo build --release --locked --target x86_64-pc-windows-msvc
         working-directory: rust
 
       - name: Prepare artifact

@@ -54,9 +54,9 @@ import 'src/generated/api/argon2.dart' as ffi;
 ///
 /// Throws if any of these input limits are violated:
 ///
-/// - [time] must be at least 1.
+/// - [time] must be 1 to 2^32 - 1.
 /// - [threads] must be 1 to 16777215.
-/// - [memory] must be at least 8 * [threads] KiB.
+/// - [memory] must be 8 * [threads] to 2^32 - 1 KiB.
 /// - [salt] must be 8 to 2^32 - 1 bytes.
 /// - [password] must be at most 2^32 - 1 bytes.
 /// - [length] must be 4 to 2^32 - 1 bytes.
@@ -69,11 +69,24 @@ Uint8List key({
   int memory = 65536,
   int threads = 4,
   int length = 32,
-}) => ffi.argon2Key(
-  password: password,
-  salt: salt,
-  time: time,
-  memory: memory,
-  threads: threads,
-  keyLength: BigInt.from(length),
-);
+}) {
+  _checkUint32(time, 'time');
+  _checkUint32(memory, 'memory');
+  _checkUint32(threads, 'threads');
+  _checkUint32(length, 'length');
+  return ffi.argon2Key(
+    password: password,
+    salt: salt,
+    time: time,
+    memory: memory,
+    threads: threads,
+    keyLength: BigInt.from(length),
+  );
+}
+
+/// Rejects a parameter outside the native 32-bit range.
+void _checkUint32(int value, String name) {
+  if (value < 0 || value > 0xffffffff) {
+    throw ArgumentError.value(value, name, 'must be 0 to 2^32 - 1');
+  }
+}

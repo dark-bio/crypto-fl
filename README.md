@@ -35,7 +35,7 @@ The library is opinionated. Parameters and primitives were selected to provide m
 
 ## Quick start
 
-Signatures come from `xdsa`, encryption from `xhpke`, and `cose` wraps both into COSE envelopes using the Dark Bio wire profile. Payloads and authenticated messages can be any Dart values the `cbor` package encodes.
+Signatures come from `xdsa`, encryption from `xhpke`, and `cose` wraps both into COSE envelopes using the Dark Bio wire profile. Payloads and authenticated messages are plain Dart values within the CBOR subset above: `bool`, `null`, `int`, `String`, `Uint8List` for bytes, and lists and integer-keyed maps of those. The `cbor` library documents the details.
 
 ```sh
 flutter pub add darkbio_crypto

@@ -40,19 +40,22 @@ import 'src/generated/api/hkdf.dart' as ffi;
 ///
 /// The [salt] is optional; pass an empty list for none.
 ///
-/// Throws if [length] exceeds the maximum output length for SHA-256 HKDF, which
-/// is 255 * 32 = 8160 bytes.
+/// Throws if [length] is negative or exceeds the maximum output length for
+/// SHA-256 HKDF, which is 255 * 32 = 8160 bytes.
 Uint8List key({
   required Uint8List secret,
   required Uint8List salt,
   required Uint8List info,
   int length = 32,
-}) => ffi.hkdfKey(
-  secret: secret,
-  salt: salt,
-  info: info,
-  length: BigInt.from(length),
-);
+}) {
+  _checkLength(length);
+  return ffi.hkdfKey(
+    secret: secret,
+    salt: salt,
+    info: info,
+    length: BigInt.from(length),
+  );
+}
 
 /// Generates a 32-byte pseudorandom key for use with [expand] from an input
 /// secret and an optional independent salt.
@@ -71,10 +74,20 @@ Uint8List extract({required Uint8List secret, required Uint8List salt}) =>
 /// uniformly random or pseudorandom cryptographically strong key. See RFC
 /// 5869, Section 3.3. Most common scenarios will want to use [key] instead.
 ///
-/// Throws if [prk] is not 32 bytes long, or if [length] exceeds the maximum
-/// output length for SHA-256 HKDF, 255 * 32 = 8160 bytes.
+/// Throws if [prk] is not 32 bytes long, or if [length] is negative or exceeds
+/// the maximum output length for SHA-256 HKDF, 255 * 32 = 8160 bytes.
 Uint8List expand({
   required Uint8List prk,
   required Uint8List info,
   int length = 32,
-}) => ffi.hkdfExpand(prk: prk, info: info, length: BigInt.from(length));
+}) {
+  _checkLength(length);
+  return ffi.hkdfExpand(prk: prk, info: info, length: BigInt.from(length));
+}
+
+/// Rejects an output length beyond what SHA-256 HKDF can produce.
+void _checkLength(int length) {
+  if (length < 0 || length > 8160) {
+    throw ArgumentError.value(length, 'length', 'must be 0 to 8160');
+  }
+}

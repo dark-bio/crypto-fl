@@ -87,9 +87,16 @@ process_static_lib() {
     # Process in-place
     "$objcopy" "${redefine_args[@]}" "$lib_path"
     
-    # Verify
-    local prefixed_count=$(nm -gU "$lib_path" 2>/dev/null | grep -c "_${PREFIX}" || echo "0")
-    echo "  Done: $prefixed_count prefixed symbols"
+    # Verify that every symbol is now defined under its prefixed name
+    local defined
+    defined=$(nm -gU "$lib_path" 2>/dev/null || true)
+    for sym in "${FRB_SYMBOLS[@]}"; do
+        if ! grep -q " _${PREFIX}${sym}\$" <<< "$defined"; then
+            echo "Error: _${PREFIX}${sym} is not defined in $lib_path"
+            return 1
+        fi
+    done
+    echo "  Done: ${#FRB_SYMBOLS[@]} prefixed symbols"
 }
 
 # Main

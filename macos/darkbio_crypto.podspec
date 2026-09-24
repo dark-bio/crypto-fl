@@ -20,22 +20,22 @@ Pod::Spec.new do |s|
   s.script_phases = [
     {
       :name => 'Build Rust library',
-      :script => 'sh "$PODS_TARGET_SRCROOT/../cargokit/build_pod.sh" ../rust darkbio_crypto',
+      :script => 'sh "$PODS_TARGET_SRCROOT/../cargokit/build_pod.sh" ../rust darkbio_crypto_ffi',
       :execution_position => :before_compile,
       :input_files => ['${BUILT_PRODUCTS_DIR}/cargokit_phony'],
-      :output_files => ["${BUILT_PRODUCTS_DIR}/libdarkbio_crypto.a"],
+      :output_files => ["${BUILT_PRODUCTS_DIR}/libdarkbio_crypto_ffi.a"],
     },
     {
       :name => 'Prefix FRB symbols',
-      :script => 'sh "$PODS_TARGET_SRCROOT/../scripts/prefix_frb_symbols.sh" "${BUILT_PRODUCTS_DIR}/libdarkbio_crypto.a"',
+      :script => 'sh "$PODS_TARGET_SRCROOT/../scripts/prefix_frb_symbols.sh" "${BUILT_PRODUCTS_DIR}/libdarkbio_crypto_ffi.a"',
       :execution_position => :before_compile,
-      :input_files => ["${BUILT_PRODUCTS_DIR}/libdarkbio_crypto.a"],
-      :output_files => ["${BUILT_PRODUCTS_DIR}/libdarkbio_crypto.a.prefixed"],
+      :input_files => ["${BUILT_PRODUCTS_DIR}/libdarkbio_crypto_ffi.a"],
+      :output_files => ["${BUILT_PRODUCTS_DIR}/libdarkbio_crypto_ffi.a.prefixed"],
     },
   ]
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
-    'OTHER_LDFLAGS' => '-force_load ${BUILT_PRODUCTS_DIR}/libdarkbio_crypto.a',
+    'OTHER_LDFLAGS' => '-force_load ${BUILT_PRODUCTS_DIR}/libdarkbio_crypto_ffi.a',
   }
 end
