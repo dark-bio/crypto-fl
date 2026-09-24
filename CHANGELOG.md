@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.19.0
+## 0.19.1
 
-- Wrap darkbio-crypto v0.19.0
+- Wrap darkbio-crypto v0.19.1
 - Document every public API, with an example per library
 - Sort CWT claim keys, so claims can be set in any order
 - Compare key fingerprints by their bytes
