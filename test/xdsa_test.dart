@@ -7,6 +7,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:darkbio_crypto/cose.dart' as cose;
+import 'package:darkbio_crypto/cwt.dart' as cwt;
 import 'package:darkbio_crypto/src/generated/frb_generated.dart';
 import 'package:darkbio_crypto/xdsa.dart' as xdsa;
 import 'package:flutter_test/flutter_test.dart';
@@ -125,5 +127,43 @@ void main() {
     for (final (i, run) in cases.indexed) {
       expect(run, throwsRejection(), reason: '$i');
     }
+  });
+
+  // Tests that a disposed secret key refuses every operation, directly and
+  // through COSE and CWT, that values derived from it earlier stay usable, and
+  // that disposing it again does nothing.
+  test('dispose', () {
+    final secret = xdsa.SecretKey.generate();
+    final domain = utf8.encode('dispose');
+    final message = utf8.encode('message');
+    final public = secret.publicKey();
+    final signature = secret.sign(message);
+
+    secret.dispose();
+    final operations = <String, void Function()>{
+      'publicKey': () => secret.publicKey(),
+      'fingerprint': () => secret.fingerprint(),
+      'sign': () => secret.sign(message),
+      'toBytes': () => secret.toBytes(),
+      'toDer': () => secret.toDer(),
+      'toPem': () => secret.toPem(),
+      'cose.signDetached': () => cose.signDetached(
+        msgToAuth: 'message',
+        signer: secret,
+        domain: domain,
+      ),
+      'cwt.issue': () => cwt.issue(
+        claims: cwt.Claims()
+          ..subject = 'ark'
+          ..notBefore = 1,
+        signer: secret,
+        domain: domain,
+      ),
+    };
+    for (final MapEntry(key: name, value: run) in operations.entries) {
+      expect(run, throwsDisposed(), reason: name);
+    }
+    public.verify(message, signature);
+    secret.dispose();
   });
 }

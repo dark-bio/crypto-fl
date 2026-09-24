@@ -43,6 +43,15 @@ class SecretKey {
   final ffi.XdsaSecretKey _inner;
   SecretKey._(this._inner);
 
+  /// The native key, refused once disposed, before the bridge allocates
+  /// anything for a call on it.
+  ffi.XdsaSecretKey get _live {
+    if (_inner.isDisposed) {
+      throw StateError('secret key used after dispose');
+    }
+    return _inner;
+  }
+
   /// Creates a new, random private key.
   static SecretKey generate() => SecretKey._(ffi.XdsaSecretKey.generate());
 
@@ -69,23 +78,30 @@ class SecretKey {
       SecretKey._(ffi.XdsaSecretKey.fromPem(pem: pem));
 
   /// Retrieves the public counterpart of the secret key.
-  PublicKey publicKey() => PublicKey._(_inner.publicKey());
+  PublicKey publicKey() => PublicKey._(_live.publicKey());
 
   /// Returns a 256-bit unique identifier for this key.
-  Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
+  Fingerprint fingerprint() => Fingerprint._(_live.fingerprint());
 
   /// Creates a digital signature of the message.
   Signature sign(Uint8List message) =>
-      Signature._(_inner.sign(message: message));
+      Signature._(_live.sign(message: message));
 
   /// Converts a secret key into its 64-byte seed.
-  Uint8List toBytes() => _inner.toBytes();
+  Uint8List toBytes() => _live.toBytes();
 
   /// Serializes a private key into a DER buffer.
-  Uint8List toDer() => _inner.toDer();
+  Uint8List toDer() => _live.toDer();
 
   /// Serializes a private key into a PEM string.
-  String toPem() => _inner.toPem();
+  String toPem() => _live.toPem();
+
+  /// Wipes the secret key held in Rust memory. Every later use of this key
+  /// throws a [StateError], and disposing it again does nothing. Copies already
+  /// exported, such as by [toBytes], are not affected. Without a dispose, the
+  /// key is only wiped if the garbage collector finalizes it, which is not
+  /// guaranteed.
+  void dispose() => _inner.dispose();
 }
 
 /// An ML-DSA-65 public key paired with an Ed25519 public key for verifying
@@ -181,7 +197,7 @@ class Fingerprint {
 /// @nodoc
 extension SecretKeyInternal on SecretKey {
   /// The native key behind this secret key.
-  ffi.XdsaSecretKey get inner => _inner;
+  ffi.XdsaSecretKey get inner => _live;
 }
 
 /// Exposes the native key to this package's own libraries, not meant for

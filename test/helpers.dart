@@ -28,3 +28,14 @@ Map<String, dynamic> fixture(String name) =>
 Matcher throwsRejection([String? text]) => throwsA(
   text == null ? isA<String>() : allOf(isA<String>(), contains(text)),
 );
+
+/// Matches a call on an object that was already disposed. The wrapper refuses
+/// it with a [StateError] before the bridge allocates anything for the call,
+/// so the bridge's own disposed error fails this matcher.
+Matcher throwsDisposed() => throwsA(
+  isA<StateError>().having(
+    (err) => err.message,
+    'message',
+    contains('used after dispose'),
+  ),
+);

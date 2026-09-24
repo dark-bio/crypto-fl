@@ -110,4 +110,29 @@ fQIDAQAB
       expect(run, throwsRejection(), reason: '$i');
     }
   });
+
+  // Tests that a disposed secret key refuses every operation, that values
+  // derived from it earlier stay usable, and that disposing it again does
+  // nothing.
+  test('dispose', () {
+    final secret = rsa.SecretKey.generate();
+    final message = utf8.encode('message');
+    final public = secret.publicKey();
+    final signature = secret.sign(message);
+
+    secret.dispose();
+    final operations = <String, void Function()>{
+      'publicKey': () => secret.publicKey(),
+      'fingerprint': () => secret.fingerprint(),
+      'sign': () => secret.sign(message),
+      'toBytes': () => secret.toBytes(),
+      'toDer': () => secret.toDer(),
+      'toPem': () => secret.toPem(),
+    };
+    for (final MapEntry(key: name, value: run) in operations.entries) {
+      expect(run, throwsDisposed(), reason: name);
+    }
+    public.verify(message, signature);
+    secret.dispose();
+  });
 }
