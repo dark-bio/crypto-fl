@@ -20,7 +20,8 @@
 /// `cbor` library lists. Decoded payloads come back the way the `cbor` package
 /// decodes them, so collections are untyped `List` and `Map` values. Byte
 /// strings come back as `List<int>`, which needs `Uint8List.fromList` before
-/// it is encoded again.
+/// it is encoded again. Integers wider than 53 bits come back as `BigInt`,
+/// even when they fit an `int`.
 ///
 /// ```dart
 /// import 'dart:convert';
@@ -88,6 +89,7 @@ import 'dart:typed_data';
 
 import 'package:cbor/simple.dart' as cbor;
 
+import 'src/encoding.dart' as encoding;
 import 'src/generated/api/cose.dart' as ffi;
 import 'xdsa.dart'
     as xdsa
@@ -108,8 +110,23 @@ import 'xhpke.dart'
         PublicKeyInternal,
         FingerprintInternal;
 
-Uint8List _encode(Object? value) => Uint8List.fromList(cbor.cbor.encode(value));
+Uint8List _encode(Object? value) => encoding.encode(value);
 Object? _decode(Uint8List bytes) => cbor.cbor.decode(bytes);
+
+/// Converts the optional drift into its native form, rejecting negative ones.
+BigInt? _drift(int? maxDriftSecs) {
+  if (maxDriftSecs == null) {
+    return null;
+  }
+  if (maxDriftSecs < 0) {
+    throw ArgumentError.value(
+      maxDriftSecs,
+      'maxDriftSecs',
+      'must be non-negative',
+    );
+  }
+  return BigInt.from(maxDriftSecs);
+}
 
 /// Creates a COSE_Sign1 digital signature with an embedded payload.
 ///
@@ -172,9 +189,10 @@ Uint8List signDetached({
 ///   skips the check.
 ///
 /// Returns the embedded payload decoded by the `cbor` package, cast to [T].
-/// Throws if the envelope is malformed, has no embedded payload, was signed by
-/// another key or does not verify. Also throws if its timestamp is further
-/// than [maxDriftSecs] from the current time.
+/// Throws if [maxDriftSecs] is negative, or if the envelope is malformed, has
+/// no embedded payload, was signed by another key or does not verify. Also
+/// throws if its payload falls outside the supported CBOR subset, or if its
+/// timestamp is further than [maxDriftSecs] from the current time.
 T verify<T>({
   required Uint8List msgToCheck,
   required Object? msgToAuth,
@@ -188,9 +206,7 @@ T verify<T>({
             msgToAuth: _encode(msgToAuth),
             verifier: verifier.inner,
             domain: domain,
-            maxDriftSecs: maxDriftSecs != null
-                ? BigInt.from(maxDriftSecs)
-                : null,
+            maxDriftSecs: _drift(maxDriftSecs),
           ),
         )
         as T;
@@ -207,9 +223,9 @@ T verify<T>({
 ///   future. A value of n accepts differences up to and including n; `null`
 ///   skips the check.
 ///
-/// Throws if the envelope is malformed, embeds a payload, was signed by
-/// another key or does not verify. Also throws if its timestamp is further
-/// than [maxDriftSecs] from the current time.
+/// Throws if [maxDriftSecs] is negative, or if the envelope is malformed,
+/// embeds a payload, was signed by another key or does not verify. Also throws
+/// if its timestamp is further than [maxDriftSecs] from the current time.
 void verifyDetached({
   required Uint8List msgToCheck,
   required Object? msgToAuth,
@@ -221,7 +237,7 @@ void verifyDetached({
   msgToAuth: _encode(msgToAuth),
   verifier: verifier.inner,
   domain: domain,
-  maxDriftSecs: maxDriftSecs != null ? BigInt.from(maxDriftSecs) : null,
+  maxDriftSecs: _drift(maxDriftSecs),
 );
 
 /// Extracts the signer's fingerprint from a COSE_Sign1 signature without
@@ -246,7 +262,8 @@ xdsa.Fingerprint signer({required Uint8List signature}) =>
 /// - [signature]: The serialized COSE_Sign1 structure
 ///
 /// Returns the embedded payload decoded by the `cbor` package, cast to [T].
-/// Throws if the envelope is malformed or has no embedded payload.
+/// Throws if the envelope is malformed, has no embedded payload or its payload
+/// falls outside the supported CBOR subset.
 T peek<T>({required Uint8List signature}) =>
     _decode(ffi.cosePeek(signature: signature)) as T;
 
@@ -355,7 +372,8 @@ Uint8List seal({
 ///   skips the check.
 ///
 /// Returns the payload decoded by the `cbor` package, cast to [T]. Throws if
-/// decryption fails as in [decrypt], or verification fails as in [verify].
+/// [maxDriftSecs] is negative, if decryption fails as in [decrypt], or if
+/// verification fails as in [verify].
 T open<T>({
   required Uint8List msgToOpen,
   required Object? msgToAuth,
@@ -371,9 +389,7 @@ T open<T>({
             recipient: recipient.inner,
             sender: sender.inner,
             domain: domain,
-            maxDriftSecs: maxDriftSecs != null
-                ? BigInt.from(maxDriftSecs)
-                : null,
+            maxDriftSecs: _drift(maxDriftSecs),
           ),
         )
         as T;

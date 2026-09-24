@@ -21,7 +21,8 @@
 ///   negative keys as -1, -2, and so on
 ///
 /// Floats, tags and indefinite lengths are rejected, so `double`, `DateTime`
-/// and `Uri` values cannot be used.
+/// and `Uri` values cannot be used. A `String` holding a lone surrogate is
+/// rejected too, since it has no UTF-8 form.
 ///
 /// ```dart
 /// import 'dart:typed_data';

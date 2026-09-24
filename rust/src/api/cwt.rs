@@ -50,6 +50,7 @@ pub fn cwt_verify(
     let raw: darkbio_crypto::cbor::Raw =
         darkbio_crypto::cwt::verify(&token, &verifier.inner, &domain, now)
             .map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
     Ok(raw.0)
 }
 
@@ -70,5 +71,6 @@ pub fn cwt_signer(token: Vec<u8>) -> Result<XdsaFingerprint, String> {
 pub fn cwt_peek(token: Vec<u8>) -> Result<Vec<u8>, String> {
     let raw: darkbio_crypto::cbor::Raw =
         darkbio_crypto::cwt::peek(&token).map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
     Ok(raw.0)
 }

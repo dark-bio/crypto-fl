@@ -49,6 +49,7 @@ import 'dart:typed_data';
 
 import 'package:cbor/simple.dart' as cbor;
 
+import 'src/encoding.dart' as encoding;
 import 'src/generated/api/cwt.dart' as ffi;
 import 'xdsa.dart'
     as xdsa
@@ -72,8 +73,9 @@ const int _algorithmIdXhpke = -70001;
 /// removes it. Claims may be set in any order. Custom or application-specific
 /// claims can be accessed via `operator[]` using their integer key. Claim
 /// values must encode into the CBOR subset that the `cbor` library lists.
-/// Custom claims read back from a token hold the values the `cbor` package
-/// decodes, byte strings as `List<int>`.
+/// Custom claims read back from a token hold plain Dart values. Byte strings
+/// come back as `Uint8List`, and integers as `int`, or as `BigInt` beyond its
+/// range.
 ///
 /// Applications must evaluate the EAT claims against their attestation policy
 /// and enforce RFC 9711's relationships between claims. For example, `hwmodel`
@@ -322,9 +324,7 @@ class Claims {
   /// Encodes the claims to CBOR bytes, keys in deterministic order.
   Uint8List _encode() {
     final keys = _map.keys.toList()..sort(_compareKeys);
-    return Uint8List.fromList(
-      cbor.cbor.encode({for (final key in keys) key: _map[key]}),
-    );
+    return encoding.encode({for (final key in keys) key: _map[key]});
   }
 
   /// Orders integer map keys the way deterministic CBOR sorts their encodings,
@@ -338,7 +338,7 @@ class Claims {
 
   /// Decodes claims from CBOR bytes.
   static Claims _decode(Uint8List bytes) {
-    final decoded = cbor.cbor.decode(bytes);
+    final decoded = _normalize(cbor.cbor.decode(bytes));
     if (decoded is! Map) {
       throw FormatException('CWT claims must be a CBOR map');
     }
@@ -353,6 +353,24 @@ class Claims {
     }
     return Claims._(map);
   }
+
+  /// Turns decoded values into the types the claims are set with, recursively.
+  ///
+  /// Byte strings become [Uint8List] instead of the `cbor` package's
+  /// `Uint8Buffer` (https://github.com/shamblett/cbor/issues/88), so they
+  /// encode as byte strings again. Integers that fit become [int] instead of
+  /// the [BigInt] the package returns beyond 53 bits.
+  static Object? _normalize(Object? value) => switch (value) {
+    Uint8List() => value,
+    List<int>() => Uint8List.fromList(value),
+    List() => [for (final item in value) _normalize(item)],
+    Map() => {
+      for (final entry in value.entries)
+        _normalize(entry.key): _normalize(entry.value),
+    },
+    BigInt() when value.isValidInt => value.toInt(),
+    _ => value,
+  };
 }
 
 /// Debug port state per RFC 9711 Section 4.2.9.
@@ -433,7 +451,8 @@ Uint8List issue({
 /// - [now]: Unix timestamp in seconds for temporal validation (null to skip)
 ///
 /// Throws if [now] is negative, if the token is malformed, was signed by
-/// another key or does not verify, or if it fails the temporal checks.
+/// another key or does not verify, or if it fails the temporal checks. Also
+/// throws if its claims fall outside the supported CBOR subset.
 Claims verify({
   required Uint8List token,
   required xdsa.PublicKey verifier,
@@ -470,6 +489,7 @@ xdsa.Fingerprint signer({required Uint8List token}) =>
 /// [verify]. Use [signer] to extract the signer's fingerprint for key lookup.
 /// The single case for this method is self-signed key discovery.
 ///
-/// Throws if the token is malformed.
+/// Throws if the token is malformed or its claims fall outside the supported
+/// CBOR subset.
 Claims peek({required Uint8List token}) =>
     Claims._decode(ffi.cwtPeek(token: token));

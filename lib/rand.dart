@@ -21,4 +21,11 @@ import 'dart:typed_data';
 import 'src/generated/api/rand.dart' as ffi;
 
 /// Creates a buffer of [length] bytes filled with randomness.
-Uint8List bytes(int length) => ffi.randomBytes(length: BigInt.from(length));
+///
+/// Throws if [length] is negative or above 2^32 - 1.
+Uint8List bytes(int length) {
+  if (length < 0 || length > 0xffffffff) {
+    throw ArgumentError.value(length, 'length', 'must be 0 to 2^32 - 1');
+  }
+  return ffi.randomBytes(length: BigInt.from(length));
+}
