@@ -1,0 +1,45 @@
+name: audit
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: "0 3 * * *"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Check Rust dependencies against the RustSec advisory database
+        run: cargo audit
+        working-directory: rust
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: Check Dart dependencies against the OSV database
+        run: go run github.com/google/osv-scanner/v2/cmd/osv-scanner@latest scan --lockfile pubspec.lock
+
+  licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check Rust dependency licenses against the allowlist
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: rust/Cargo.toml
+          arguments: --all-features --config rust/.cargo/deny.toml
+          command: check licenses
