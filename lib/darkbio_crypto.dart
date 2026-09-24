@@ -4,55 +4,41 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/// Post-quantum cryptography primitives.
+/// Post-quantum cryptography for Flutter, backed by the Rust `darkbio-crypto`
+/// crate through FFI.
 ///
-/// ## Initialization
+/// Call [init] once, before anything else in this package. Every other call is
+/// synchronous and throws on failure. A slow call, such as an Argon2 derivation
+/// with large costs, blocks the calling isolate until it finishes.
 ///
-/// Call [init] once at app startup before using any crypto functions:
+/// Each primitive lives in its own library, imported with a prefix:
+///
+/// - `xdsa`: composite ML-DSA-65 and Ed25519 signatures
+/// - `xhpke`: X-Wing hybrid public key encryption
+/// - `cose`: signed and encrypted COSE envelopes over xDSA and xHPKE
+/// - `cwt`: CBOR Web Tokens with CWT and EAT claims
+/// - `cbor`: validation of the CBOR subset that `cose` and `cwt` accept
+/// - `rsa`: RSA-2048 signatures with SHA-256
+/// - `stream`: STREAM authenticated encryption with ChaCha20-Poly1305
+/// - `argon2`: password based key derivation
+/// - `hkdf`: HKDF-SHA256 key derivation
+/// - `rand`: random bytes from the operating system
 ///
 /// ```dart
-/// import 'package:darkbio_crypto/darkbio_crypto.dart';
+/// import 'dart:convert';
 ///
-/// void main() async {
-///   await init();
-///   runApp(MyApp());
+/// import 'package:darkbio_crypto/darkbio_crypto.dart' as darkbio;
+/// import 'package:darkbio_crypto/xdsa.dart' as xdsa;
+///
+/// Future<void> main() async {
+///   // Load the native library once, before any other call
+///   await darkbio.init();
+///
+///   final secret = xdsa.SecretKey.generate();
+///   final signature = secret.sign(utf8.encode('hello'));
+///   secret.publicKey().verify(utf8.encode('hello'), signature);
 /// }
 /// ```
-///
-/// ## Usage
-///
-/// Import individual modules with prefixes:
-///
-/// ```dart
-/// import 'package:darkbio_crypto/xdsa.dart' as xdsa;
-/// import 'package:darkbio_crypto/xhpke.dart' as xhpke;
-/// import 'package:darkbio_crypto/cose.dart' as cose;
-/// import 'package:darkbio_crypto/hkdf.dart' as hkdf;
-/// import 'package:darkbio_crypto/rand.dart' as rand;
-///
-/// // Digital signatures
-/// final secret = xdsa.SecretKey.generate();
-/// final signature = secret.sign(message: data);
-///
-/// // Encryption
-/// final recipient = xhpke.SecretKey.generate().publicKey();
-/// final sealed = cose.seal(signer: secret, recipient: recipient, ...);
-///
-/// // Key derivation
-/// final key = hkdf.key(secret: secret, salt: salt, info: info);
-/// ```
-///
-/// ## Available modules
-///
-/// - **xdsa**: Composite ML-DSA-65 + Ed25519 signatures (quantum-resistant)
-/// - **xhpke**: X-Wing (X25519 + ML-KEM-768) hybrid encryption
-/// - **rsa**: RSA-2048 signatures with SHA-256
-/// - **cwt**: CBOR Web Tokens with CWT and EAT claims
-/// - **cose**: COSE sign, verify, seal, open operations
-/// - **hkdf**: HKDF-SHA256 key derivation
-/// - **argon2**: Password-based key derivation
-/// - **rand**: Cryptographically secure random bytes
-/// - **stream**: STREAM encryption with ChaCha20-Poly1305
 library;
 
 import 'dart:io';
@@ -61,8 +47,10 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 import 'src/generated/frb_generated.dart';
 
-/// Initializes the crypto library. Call this once at app startup before
-/// using any crypto functions.
+/// Loads the native library behind this package.
+///
+/// Await it once, before any other call into this package. Calling it a
+/// second time throws.
 Future<void> init() async {
   ExternalLibrary? lib;
   if (Platform.isIOS || Platform.isMacOS) {
