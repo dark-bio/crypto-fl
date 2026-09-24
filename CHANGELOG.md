@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.2
+
+- Mark the test vectors as false secrets, so pub.dev accepts the package
+
 ## 0.19.1
 
 - Wrap darkbio-crypto v0.19.1
