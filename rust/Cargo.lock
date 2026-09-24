@@ -379,7 +379,7 @@ dependencies = [
 
 [[package]]
 name = "darkbio_crypto_ffi"
-version = "0.19.1"
+version = "0.19.2"
 dependencies = [
  "darkbio-crypto",
  "flutter_rust_bridge",
