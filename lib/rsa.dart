@@ -39,6 +39,15 @@ class SecretKey {
   final ffi.RsaSecretKey _inner;
   SecretKey._(this._inner);
 
+  /// The native key, refused once disposed, before the bridge allocates
+  /// anything for a call on it.
+  ffi.RsaSecretKey get _live {
+    if (_inner.isDisposed) {
+      throw StateError('secret key used after dispose');
+    }
+    return _inner;
+  }
+
   /// Creates a new, random private key.
   static SecretKey generate() => SecretKey._(ffi.RsaSecretKey.generate());
 
@@ -68,27 +77,34 @@ class SecretKey {
       SecretKey._(ffi.RsaSecretKey.fromPem(pem: pem));
 
   /// Retrieves the public counterpart of the secret key.
-  PublicKey publicKey() => PublicKey._(_inner.publicKey());
+  PublicKey publicKey() => PublicKey._(_live.publicKey());
 
   /// Returns a 256-bit unique identifier for this key. For RSA, that is the
   /// SHA256 hash of the raw (le modulus || le exponent) public key.
-  Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
+  Fingerprint fingerprint() => Fingerprint._(_live.fingerprint());
 
   /// Creates a digital signature of the message.
   Signature sign(Uint8List message) =>
-      Signature._(_inner.sign(message: message));
+      Signature._(_live.sign(message: message));
 
   /// Serializes a private key into a 520-byte array.
   ///
   /// Format: p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes),
   /// all in big-endian.
-  Uint8List toBytes() => _inner.toBytes();
+  Uint8List toBytes() => _live.toBytes();
 
   /// Serializes a private key into a DER buffer.
-  Uint8List toDer() => _inner.toDer();
+  Uint8List toDer() => _live.toDer();
 
   /// Serializes a private key into a PEM string.
-  String toPem() => _inner.toPem();
+  String toPem() => _live.toPem();
+
+  /// Wipes the secret key held in Rust memory. Every later use of this key
+  /// throws a [StateError], and disposing it again does nothing. Copies already
+  /// exported, such as by [toBytes], are not affected. Without a dispose, the
+  /// key is only wiped if the garbage collector finalizes it, which is not
+  /// guaranteed.
+  void dispose() => _inner.dispose();
 }
 
 /// A 2048-bit RSA public key usable for verification, with SHA256 as the
@@ -189,7 +205,7 @@ class Fingerprint {
 /// @nodoc
 extension SecretKeyInternal on SecretKey {
   /// The native key behind this secret key.
-  ffi.RsaSecretKey get inner => _inner;
+  ffi.RsaSecretKey get inner => _live;
 }
 
 /// Exposes the native key to this package's own libraries, not meant for

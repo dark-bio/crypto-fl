@@ -52,6 +52,15 @@ class SecretKey {
   final ffi.XhpkeSecretKey _inner;
   SecretKey._(this._inner);
 
+  /// The native key, refused once disposed, before the bridge allocates
+  /// anything for a call on it.
+  ffi.XhpkeSecretKey get _live {
+    if (_inner.isDisposed) {
+      throw StateError('secret key used after dispose');
+    }
+    return _inner;
+  }
+
   /// Creates a new, random private key.
   static SecretKey generate() => SecretKey._(ffi.XhpkeSecretKey.generate());
 
@@ -77,11 +86,11 @@ class SecretKey {
       SecretKey._(ffi.XhpkeSecretKey.fromPem(pem: pem));
 
   /// Retrieves the public counterpart of the secret key.
-  PublicKey publicKey() => PublicKey._(_inner.publicKey());
+  PublicKey publicKey() => PublicKey._(_live.publicKey());
 
   /// Returns a 256-bit unique identifier for this key. For HPKE, that is the
   /// SHA256 hash of the raw public key.
-  Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
+  Fingerprint fingerprint() => Fingerprint._(_live.fingerprint());
 
   /// Consumes a standalone cryptographic construct encrypted to this secret
   /// key. The method will deconstruct the given encapsulated key and ciphertext
@@ -104,7 +113,7 @@ class SecretKey {
     required Uint8List msgToOpen,
     required Uint8List msgToAuth,
     required Uint8List domain,
-  }) => _inner.open(
+  }) => _live.open(
     sessionKey: sessionKey,
     msgToOpen: msgToOpen,
     msgToAuth: msgToAuth,
@@ -126,16 +135,23 @@ class SecretKey {
   Receiver newReceiver({
     required Uint8List encapKey,
     required Uint8List domain,
-  }) => Receiver._(_inner.newReceiver(encapKey: encapKey, domain: domain));
+  }) => Receiver._(_live.newReceiver(encapKey: encapKey, domain: domain));
 
   /// Converts a private key into a 32-byte seed.
-  Uint8List toBytes() => _inner.toBytes();
+  Uint8List toBytes() => _live.toBytes();
 
   /// Serializes a private key into a DER buffer.
-  Uint8List toDer() => _inner.toDer();
+  Uint8List toDer() => _live.toDer();
 
   /// Serializes a private key into a PEM string.
-  String toPem() => _inner.toPem();
+  String toPem() => _live.toPem();
+
+  /// Wipes the secret key held in Rust memory. Every later use of this key
+  /// throws a [StateError], and disposing it again does nothing. Copies already
+  /// exported, such as by [toBytes], and receivers already created from it are
+  /// not affected. Without a dispose, the key is only wiped if the garbage
+  /// collector finalizes it, which is not guaranteed.
+  void dispose() => _inner.dispose();
 }
 
 /// An X-Wing public key for encrypting HPKE messages.
@@ -249,6 +265,15 @@ class Sender {
   final ffi.XhpkeSender _inner;
   Sender._(this._inner);
 
+  /// The native context, refused once disposed, before the bridge allocates
+  /// anything for a call on it.
+  ffi.XhpkeSender get _live {
+    if (_inner.isDisposed) {
+      throw StateError('sender used after dispose');
+    }
+    return _inner;
+  }
+
   /// Encrypts a message using the next nonce in the sequence.
   ///
   /// - [msgToSeal]: The plaintext to encrypt
@@ -256,7 +281,13 @@ class Sender {
   Uint8List seal({
     required Uint8List msgToSeal,
     required Uint8List msgToAuth,
-  }) => _inner.seal(msgToSeal: msgToSeal, msgToAuth: msgToAuth);
+  }) => _live.seal(msgToSeal: msgToSeal, msgToAuth: msgToAuth);
+
+  /// Wipes the keys of this context held in Rust memory. Every later use of the
+  /// sender throws a [StateError], and disposing it again does nothing. Without
+  /// a dispose, the keys are only wiped if the garbage collector finalizes the
+  /// sender, which is not guaranteed.
+  void dispose() => _inner.dispose();
 }
 
 /// A stateful HPKE receiver context for multi-message decryption.
@@ -268,6 +299,15 @@ class Receiver {
   final ffi.XhpkeReceiver _inner;
   Receiver._(this._inner);
 
+  /// The native context, refused once disposed, before the bridge allocates
+  /// anything for a call on it.
+  ffi.XhpkeReceiver get _live {
+    if (_inner.isDisposed) {
+      throw StateError('receiver used after dispose');
+    }
+    return _inner;
+  }
+
   /// Decrypts a message using the next nonce in the sequence.
   ///
   /// - [msgToOpen]: The ciphertext to decrypt
@@ -278,7 +318,13 @@ class Receiver {
   Uint8List open({
     required Uint8List msgToOpen,
     required Uint8List msgToAuth,
-  }) => _inner.open(msgToOpen: msgToOpen, msgToAuth: msgToAuth);
+  }) => _live.open(msgToOpen: msgToOpen, msgToAuth: msgToAuth);
+
+  /// Wipes the keys of this context held in Rust memory. Every later use of the
+  /// receiver throws a [StateError], and disposing it again does nothing.
+  /// Without a dispose, the keys are only wiped if the garbage collector
+  /// finalizes the receiver, which is not guaranteed.
+  void dispose() => _inner.dispose();
 }
 
 /// Exposes the native key to this package's own libraries, not meant for
@@ -287,7 +333,7 @@ class Receiver {
 /// @nodoc
 extension SecretKeyInternal on SecretKey {
   /// The native key behind this secret key.
-  ffi.XhpkeSecretKey get inner => _inner;
+  ffi.XhpkeSecretKey get inner => _live;
 }
 
 /// Exposes the native key to this package's own libraries, not meant for

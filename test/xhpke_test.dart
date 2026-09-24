@@ -7,7 +7,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:darkbio_crypto/cose.dart' as cose;
 import 'package:darkbio_crypto/src/generated/frb_generated.dart';
+import 'package:darkbio_crypto/xdsa.dart' as xdsa;
 import 'package:darkbio_crypto/xhpke.dart' as xhpke;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -174,5 +176,75 @@ void main() {
     for (final (i, run) in cases.indexed) {
       expect(run, throwsRejection(), reason: '$i');
     }
+  });
+
+  // Tests that disposed secret keys, senders and receivers refuse every
+  // operation, directly and through COSE, that a receiver created from a key
+  // before its disposal stays usable, and that disposing again does nothing.
+  test('dispose', () {
+    final secret = xhpke.SecretKey.generate();
+    final signer = xdsa.SecretKey.generate();
+    final domain = utf8.encode('dispose');
+    final aad = Uint8List(0);
+    final (sender, encapKey) = secret.publicKey().newSender(domain: domain);
+    final receiver = secret.newReceiver(encapKey: encapKey, domain: domain);
+    final (sessionKey, ciphertext) = secret.publicKey().seal(
+      msgToSeal: Uint8List(1),
+      msgToAuth: aad,
+      domain: domain,
+    );
+    final sealed = cose.seal(
+      msgToSeal: 'payload',
+      msgToAuth: null,
+      signer: signer,
+      recipient: secret.publicKey(),
+      domain: domain,
+    );
+
+    secret.dispose();
+    final operations = <String, void Function()>{
+      'publicKey': () => secret.publicKey(),
+      'fingerprint': () => secret.fingerprint(),
+      'newReceiver': () =>
+          secret.newReceiver(encapKey: encapKey, domain: domain),
+      'open': () => secret.open(
+        sessionKey: sessionKey,
+        msgToOpen: ciphertext,
+        msgToAuth: aad,
+        domain: domain,
+      ),
+      'toBytes': () => secret.toBytes(),
+      'toDer': () => secret.toDer(),
+      'toPem': () => secret.toPem(),
+      'cose.open': () => cose.open<String>(
+        msgToOpen: sealed,
+        msgToAuth: null,
+        recipient: secret,
+        sender: signer.publicKey(),
+        domain: domain,
+      ),
+    };
+    for (final MapEntry(key: name, value: run) in operations.entries) {
+      expect(run, throwsDisposed(), reason: name);
+    }
+
+    final message = utf8.encode('message');
+    final sealedMessage = sender.seal(msgToSeal: message, msgToAuth: aad);
+    expect(receiver.open(msgToOpen: sealedMessage, msgToAuth: aad), message);
+
+    sender.dispose();
+    receiver.dispose();
+    expect(
+      () => sender.seal(msgToSeal: message, msgToAuth: aad),
+      throwsDisposed(),
+    );
+    expect(
+      () => receiver.open(msgToOpen: sealedMessage, msgToAuth: aad),
+      throwsDisposed(),
+    );
+
+    secret.dispose();
+    sender.dispose();
+    receiver.dispose();
   });
 }

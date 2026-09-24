@@ -11,6 +11,7 @@
 - Decode CWT claims into the types they are set with, so they issue again unchanged
 - Reject a negative COSE drift and out-of-range `argon2`, `hkdf` and `rand` integers
 - Reject text holding a lone surrogate, instead of encoding it as U+FFFD
+- Add `dispose()` to secret keys and HPKE contexts, wiping them from memory on demand
 - Name the native library correctly in the macOS, Linux and Windows source builds
 - Add a Dart test suite with the shared test vectors, run in CI
 - Refresh dependency locks
