@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.3
+
+- Wrap darkbio-crypto v0.19.3, whose COSE `signer` and `peek` wipe the payload copy they make
+
 ## 0.19.2
 
 - Mark the test vectors as false secrets, so pub.dev accepts the package
