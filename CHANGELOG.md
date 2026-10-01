@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.4
+
+- Add `signAt`, `signDetachedAt`, `verifyAt`, `verifyDetachedAt`, `sealAt` and `openAt`, which take the signature time from the caller instead of the system clock
+
 ## 0.19.3
 
 - Wrap darkbio-crypto v0.19.3, whose COSE `signer` and `peek` wipe the payload copy they make

@@ -125,7 +125,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -1198124067;
+  int get rustContentHash => -1937088178;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -373,6 +373,16 @@ abstract class RustLibApi extends BaseApi {
     BigInt? maxDriftSecs,
   });
 
+  Uint8List crateApiCoseCoseOpenAt({
+    required List<int> msgToOpen,
+    required List<int> msgToAuth,
+    required XhpkeSecretKey recipient,
+    required XdsaPublicKey sender,
+    required List<int> domain,
+    BigInt? maxDriftSecs,
+    required PlatformInt64 now,
+  });
+
   Uint8List crateApiCoseCosePeek({required List<int> signature});
 
   XhpkeFingerprint crateApiCoseCoseRecipient({required List<int> ciphertext});
@@ -385,6 +395,15 @@ abstract class RustLibApi extends BaseApi {
     required List<int> domain,
   });
 
+  Uint8List crateApiCoseCoseSealAt({
+    required List<int> msgToSeal,
+    required List<int> msgToAuth,
+    required XdsaSecretKey signer,
+    required XhpkePublicKey recipient,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
+  });
+
   Uint8List crateApiCoseCoseSign({
     required List<int> msgToEmbed,
     required List<int> msgToAuth,
@@ -392,10 +411,25 @@ abstract class RustLibApi extends BaseApi {
     required List<int> domain,
   });
 
+  Uint8List crateApiCoseCoseSignAt({
+    required List<int> msgToEmbed,
+    required List<int> msgToAuth,
+    required XdsaSecretKey signer,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
+  });
+
   Uint8List crateApiCoseCoseSignDetached({
     required List<int> msgToAuth,
     required XdsaSecretKey signer,
     required List<int> domain,
+  });
+
+  Uint8List crateApiCoseCoseSignDetachedAt({
+    required List<int> msgToAuth,
+    required XdsaSecretKey signer,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
   });
 
   XdsaFingerprint crateApiCoseCoseSigner({required List<int> signature});
@@ -408,12 +442,30 @@ abstract class RustLibApi extends BaseApi {
     BigInt? maxDriftSecs,
   });
 
+  Uint8List crateApiCoseCoseVerifyAt({
+    required List<int> msgToCheck,
+    required List<int> msgToAuth,
+    required XdsaPublicKey verifier,
+    required List<int> domain,
+    BigInt? maxDriftSecs,
+    required PlatformInt64 now,
+  });
+
   void crateApiCoseCoseVerifyDetached({
     required List<int> msgToCheck,
     required List<int> msgToAuth,
     required XdsaPublicKey verifier,
     required List<int> domain,
     BigInt? maxDriftSecs,
+  });
+
+  void crateApiCoseCoseVerifyDetachedAt({
+    required List<int> msgToCheck,
+    required List<int> msgToAuth,
+    required XdsaPublicKey verifier,
+    required List<int> domain,
+    BigInt? maxDriftSecs,
+    required PlatformInt64 now,
   });
 
   Uint8List crateApiCwtCwtIssue({
@@ -2783,13 +2835,74 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Uint8List crateApiCoseCoseOpenAt({
+    required List<int> msgToOpen,
+    required List<int> msgToAuth,
+    required XhpkeSecretKey recipient,
+    required XdsaPublicKey sender,
+    required List<int> domain,
+    BigInt? maxDriftSecs,
+    required PlatformInt64 now,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(msgToOpen, serializer);
+          sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkeSecretKey(
+            recipient,
+            serializer,
+          );
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
+            sender,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
+          sse_encode_i_64(now, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 74)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCoseCoseOpenAtConstMeta,
+        argValues: [
+          msgToOpen,
+          msgToAuth,
+          recipient,
+          sender,
+          domain,
+          maxDriftSecs,
+          now,
+        ],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCoseCoseOpenAtConstMeta => const TaskConstMeta(
+    debugName: "cose_open_at",
+    argNames: [
+      "msgToOpen",
+      "msgToAuth",
+      "recipient",
+      "sender",
+      "domain",
+      "maxDriftSecs",
+      "now",
+    ],
+  );
+
+  @override
   Uint8List crateApiCoseCosePeek({required List<int> signature}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(signature, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 74)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 75)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2812,7 +2925,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(ciphertext, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 75)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 76)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2854,7 +2967,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 76)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 77)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2870,6 +2983,56 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiCoseCoseSealConstMeta => const TaskConstMeta(
     debugName: "cose_seal",
     argNames: ["msgToSeal", "msgToAuth", "signer", "recipient", "domain"],
+  );
+
+  @override
+  Uint8List crateApiCoseCoseSealAt({
+    required List<int> msgToSeal,
+    required List<int> msgToAuth,
+    required XdsaSecretKey signer,
+    required XhpkePublicKey recipient,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(msgToSeal, serializer);
+          sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
+            signer,
+            serializer,
+          );
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXhpkePublicKey(
+            recipient,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_i_64(timestamp, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 78)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCoseCoseSealAtConstMeta,
+        argValues: [msgToSeal, msgToAuth, signer, recipient, domain, timestamp],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCoseCoseSealAtConstMeta => const TaskConstMeta(
+    debugName: "cose_seal_at",
+    argNames: [
+      "msgToSeal",
+      "msgToAuth",
+      "signer",
+      "recipient",
+      "domain",
+      "timestamp",
+    ],
   );
 
   @override
@@ -2890,7 +3053,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 77)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 79)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2909,6 +3072,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Uint8List crateApiCoseCoseSignAt({
+    required List<int> msgToEmbed,
+    required List<int> msgToAuth,
+    required XdsaSecretKey signer,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(msgToEmbed, serializer);
+          sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
+            signer,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_i_64(timestamp, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 80)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCoseCoseSignAtConstMeta,
+        argValues: [msgToEmbed, msgToAuth, signer, domain, timestamp],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCoseCoseSignAtConstMeta => const TaskConstMeta(
+    debugName: "cose_sign_at",
+    argNames: ["msgToEmbed", "msgToAuth", "signer", "domain", "timestamp"],
+  );
+
+  @override
   Uint8List crateApiCoseCoseSignDetached({
     required List<int> msgToAuth,
     required XdsaSecretKey signer,
@@ -2924,7 +3125,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 78)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 81)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -2944,13 +3145,50 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Uint8List crateApiCoseCoseSignDetachedAt({
+    required List<int> msgToAuth,
+    required XdsaSecretKey signer,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
+            signer,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_i_64(timestamp, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 82)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCoseCoseSignDetachedAtConstMeta,
+        argValues: [msgToAuth, signer, domain, timestamp],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCoseCoseSignDetachedAtConstMeta =>
+      const TaskConstMeta(
+        debugName: "cose_sign_detached_at",
+        argNames: ["msgToAuth", "signer", "domain", "timestamp"],
+      );
+
+  @override
   XdsaFingerprint crateApiCoseCoseSigner({required List<int> signature}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(signature, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 79)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 83)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -2987,7 +3225,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 80)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 84)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3003,6 +3241,53 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiCoseCoseVerifyConstMeta => const TaskConstMeta(
     debugName: "cose_verify",
     argNames: ["msgToCheck", "msgToAuth", "verifier", "domain", "maxDriftSecs"],
+  );
+
+  @override
+  Uint8List crateApiCoseCoseVerifyAt({
+    required List<int> msgToCheck,
+    required List<int> msgToAuth,
+    required XdsaPublicKey verifier,
+    required List<int> domain,
+    BigInt? maxDriftSecs,
+    required PlatformInt64 now,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(msgToCheck, serializer);
+          sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
+            verifier,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
+          sse_encode_i_64(now, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 85)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCoseCoseVerifyAtConstMeta,
+        argValues: [msgToCheck, msgToAuth, verifier, domain, maxDriftSecs, now],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCoseCoseVerifyAtConstMeta => const TaskConstMeta(
+    debugName: "cose_verify_at",
+    argNames: [
+      "msgToCheck",
+      "msgToAuth",
+      "verifier",
+      "domain",
+      "maxDriftSecs",
+      "now",
+    ],
   );
 
   @override
@@ -3025,7 +3310,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 81)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 86)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -3051,6 +3336,54 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  void crateApiCoseCoseVerifyDetachedAt({
+    required List<int> msgToCheck,
+    required List<int> msgToAuth,
+    required XdsaPublicKey verifier,
+    required List<int> domain,
+    BigInt? maxDriftSecs,
+    required PlatformInt64 now,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(msgToCheck, serializer);
+          sse_encode_list_prim_u_8_loose(msgToAuth, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaPublicKey(
+            verifier,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_opt_box_autoadd_u_64(maxDriftSecs, serializer);
+          sse_encode_i_64(now, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 87)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCoseCoseVerifyDetachedAtConstMeta,
+        argValues: [msgToCheck, msgToAuth, verifier, domain, maxDriftSecs, now],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCoseCoseVerifyDetachedAtConstMeta =>
+      const TaskConstMeta(
+        debugName: "cose_verify_detached_at",
+        argNames: [
+          "msgToCheck",
+          "msgToAuth",
+          "verifier",
+          "domain",
+          "maxDriftSecs",
+          "now",
+        ],
+      );
+
+  @override
   Uint8List crateApiCwtCwtIssue({
     required List<int> claimsCbor,
     required XdsaSecretKey signer,
@@ -3066,7 +3399,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 82)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 88)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3091,7 +3424,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 83)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 89)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3114,7 +3447,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 84)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 90)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -3149,7 +3482,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(now, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 85)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 91)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3180,7 +3513,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(prk, serializer);
           sse_encode_list_prim_u_8_loose(info, serializer);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 86)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 92)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3209,7 +3542,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(secret, serializer);
           sse_encode_list_prim_u_8_loose(salt, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 87)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 93)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3242,7 +3575,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(salt, serializer);
           sse_encode_list_prim_u_8_loose(info, serializer);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 88)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 94)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3269,7 +3602,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 89,
+            funcId: 95,
             port: port_,
           );
         },
@@ -3294,7 +3627,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 90)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 96)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3321,7 +3654,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(key, serializer);
           sse_encode_list_prim_u_8_loose(ciphertext, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 91)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 97)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3351,7 +3684,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(key, serializer);
           sse_encode_list_prim_u_8_loose(plaintext, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 92)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 98)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3835,6 +4168,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt dco_decode_box_autoadd_u_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_u_64(raw);
+  }
+
+  @protected
+  PlatformInt64 dco_decode_i_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeI64(raw);
   }
 
   @protected
@@ -4396,6 +4735,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_u_64(deserializer));
+  }
+
+  @protected
+  PlatformInt64 sse_decode_i_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getPlatformInt64();
   }
 
   @protected
@@ -5006,6 +5351,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_64(self, serializer);
+  }
+
+  @protected
+  void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putPlatformInt64(self);
   }
 
   @protected

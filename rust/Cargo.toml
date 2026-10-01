@@ -1,6 +1,6 @@
 [package]
 name = "darkbio_crypto_ffi"
-version = "0.19.3"
+version = "0.19.4"
 edition = "2024"
 license = "BSD-3-Clause"
 
