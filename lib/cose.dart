@@ -57,6 +57,11 @@
 /// one-time acceptance must also track a message identifier, nonce, or
 /// challenge to reject replays.
 ///
+/// Signing stamps the current system time, and verification measures the
+/// drift against it. The functions ending in `At` take that time from the
+/// caller instead, for an application that keeps its own clock, such as one
+/// synchronized with a server.
+///
 /// ## Wire profile
 ///
 /// Interoperating implementations must match these Dark Bio conventions:
@@ -130,7 +135,8 @@ BigInt? _drift(int? maxDriftSecs) {
 
 /// Creates a COSE_Sign1 digital signature with an embedded payload.
 ///
-/// Uses the current system time as the signature timestamp.
+/// Uses the current system time as the signature timestamp, and [signAt]
+/// takes it from the caller instead.
 ///
 /// - [msgToEmbed]: The message to sign (embedded in COSE_Sign1)
 /// - [msgToAuth]: Additional authenticated data (not embedded, but signed)
@@ -151,6 +157,31 @@ Uint8List sign({
   domain: domain,
 );
 
+/// Creates a COSE_Sign1 digital signature with an embedded payload, stamped
+/// with a timestamp from the caller.
+///
+/// - [msgToEmbed]: The message to sign (embedded in COSE_Sign1)
+/// - [msgToAuth]: Additional authenticated data (not embedded, but signed)
+/// - [signer]: The xDSA secret key to sign with
+/// - [domain]: Application domain for separating protocol purposes
+/// - [timestamp]: Unix timestamp in seconds to embed in the protected header
+///
+/// Returns the serialized COSE_Sign1 structure. Throws if [msgToEmbed] or
+/// [msgToAuth] does not encode into the supported CBOR subset.
+Uint8List signAt({
+  required Object? msgToEmbed,
+  required Object? msgToAuth,
+  required xdsa.SecretKey signer,
+  required Uint8List domain,
+  required int timestamp,
+}) => ffi.coseSignAt(
+  msgToEmbed: _encode(msgToEmbed),
+  msgToAuth: _encode(msgToAuth),
+  signer: signer.inner,
+  domain: domain,
+  timestamp: timestamp,
+);
+
 /// Creates a COSE_Sign1 digital signature without an embedded payload (the
 /// envelope payload is null).
 ///
@@ -158,7 +189,8 @@ Uint8List sign({
 /// signature input is empty. See the library's wire profile for
 /// interoperability.
 ///
-/// Uses the current system time as the signature timestamp.
+/// Uses the current system time as the signature timestamp, and
+/// [signDetachedAt] takes it from the caller instead.
 ///
 /// - [msgToAuth]: The message to sign (not embedded in COSE_Sign1)
 /// - [signer]: The xDSA secret key to sign with
@@ -176,9 +208,34 @@ Uint8List signDetached({
   domain: domain,
 );
 
+/// Creates a COSE_Sign1 digital signature without an embedded payload, stamped
+/// with a timestamp from the caller.
+///
+/// Uses the same `external_aad` convention as [signDetached].
+///
+/// - [msgToAuth]: The message to sign (not embedded in COSE_Sign1)
+/// - [signer]: The xDSA secret key to sign with
+/// - [domain]: Application domain for separating protocol purposes
+/// - [timestamp]: Unix timestamp in seconds to embed in the protected header
+///
+/// Returns the serialized COSE_Sign1 structure. Throws if [msgToAuth] does not
+/// encode into the supported CBOR subset.
+Uint8List signDetachedAt({
+  required Object? msgToAuth,
+  required xdsa.SecretKey signer,
+  required Uint8List domain,
+  required int timestamp,
+}) => ffi.coseSignDetachedAt(
+  msgToAuth: _encode(msgToAuth),
+  signer: signer.inner,
+  domain: domain,
+  timestamp: timestamp,
+);
+
 /// Validates a COSE_Sign1 digital signature and returns the embedded payload.
 ///
-/// Uses the current system time for drift checking.
+/// Uses the current system time for drift checking, and [verifyAt] takes it
+/// from the caller instead.
 ///
 /// - [msgToCheck]: The serialized COSE_Sign1 structure
 /// - [msgToAuth]: The same additional authenticated data used during signing
@@ -211,9 +268,44 @@ T verify<T>({
         )
         as T;
 
+/// Validates a COSE_Sign1 digital signature against a time from the caller
+/// and returns the embedded payload.
+///
+/// - [msgToCheck]: The serialized COSE_Sign1 structure
+/// - [msgToAuth]: The same additional authenticated data used during signing
+/// - [verifier]: The xDSA public key to verify against
+/// - [domain]: Application domain for separating protocol purposes
+/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n; `null`
+///   skips the check.
+/// - [now]: Unix timestamp in seconds to measure the drift against
+///
+/// Returns the embedded payload decoded by the `cbor` package, cast to [T].
+/// Throws as [verify] does, with the drift measured against [now].
+T verifyAt<T>({
+  required Uint8List msgToCheck,
+  required Object? msgToAuth,
+  required xdsa.PublicKey verifier,
+  required Uint8List domain,
+  int? maxDriftSecs,
+  required int now,
+}) =>
+    _decode(
+          ffi.coseVerifyAt(
+            msgToCheck: msgToCheck,
+            msgToAuth: _encode(msgToAuth),
+            verifier: verifier.inner,
+            domain: domain,
+            maxDriftSecs: _drift(maxDriftSecs),
+            now: now,
+          ),
+        )
+        as T;
+
 /// Validates a COSE_Sign1 digital signature with a detached payload.
 ///
-/// Uses the current system time for drift checking.
+/// Uses the current system time for drift checking, and [verifyDetachedAt]
+/// takes it from the caller instead.
 ///
 /// - [msgToCheck]: The serialized COSE_Sign1 structure (with null payload)
 /// - [msgToAuth]: The same message used during signing (verified but not embedded)
@@ -238,6 +330,35 @@ void verifyDetached({
   verifier: verifier.inner,
   domain: domain,
   maxDriftSecs: _drift(maxDriftSecs),
+);
+
+/// Validates a COSE_Sign1 digital signature with a detached payload against a
+/// time from the caller.
+///
+/// - [msgToCheck]: The serialized COSE_Sign1 structure (with null payload)
+/// - [msgToAuth]: The same message used during signing (verified but not embedded)
+/// - [verifier]: The xDSA public key to verify against
+/// - [domain]: Application domain for separating protocol purposes
+/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n; `null`
+///   skips the check.
+/// - [now]: Unix timestamp in seconds to measure the drift against
+///
+/// Throws as [verifyDetached] does, with the drift measured against [now].
+void verifyDetachedAt({
+  required Uint8List msgToCheck,
+  required Object? msgToAuth,
+  required xdsa.PublicKey verifier,
+  required Uint8List domain,
+  int? maxDriftSecs,
+  required int now,
+}) => ffi.coseVerifyDetachedAt(
+  msgToCheck: msgToCheck,
+  msgToAuth: _encode(msgToAuth),
+  verifier: verifier.inner,
+  domain: domain,
+  maxDriftSecs: _drift(maxDriftSecs),
+  now: now,
 );
 
 /// Extracts the signer's fingerprint from a COSE_Sign1 signature without
@@ -332,7 +453,8 @@ Uint8List decrypt({
 
 /// Signs a message then encrypts it to a recipient.
 ///
-/// Uses the current system time as the signature timestamp.
+/// Uses the current system time as the signature timestamp, and [sealAt]
+/// takes it from the caller instead.
 ///
 /// - [msgToSeal]: The message to sign and encrypt
 /// - [msgToAuth]: Additional authenticated data (signed and bound to encryption,
@@ -358,9 +480,40 @@ Uint8List seal({
   domain: domain,
 );
 
+/// Signs a message with a timestamp from the caller, then encrypts it to a
+/// recipient.
+///
+/// - [msgToSeal]: The message to sign and encrypt
+/// - [msgToAuth]: Additional authenticated data (signed and bound to encryption,
+///   but not embedded)
+/// - [signer]: The xDSA secret key to sign with
+/// - [recipient]: The xHPKE public key to encrypt to
+/// - [domain]: Application domain for HPKE key derivation
+/// - [timestamp]: Unix timestamp in seconds to embed in the signature
+///
+/// Returns the serialized COSE_Encrypt0 structure containing the encrypted
+/// COSE_Sign1. Throws if [msgToSeal] or [msgToAuth] does not encode into the
+/// supported CBOR subset.
+Uint8List sealAt({
+  required Object? msgToSeal,
+  required Object? msgToAuth,
+  required xdsa.SecretKey signer,
+  required xhpke.PublicKey recipient,
+  required Uint8List domain,
+  required int timestamp,
+}) => ffi.coseSealAt(
+  msgToSeal: _encode(msgToSeal),
+  msgToAuth: _encode(msgToAuth),
+  signer: signer.inner,
+  recipient: recipient.inner,
+  domain: domain,
+  timestamp: timestamp,
+);
+
 /// Decrypts and verifies a sealed message.
 ///
-/// Uses the current system time for drift checking.
+/// Uses the current system time for drift checking, and [openAt] takes it from
+/// the caller instead.
 ///
 /// - [msgToOpen]: The serialized COSE_Encrypt0 structure
 /// - [msgToAuth]: The same additional authenticated data used during sealing
@@ -390,6 +543,42 @@ T open<T>({
             sender: sender.inner,
             domain: domain,
             maxDriftSecs: _drift(maxDriftSecs),
+          ),
+        )
+        as T;
+
+/// Decrypts and verifies a sealed message against a time from the caller.
+///
+/// - [msgToOpen]: The serialized COSE_Encrypt0 structure
+/// - [msgToAuth]: The same additional authenticated data used during sealing
+/// - [recipient]: The xHPKE secret key to decrypt with
+/// - [sender]: The xDSA public key to verify the signature against
+/// - [domain]: Application domain for HPKE key derivation
+/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n; `null`
+///   skips the check.
+/// - [now]: Unix timestamp in seconds to measure the drift against
+///
+/// Returns the payload decoded by the `cbor` package, cast to [T]. Throws as
+/// [open] does, with the drift measured against [now].
+T openAt<T>({
+  required Uint8List msgToOpen,
+  required Object? msgToAuth,
+  required xhpke.SecretKey recipient,
+  required xdsa.PublicKey sender,
+  required Uint8List domain,
+  int? maxDriftSecs,
+  required int now,
+}) =>
+    _decode(
+          ffi.coseOpenAt(
+            msgToOpen: msgToOpen,
+            msgToAuth: _encode(msgToAuth),
+            recipient: recipient.inner,
+            sender: sender.inner,
+            domain: domain,
+            maxDriftSecs: _drift(maxDriftSecs),
+            now: now,
           ),
         )
         as T;

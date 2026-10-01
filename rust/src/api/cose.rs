@@ -34,6 +34,35 @@ pub fn cose_sign(
     .map_err(|e| e.to_string())
 }
 
+/// Creates a COSE_Sign1 signature with an embedded payload and an explicit
+/// timestamp.
+///
+/// - `msg_to_embed`: The payload to embed and sign
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `signer`: The private key to sign with
+/// - `domain`: Application-specific domain separator
+/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+#[frb(sync)]
+pub fn cose_sign_at(
+    msg_to_embed: Vec<u8>,
+    msg_to_auth: Vec<u8>,
+    signer: &XdsaSecretKey,
+    domain: Vec<u8>,
+    timestamp: i64,
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_embed).map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    darkbio_crypto::cose::sign_at(
+        darkbio_crypto::cbor::Raw(msg_to_embed),
+        darkbio_crypto::cbor::Raw(msg_to_auth),
+        &signer.inner,
+        &domain,
+        timestamp,
+    )
+    .map_err(|e| e.to_string())
+}
+
 /// Creates a COSE_Sign1 signature without an embedded payload (detached mode).
 ///
 /// - `msg_to_auth`: The message to authenticate (external AAD)
@@ -51,6 +80,31 @@ pub fn cose_sign_detached(
         darkbio_crypto::cbor::Raw(msg_to_auth),
         &signer.inner,
         &domain,
+    )
+    .map_err(|e| e.to_string())
+}
+
+/// Creates a COSE_Sign1 signature without an embedded payload (detached mode)
+/// and with an explicit timestamp.
+///
+/// - `msg_to_auth`: The message to authenticate (external AAD)
+/// - `signer`: The private key to sign with
+/// - `domain`: Application-specific domain separator
+/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+#[frb(sync)]
+pub fn cose_sign_detached_at(
+    msg_to_auth: Vec<u8>,
+    signer: &XdsaSecretKey,
+    domain: Vec<u8>,
+    timestamp: i64,
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    darkbio_crypto::cose::sign_detached_at(
+        darkbio_crypto::cbor::Raw(msg_to_auth),
+        &signer.inner,
+        &domain,
+        timestamp,
     )
     .map_err(|e| e.to_string())
 }
@@ -84,6 +138,39 @@ pub fn cose_verify(
     Ok(raw.0)
 }
 
+/// Verifies a COSE_Sign1 signature against an explicit current time and
+/// returns the embedded payload.
+///
+/// - `msg_to_check`: The COSE_Sign1 structure to verify
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `verifier`: The public key to verify against
+/// - `domain`: Application-specific domain separator
+/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// - `now`: Unix timestamp in seconds to measure the drift against
+#[frb(sync)]
+pub fn cose_verify_at(
+    msg_to_check: Vec<u8>,
+    msg_to_auth: Vec<u8>,
+    verifier: &XdsaPublicKey,
+    domain: Vec<u8>,
+    max_drift_secs: Option<u64>,
+    now: i64,
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    let raw: darkbio_crypto::cbor::Raw = darkbio_crypto::cose::verify_at(
+        &msg_to_check,
+        darkbio_crypto::cbor::Raw(msg_to_auth),
+        &verifier.inner,
+        &domain,
+        max_drift_secs,
+        now,
+    )
+    .map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
+    Ok(raw.0)
+}
+
 /// Verifies a COSE_Sign1 signature with a detached payload.
 ///
 /// - `msg_to_check`: The COSE_Sign1 structure to verify
@@ -107,6 +194,37 @@ pub fn cose_verify_detached(
         &verifier.inner,
         &domain,
         max_drift_secs,
+    )
+    .map_err(|e| e.to_string())
+}
+
+/// Verifies a COSE_Sign1 signature with a detached payload against an
+/// explicit current time.
+///
+/// - `msg_to_check`: The COSE_Sign1 structure to verify
+/// - `msg_to_auth`: The detached message to authenticate
+/// - `verifier`: The public key to verify against
+/// - `domain`: Application-specific domain separator
+/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// - `now`: Unix timestamp in seconds to measure the drift against
+#[frb(sync)]
+pub fn cose_verify_detached_at(
+    msg_to_check: Vec<u8>,
+    msg_to_auth: Vec<u8>,
+    verifier: &XdsaPublicKey,
+    domain: Vec<u8>,
+    max_drift_secs: Option<u64>,
+    now: i64,
+) -> Result<(), String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    darkbio_crypto::cose::verify_detached_at(
+        &msg_to_check,
+        darkbio_crypto::cbor::Raw(msg_to_auth),
+        &verifier.inner,
+        &domain,
+        max_drift_secs,
+        now,
     )
     .map_err(|e| e.to_string())
 }
@@ -222,6 +340,38 @@ pub fn cose_seal(
     .map_err(|e| e.to_string())
 }
 
+/// Signs a message with an explicit timestamp then encrypts it to a recipient
+/// (sign-then-encrypt).
+///
+/// - `msg_to_seal`: The payload to sign and encrypt
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `signer`: The private key to sign with
+/// - `recipient`: The public key to encrypt to
+/// - `domain`: Application-specific domain separator
+/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+#[frb(sync)]
+pub fn cose_seal_at(
+    msg_to_seal: Vec<u8>,
+    msg_to_auth: Vec<u8>,
+    signer: &XdsaSecretKey,
+    recipient: &XhpkePublicKey,
+    domain: Vec<u8>,
+    timestamp: i64,
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_seal).map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    darkbio_crypto::cose::seal_at(
+        darkbio_crypto::cbor::Raw(msg_to_seal),
+        darkbio_crypto::cbor::Raw(msg_to_auth),
+        &signer.inner,
+        &recipient.inner,
+        &domain,
+        timestamp,
+    )
+    .map_err(|e| e.to_string())
+}
+
 /// Decrypts and verifies a sealed message.
 ///
 /// - `msg_to_open`: The COSE structure to decrypt and verify
@@ -248,6 +398,41 @@ pub fn cose_open(
         &sender.inner,
         &domain,
         max_drift_secs,
+    )
+    .map_err(|e| e.to_string())?;
+    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
+    Ok(raw.0)
+}
+
+/// Decrypts and verifies a sealed message against an explicit current time.
+///
+/// - `msg_to_open`: The COSE structure to decrypt and verify
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `recipient`: The private key to decrypt with
+/// - `sender`: The public key to verify the signature against
+/// - `domain`: Application-specific domain separator
+/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// - `now`: Unix timestamp in seconds to measure the drift against
+#[frb(sync)]
+pub fn cose_open_at(
+    msg_to_open: Vec<u8>,
+    msg_to_auth: Vec<u8>,
+    recipient: &XhpkeSecretKey,
+    sender: &XdsaPublicKey,
+    domain: Vec<u8>,
+    max_drift_secs: Option<u64>,
+    now: i64,
+) -> Result<Vec<u8>, String> {
+    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+
+    let raw: darkbio_crypto::cbor::Raw = darkbio_crypto::cose::open_at(
+        &msg_to_open,
+        darkbio_crypto::cbor::Raw(msg_to_auth),
+        &recipient.inner,
+        &sender.inner,
+        &domain,
+        max_drift_secs,
+        now,
     )
     .map_err(|e| e.to_string())?;
     darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;

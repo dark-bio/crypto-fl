@@ -191,13 +191,15 @@ void main() {
   });
 
   // Tests that payloads round trip through the cbor package, with byte
-  // strings coming back as plain integer lists.
+  // strings coming back as plain integer lists. The largest 64-bit integer
+  // only fits a BigInt, yet still encodes as a plain CBOR integer.
   test('payload types', () {
     final signer = xdsa.SecretKey.generate();
     final payload = {
       1: 'text',
       2: Uint8List.fromList([1, 2, 3]),
       3: [true, null, -5],
+      4: BigInt.two.pow(64) - BigInt.one,
     };
     final signed = cose.sign(
       msgToEmbed: payload,
@@ -215,6 +217,7 @@ void main() {
     expect(decoded[2], isA<List<int>>());
     expect(decoded[2], [1, 2, 3]);
     expect(decoded[3], [true, null, -5]);
+    expect(decoded[4], BigInt.two.pow(64) - BigInt.one);
   });
 
   // Tests that values outside the supported CBOR subset are refused rather
@@ -365,6 +368,128 @@ void main() {
     expect(() => verify(age - 3600), throwsRejection());
   });
 
+  // Tests that the drift is measured against the time the caller gives, at
+  // both edges of the allowed window, using the fixtures made at a known time.
+  test('drift against a given time', () {
+    final fx = fixture('cose/v0.16');
+    final signer = xdsa.SecretKey.fromBytes(hex(fx['xdsa_seed'] as String));
+    final recipient = xhpke.SecretKey.fromBytes(
+      hex(fx['xhpke_seed'] as String),
+    );
+    final domain = hex(fx['domain'] as String);
+    final payload = hex(fx['payload'] as String);
+    final aad = hex(fx['aad'] as String);
+    final sign1 = hex(fx['sign1'] as String);
+    final encrypt0 = hex(fx['encrypt0'] as String);
+    final timestamp = fx['timestamp'] as int;
+
+    List<int> verify(int now) => cose.verifyAt<List<int>>(
+      msgToCheck: sign1,
+      msgToAuth: aad,
+      verifier: signer.publicKey(),
+      domain: domain,
+      maxDriftSecs: 60,
+      now: now,
+    );
+    List<int> open(int now) => cose.openAt<List<int>>(
+      msgToOpen: encrypt0,
+      msgToAuth: aad,
+      recipient: recipient,
+      sender: signer.publicKey(),
+      domain: domain,
+      maxDriftSecs: 60,
+      now: now,
+    );
+    final cases = [
+      (timestamp + 60, true), // a signature 60 s old
+      (timestamp - 60, true), // a signature 60 s in the future
+      (timestamp + 61, false), // a signature 61 s old
+      (timestamp - 61, false), // a signature 61 s in the future
+    ];
+    for (final (i, (now, fresh)) in cases.indexed) {
+      if (fresh) {
+        expect(verify(now), payload, reason: '$i');
+        expect(open(now), payload, reason: '$i');
+      } else {
+        expect(() => verify(now), throwsRejection('stale'), reason: '$i');
+        expect(() => open(now), throwsRejection('stale'), reason: '$i');
+      }
+    }
+  });
+
+  // Tests that signing and sealing embed exactly the timestamp given, which a
+  // check allowing no drift accepts at that second only.
+  test('signing at a given time', () {
+    final signer = xdsa.SecretKey.generate();
+    final recipient = xhpke.SecretKey.generate();
+    const timestamp = 1700000000;
+
+    final signed = cose.signAt(
+      msgToEmbed: 'payload',
+      msgToAuth: 'context',
+      signer: signer,
+      domain: domain,
+      timestamp: timestamp,
+    );
+    final detached = cose.signDetachedAt(
+      msgToAuth: 'payload',
+      signer: signer,
+      domain: domain,
+      timestamp: timestamp,
+    );
+    final sealed = cose.sealAt(
+      msgToSeal: 'payload',
+      msgToAuth: 'context',
+      signer: signer,
+      recipient: recipient.publicKey(),
+      domain: domain,
+      timestamp: timestamp,
+    );
+    final checks = <void Function(int now)>[
+      // the embedded signature
+      (now) => cose.verifyAt<String>(
+        msgToCheck: signed,
+        msgToAuth: 'context',
+        verifier: signer.publicKey(),
+        domain: domain,
+        maxDriftSecs: 0,
+        now: now,
+      ),
+      // the detached signature
+      (now) => cose.verifyDetachedAt(
+        msgToCheck: detached,
+        msgToAuth: 'payload',
+        verifier: signer.publicKey(),
+        domain: domain,
+        maxDriftSecs: 0,
+        now: now,
+      ),
+      // the sealed message
+      (now) => cose.openAt<String>(
+        msgToOpen: sealed,
+        msgToAuth: 'context',
+        recipient: recipient,
+        sender: signer.publicKey(),
+        domain: domain,
+        maxDriftSecs: 0,
+        now: now,
+      ),
+    ];
+    for (final (i, check) in checks.indexed) {
+      expect(() => check(timestamp), returnsNormally, reason: '$i');
+      expect(
+        () => check(timestamp - 1),
+        throwsRejection('stale'),
+        reason: '$i',
+      );
+      expect(
+        () => check(timestamp + 1),
+        throwsRejection('stale'),
+        reason: '$i',
+      );
+    }
+  });
+
   // Tests that a negative drift is refused by every checking call, instead of
   // passing any timestamp.
   test('negative drift', () {
@@ -410,6 +535,31 @@ void main() {
         sender: signer.publicKey(),
         domain: domain,
         maxDriftSecs: -1,
+      ),
+      () => cose.verifyAt<String>(
+        msgToCheck: signed,
+        msgToAuth: null,
+        verifier: signer.publicKey(),
+        domain: domain,
+        maxDriftSecs: -1,
+        now: 0,
+      ),
+      () => cose.verifyDetachedAt(
+        msgToCheck: detached,
+        msgToAuth: 'payload',
+        verifier: signer.publicKey(),
+        domain: domain,
+        maxDriftSecs: -1,
+        now: 0,
+      ),
+      () => cose.openAt<String>(
+        msgToOpen: sealed,
+        msgToAuth: null,
+        recipient: recipient,
+        sender: signer.publicKey(),
+        domain: domain,
+        maxDriftSecs: -1,
+        now: 0,
       ),
     ];
     for (final (i, run) in cases.indexed) {

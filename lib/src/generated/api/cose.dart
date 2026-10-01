@@ -26,6 +26,28 @@ Uint8List coseSign({
   domain: domain,
 );
 
+/// Creates a COSE_Sign1 signature with an embedded payload and an explicit
+/// timestamp.
+///
+/// - `msg_to_embed`: The payload to embed and sign
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `signer`: The private key to sign with
+/// - `domain`: Application-specific domain separator
+/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+Uint8List coseSignAt({
+  required List<int> msgToEmbed,
+  required List<int> msgToAuth,
+  required XdsaSecretKey signer,
+  required List<int> domain,
+  required PlatformInt64 timestamp,
+}) => RustLib.instance.api.crateApiCoseCoseSignAt(
+  msgToEmbed: msgToEmbed,
+  msgToAuth: msgToAuth,
+  signer: signer,
+  domain: domain,
+  timestamp: timestamp,
+);
+
 /// Creates a COSE_Sign1 signature without an embedded payload (detached mode).
 ///
 /// - `msg_to_auth`: The message to authenticate (external AAD)
@@ -39,6 +61,25 @@ Uint8List coseSignDetached({
   msgToAuth: msgToAuth,
   signer: signer,
   domain: domain,
+);
+
+/// Creates a COSE_Sign1 signature without an embedded payload (detached mode)
+/// and with an explicit timestamp.
+///
+/// - `msg_to_auth`: The message to authenticate (external AAD)
+/// - `signer`: The private key to sign with
+/// - `domain`: Application-specific domain separator
+/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+Uint8List coseSignDetachedAt({
+  required List<int> msgToAuth,
+  required XdsaSecretKey signer,
+  required List<int> domain,
+  required PlatformInt64 timestamp,
+}) => RustLib.instance.api.crateApiCoseCoseSignDetachedAt(
+  msgToAuth: msgToAuth,
+  signer: signer,
+  domain: domain,
+  timestamp: timestamp,
 );
 
 /// Verifies a COSE_Sign1 signature and returns the embedded payload.
@@ -62,6 +103,31 @@ Uint8List coseVerify({
   maxDriftSecs: maxDriftSecs,
 );
 
+/// Verifies a COSE_Sign1 signature against an explicit current time and
+/// returns the embedded payload.
+///
+/// - `msg_to_check`: The COSE_Sign1 structure to verify
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `verifier`: The public key to verify against
+/// - `domain`: Application-specific domain separator
+/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// - `now`: Unix timestamp in seconds to measure the drift against
+Uint8List coseVerifyAt({
+  required List<int> msgToCheck,
+  required List<int> msgToAuth,
+  required XdsaPublicKey verifier,
+  required List<int> domain,
+  BigInt? maxDriftSecs,
+  required PlatformInt64 now,
+}) => RustLib.instance.api.crateApiCoseCoseVerifyAt(
+  msgToCheck: msgToCheck,
+  msgToAuth: msgToAuth,
+  verifier: verifier,
+  domain: domain,
+  maxDriftSecs: maxDriftSecs,
+  now: now,
+);
+
 /// Verifies a COSE_Sign1 signature with a detached payload.
 ///
 /// - `msg_to_check`: The COSE_Sign1 structure to verify
@@ -81,6 +147,31 @@ void coseVerifyDetached({
   verifier: verifier,
   domain: domain,
   maxDriftSecs: maxDriftSecs,
+);
+
+/// Verifies a COSE_Sign1 signature with a detached payload against an
+/// explicit current time.
+///
+/// - `msg_to_check`: The COSE_Sign1 structure to verify
+/// - `msg_to_auth`: The detached message to authenticate
+/// - `verifier`: The public key to verify against
+/// - `domain`: Application-specific domain separator
+/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// - `now`: Unix timestamp in seconds to measure the drift against
+void coseVerifyDetachedAt({
+  required List<int> msgToCheck,
+  required List<int> msgToAuth,
+  required XdsaPublicKey verifier,
+  required List<int> domain,
+  BigInt? maxDriftSecs,
+  required PlatformInt64 now,
+}) => RustLib.instance.api.crateApiCoseCoseVerifyDetachedAt(
+  msgToCheck: msgToCheck,
+  msgToAuth: msgToAuth,
+  verifier: verifier,
+  domain: domain,
+  maxDriftSecs: maxDriftSecs,
+  now: now,
 );
 
 /// Extracts the signer's fingerprint from a COSE_Sign1 without verifying.
@@ -164,6 +255,31 @@ Uint8List coseSeal({
   domain: domain,
 );
 
+/// Signs a message with an explicit timestamp then encrypts it to a recipient
+/// (sign-then-encrypt).
+///
+/// - `msg_to_seal`: The payload to sign and encrypt
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `signer`: The private key to sign with
+/// - `recipient`: The public key to encrypt to
+/// - `domain`: Application-specific domain separator
+/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+Uint8List coseSealAt({
+  required List<int> msgToSeal,
+  required List<int> msgToAuth,
+  required XdsaSecretKey signer,
+  required XhpkePublicKey recipient,
+  required List<int> domain,
+  required PlatformInt64 timestamp,
+}) => RustLib.instance.api.crateApiCoseCoseSealAt(
+  msgToSeal: msgToSeal,
+  msgToAuth: msgToAuth,
+  signer: signer,
+  recipient: recipient,
+  domain: domain,
+  timestamp: timestamp,
+);
+
 /// Decrypts and verifies a sealed message.
 ///
 /// - `msg_to_open`: The COSE structure to decrypt and verify
@@ -186,4 +302,31 @@ Uint8List coseOpen({
   sender: sender,
   domain: domain,
   maxDriftSecs: maxDriftSecs,
+);
+
+/// Decrypts and verifies a sealed message against an explicit current time.
+///
+/// - `msg_to_open`: The COSE structure to decrypt and verify
+/// - `msg_to_auth`: Additional authenticated data (external AAD)
+/// - `recipient`: The private key to decrypt with
+/// - `sender`: The public key to verify the signature against
+/// - `domain`: Application-specific domain separator
+/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// - `now`: Unix timestamp in seconds to measure the drift against
+Uint8List coseOpenAt({
+  required List<int> msgToOpen,
+  required List<int> msgToAuth,
+  required XhpkeSecretKey recipient,
+  required XdsaPublicKey sender,
+  required List<int> domain,
+  BigInt? maxDriftSecs,
+  required PlatformInt64 now,
+}) => RustLib.instance.api.crateApiCoseCoseOpenAt(
+  msgToOpen: msgToOpen,
+  msgToAuth: msgToAuth,
+  recipient: recipient,
+  sender: sender,
+  domain: domain,
+  maxDriftSecs: maxDriftSecs,
+  now: now,
 );
