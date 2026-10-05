@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.20.0
+
+- Wrap darkbio-crypto v0.20.0
+- Require `Padding.none()` or `Padding.buckets(floor: ..., step: ...)` in COSE `seal`, `sealAt` and `encrypt`
+- Strip encrypted zero padding when opening, and reject nonzero padding bytes
+- Reject bucket parameters outside 1 to 2^32 - 1 with an `ArgumentError`
+
 ## 0.19.4
 
 - Add `signAt`, `signDetachedAt`, `verifyAt`, `verifyDetachedAt`, `sealAt` and `openAt`, which take the signature time from the caller instead of the system clock

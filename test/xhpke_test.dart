@@ -199,6 +199,7 @@ void main() {
       signer: signer,
       recipient: secret.publicKey(),
       domain: domain,
+      padding: const cose.Padding.none(),
     );
 
     secret.dispose();

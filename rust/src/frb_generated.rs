@@ -3034,6 +3034,7 @@ fn wire__crate__api__cose__cose_encrypt_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_padding = <Option<(usize, usize)>>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let mut api_recipient_guard = None;
@@ -3057,6 +3058,7 @@ fn wire__crate__api__cose__cose_encrypt_impl(
                     api_msg_to_auth,
                     &*api_recipient_guard,
                     api_domain,
+                    api_padding,
                 )?;
                 std::result::Result::Ok(output_ok)
             })())
@@ -3295,6 +3297,7 @@ fn wire__crate__api__cose__cose_seal_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_padding = <Option<(usize, usize)>>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let mut api_signer_guard = None;
@@ -3327,6 +3330,7 @@ fn wire__crate__api__cose__cose_seal_impl(
                     &*api_signer_guard,
                     &*api_recipient_guard,
                     api_domain,
+                    api_padding,
                 )?;
                 std::result::Result::Ok(output_ok)
             })())
@@ -3363,6 +3367,7 @@ fn wire__crate__api__cose__cose_seal_at_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_padding = <Option<(usize, usize)>>::sse_decode(&mut deserializer);
             let api_timestamp = <i64>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
@@ -3396,6 +3401,7 @@ fn wire__crate__api__cose__cose_seal_at_impl(
                     &*api_signer_guard,
                     &*api_recipient_guard,
                     api_domain,
+                    api_padding,
                     api_timestamp,
                 )?;
                 std::result::Result::Ok(output_ok)
@@ -4616,6 +4622,17 @@ impl SseDecode for Vec<u8> {
     }
 }
 
+impl SseDecode for Option<(usize, usize)> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<(usize, usize)>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<u64> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -4641,6 +4658,15 @@ impl SseDecode for (Vec<u8>, Vec<u8>) {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <Vec<u8>>::sse_decode(deserializer);
         let mut var_field1 = <Vec<u8>>::sse_decode(deserializer);
+        return (var_field0, var_field1);
+    }
+}
+
+impl SseDecode for (usize, usize) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_field0 = <usize>::sse_decode(deserializer);
+        let mut var_field1 = <usize>::sse_decode(deserializer);
         return (var_field0, var_field1);
     }
 }
@@ -5274,6 +5300,16 @@ impl SseEncode for Vec<u8> {
     }
 }
 
+impl SseEncode for Option<(usize, usize)> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <(usize, usize)>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<u64> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -5297,6 +5333,14 @@ impl SseEncode for (Vec<u8>, Vec<u8>) {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<u8>>::sse_encode(self.0, serializer);
         <Vec<u8>>::sse_encode(self.1, serializer);
+    }
+}
+
+impl SseEncode for (usize, usize) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <usize>::sse_encode(self.0, serializer);
+        <usize>::sse_encode(self.1, serializer);
     }
 }
 

@@ -66,10 +66,18 @@ Future<String> example() async {
 
   // Sign and encrypt a payload to the recipient, then open and verify it back.
   // The second argument is authenticated but must be supplied separately.
-  final sealed = cose.seal(msgToSeal: 'payload', msgToAuth: 'metadata', signer: signer, recipient: recipient.publicKey(), domain: domain);
+  final sealed = cose.seal(msgToSeal: 'payload', msgToAuth: 'metadata', signer: signer, recipient: recipient.publicKey(), domain: domain, padding: cose.Padding.buckets(floor: 8192, step: 20));
   return cose.open<String>(msgToOpen: sealed, msgToAuth: 'metadata', recipient: recipient, sender: signer.publicKey(), domain: domain, maxDriftSecs: 60);
 }
 ```
+
+COSE `seal`, `sealAt` and `encrypt` take a padding policy. `cose.Padding.none()`
+keeps the signed envelope's length, and `cose.Padding.buckets(floor: 8192,
+step: 20)` pads it to the smallest of a series of sizes that starts at 8,192
+bytes and grows by a twentieth each, rounded up. The padding sits inside the
+encryption, and opening strips it without knowing the policy, refusing a
+nonzero byte. Both bucket parameters must be from 1 to 2^32 - 1, or
+`Padding.buckets` throws an `ArgumentError`.
 
 ## Native packages
 

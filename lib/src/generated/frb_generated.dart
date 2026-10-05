@@ -362,6 +362,7 @@ abstract class RustLibApi extends BaseApi {
     required List<int> msgToAuth,
     required XhpkePublicKey recipient,
     required List<int> domain,
+    (BigInt, BigInt)? padding,
   });
 
   Uint8List crateApiCoseCoseOpen({
@@ -393,6 +394,7 @@ abstract class RustLibApi extends BaseApi {
     required XdsaSecretKey signer,
     required XhpkePublicKey recipient,
     required List<int> domain,
+    (BigInt, BigInt)? padding,
   });
 
   Uint8List crateApiCoseCoseSealAt({
@@ -401,6 +403,7 @@ abstract class RustLibApi extends BaseApi {
     required XdsaSecretKey signer,
     required XhpkePublicKey recipient,
     required List<int> domain,
+    (BigInt, BigInt)? padding,
     required PlatformInt64 timestamp,
   });
 
@@ -2747,6 +2750,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required List<int> msgToAuth,
     required XhpkePublicKey recipient,
     required List<int> domain,
+    (BigInt, BigInt)? padding,
   }) {
     return handler.executeSync(
       SyncTask(
@@ -2759,6 +2763,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_opt_box_autoadd_record_usize_usize(padding, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 72)!;
         },
         codec: SseCodec(
@@ -2766,7 +2771,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_String,
         ),
         constMeta: kCrateApiCoseCoseEncryptConstMeta,
-        argValues: [sign1, msgToAuth, recipient, domain],
+        argValues: [sign1, msgToAuth, recipient, domain, padding],
         apiImpl: this,
       ),
     );
@@ -2774,7 +2779,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiCoseCoseEncryptConstMeta => const TaskConstMeta(
     debugName: "cose_encrypt",
-    argNames: ["sign1", "msgToAuth", "recipient", "domain"],
+    argNames: ["sign1", "msgToAuth", "recipient", "domain", "padding"],
   );
 
   @override
@@ -2951,6 +2956,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required XdsaSecretKey signer,
     required XhpkePublicKey recipient,
     required List<int> domain,
+    (BigInt, BigInt)? padding,
   }) {
     return handler.executeSync(
       SyncTask(
@@ -2967,6 +2973,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_opt_box_autoadd_record_usize_usize(padding, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 77)!;
         },
         codec: SseCodec(
@@ -2974,7 +2981,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_String,
         ),
         constMeta: kCrateApiCoseCoseSealConstMeta,
-        argValues: [msgToSeal, msgToAuth, signer, recipient, domain],
+        argValues: [msgToSeal, msgToAuth, signer, recipient, domain, padding],
         apiImpl: this,
       ),
     );
@@ -2982,7 +2989,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiCoseCoseSealConstMeta => const TaskConstMeta(
     debugName: "cose_seal",
-    argNames: ["msgToSeal", "msgToAuth", "signer", "recipient", "domain"],
+    argNames: [
+      "msgToSeal",
+      "msgToAuth",
+      "signer",
+      "recipient",
+      "domain",
+      "padding",
+    ],
   );
 
   @override
@@ -2992,6 +3006,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required XdsaSecretKey signer,
     required XhpkePublicKey recipient,
     required List<int> domain,
+    (BigInt, BigInt)? padding,
     required PlatformInt64 timestamp,
   }) {
     return handler.executeSync(
@@ -3009,6 +3024,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_opt_box_autoadd_record_usize_usize(padding, serializer);
           sse_encode_i_64(timestamp, serializer);
           return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 78)!;
         },
@@ -3017,7 +3033,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_String,
         ),
         constMeta: kCrateApiCoseCoseSealAtConstMeta,
-        argValues: [msgToSeal, msgToAuth, signer, recipient, domain, timestamp],
+        argValues: [
+          msgToSeal,
+          msgToAuth,
+          signer,
+          recipient,
+          domain,
+          padding,
+          timestamp,
+        ],
         apiImpl: this,
       ),
     );
@@ -3031,6 +3055,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       "signer",
       "recipient",
       "domain",
+      "padding",
       "timestamp",
     ],
   );
@@ -4165,6 +4190,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (BigInt, BigInt) dco_decode_box_autoadd_record_usize_usize(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_record_usize_usize(raw);
+  }
+
+  @protected
   BigInt dco_decode_box_autoadd_u_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_u_64(raw);
@@ -4186,6 +4217,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  (BigInt, BigInt)? dco_decode_opt_box_autoadd_record_usize_usize(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_record_usize_usize(raw);
   }
 
   @protected
@@ -4224,6 +4261,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       dco_decode_list_prim_u_8_strict(arr[0]),
       dco_decode_list_prim_u_8_strict(arr[1]),
     );
+  }
+
+  @protected
+  (BigInt, BigInt) dco_decode_record_usize_usize(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) {
+      throw Exception('Expected 2 elements, got ${arr.length}');
+    }
+    return (dco_decode_usize(arr[0]), dco_decode_usize(arr[1]));
   }
 
   @protected
@@ -4732,6 +4779,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (BigInt, BigInt) sse_decode_box_autoadd_record_usize_usize(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_record_usize_usize(deserializer));
+  }
+
+  @protected
   BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_u_64(deserializer));
@@ -4755,6 +4810,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  (BigInt, BigInt)? sse_decode_opt_box_autoadd_record_usize_usize(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_record_usize_usize(deserializer));
+    } else {
+      return null;
+    }
   }
 
   @protected
@@ -4790,6 +4858,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 = sse_decode_list_prim_u_8_strict(deserializer);
     var var_field1 = sse_decode_list_prim_u_8_strict(deserializer);
+    return (var_field0, var_field1);
+  }
+
+  @protected
+  (BigInt, BigInt) sse_decode_record_usize_usize(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_field0 = sse_decode_usize(deserializer);
+    var var_field1 = sse_decode_usize(deserializer);
     return (var_field0, var_field1);
   }
 
@@ -5348,6 +5424,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_record_usize_usize(
+    (BigInt, BigInt) self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_record_usize_usize(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_64(self, serializer);
@@ -5382,6 +5467,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_record_usize_usize(
+    (BigInt, BigInt)? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_record_usize_usize(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -5413,6 +5511,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(self.$1, serializer);
     sse_encode_list_prim_u_8_strict(self.$2, serializer);
+  }
+
+  @protected
+  void sse_encode_record_usize_usize(
+    (BigInt, BigInt) self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(self.$1, serializer);
+    sse_encode_usize(self.$2, serializer);
   }
 
   @protected
