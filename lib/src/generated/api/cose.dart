@@ -199,16 +199,19 @@ XhpkeFingerprint coseRecipient({required List<int> ciphertext}) =>
 /// - `msg_to_auth`: The same additional authenticated data used during sealing
 /// - `recipient`: The xHPKE public key to encrypt to
 /// - `domain`: Application domain for HPKE key derivation
+/// - `padding`: Sender's padding policy, buckets as `(floor, step)` or none
 Uint8List coseEncrypt({
   required List<int> sign1,
   required List<int> msgToAuth,
   required XhpkePublicKey recipient,
   required List<int> domain,
+  required CosePadding padding,
 }) => RustLib.instance.api.crateApiCoseCoseEncrypt(
   sign1: sign1,
   msgToAuth: msgToAuth,
   recipient: recipient,
   domain: domain,
+  padding: padding,
 );
 
 /// Decrypts a sealed message without verifying the signature.
@@ -221,7 +224,8 @@ Uint8List coseEncrypt({
 /// - `recipient`: The xHPKE secret key to decrypt with
 /// - `domain`: Application domain for HPKE key derivation
 ///
-/// Returns the decrypted COSE_Sign1 structure (not yet verified).
+/// Returns the decrypted COSE_Sign1 structure (not yet verified), stripping
+/// trailing zeros and rejecting any nonzero padding byte.
 Uint8List coseDecrypt({
   required List<int> msgToOpen,
   required List<int> msgToAuth,
@@ -241,18 +245,21 @@ Uint8List coseDecrypt({
 /// - `signer`: The private key to sign with
 /// - `recipient`: The public key to encrypt to
 /// - `domain`: Application-specific domain separator
+/// - `padding`: Sender's padding policy, buckets as `(floor, step)` or none
 Uint8List coseSeal({
   required List<int> msgToSeal,
   required List<int> msgToAuth,
   required XdsaSecretKey signer,
   required XhpkePublicKey recipient,
   required List<int> domain,
+  required CosePadding padding,
 }) => RustLib.instance.api.crateApiCoseCoseSeal(
   msgToSeal: msgToSeal,
   msgToAuth: msgToAuth,
   signer: signer,
   recipient: recipient,
   domain: domain,
+  padding: padding,
 );
 
 /// Signs a message with an explicit timestamp then encrypts it to a recipient
@@ -263,6 +270,7 @@ Uint8List coseSeal({
 /// - `signer`: The private key to sign with
 /// - `recipient`: The public key to encrypt to
 /// - `domain`: Application-specific domain separator
+/// - `padding`: Sender's padding policy, buckets as `(floor, step)` or none
 /// - `timestamp`: Unix timestamp in seconds to embed in the signature
 Uint8List coseSealAt({
   required List<int> msgToSeal,
@@ -270,6 +278,7 @@ Uint8List coseSealAt({
   required XdsaSecretKey signer,
   required XhpkePublicKey recipient,
   required List<int> domain,
+  required CosePadding padding,
   required PlatformInt64 timestamp,
 }) => RustLib.instance.api.crateApiCoseCoseSealAt(
   msgToSeal: msgToSeal,
@@ -277,6 +286,7 @@ Uint8List coseSealAt({
   signer: signer,
   recipient: recipient,
   domain: domain,
+  padding: padding,
   timestamp: timestamp,
 );
 
@@ -330,3 +340,19 @@ Uint8List coseOpenAt({
   maxDriftSecs: maxDriftSecs,
   now: now,
 );
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>
+abstract class CosePadding implements RustOpaqueInterface {
+  /// Creates a policy that pads to the smallest size that fits. Sizes start at
+  /// `floor`, and each next one is the previous one plus `1/step` of it,
+  /// rounded up.
+  static CosePadding buckets({required BigInt floor, required BigInt step}) =>
+      RustLib.instance.api.crateApiCoseCosePaddingBuckets(
+        floor: floor,
+        step: step,
+      );
+
+  /// Creates a policy that adds no padding.
+  static CosePadding none() =>
+      RustLib.instance.api.crateApiCoseCosePaddingNone();
+}

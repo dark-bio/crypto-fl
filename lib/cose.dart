@@ -41,7 +41,7 @@
 ///   assert(payload == 'hello');
 ///
 ///   // Sign and encrypt to a recipient in one step, then open and verify it back
-///   final sealed = cose.seal(msgToSeal: 'secret', msgToAuth: 'context', signer: signer, recipient: recipient.publicKey(), domain: domain);
+///   final sealed = cose.seal(msgToSeal: 'secret', msgToAuth: 'context', signer: signer, recipient: recipient.publicKey(), domain: domain, padding: cose.Padding.buckets(floor: 8192, step: 20));
 ///   final opened = cose.open<String>(msgToOpen: sealed, msgToAuth: 'context', recipient: recipient, sender: signer.publicKey(), domain: domain, maxDriftSecs: 60);
 ///   assert(opened == 'secret');
 /// }
@@ -84,6 +84,9 @@
 ///   `msgToAuth`; the complete encoded Enc_structure is passed as HPKE AAD.
 ///   HPKE key derivation uses `"dark-bio-v1:" || domain` as its info. The
 ///   X-Wing encapsulated key is carried in unprotected header `-4`.
+/// - The encrypted plaintext is the COSE_Sign1 followed by the zeros selected
+///   by [Padding]. Receivers strip any number of zeros and reject a nonzero
+///   padding byte. The sender's bucket sizes need not be shared with them.
 ///
 /// Here `bstr` denotes a CBOR byte string and `||` denotes byte concatenation.
 /// The domain and `msgToAuth` are not included in the returned envelope; both
@@ -117,6 +120,69 @@ import 'xhpke.dart'
 
 Uint8List _encode(Object? value) => encoding.encode(value);
 Object? _decode(Uint8List bytes) => cbor.cbor.decode(bytes);
+
+/// How many zero bytes a sender appends to the signed envelope inside the
+/// encryption, so the ciphertext's length shows little about the message.
+///
+/// Receivers strip any number of zeros, so the policy is the sender's alone and
+/// can change without them. A padded size beyond what the platform can address,
+/// which takes a message of gigabytes, surfaces as the bridge's panic exception.
+sealed class Padding {
+  /// Creates a policy whose concrete variants belong to this library.
+  const Padding._();
+
+  /// Keeps the signed envelope unpadded.
+  const factory Padding.none() = _NoPadding;
+
+  /// Pads to the smallest size that fits the signed envelope.
+  ///
+  /// Sizes start at [floor] bytes, and each next size is the previous one plus
+  /// 1/[step] of it, rounded up. Both parameters must be from 1 to 2^32 - 1, so
+  /// they fit Rust's `usize` on every target, or this throws an
+  /// [ArgumentError].
+  factory Padding.buckets({required int floor, required int step}) {
+    _checkPaddingRange(floor, 'floor');
+    _checkPaddingRange(step, 'step');
+    return _BucketPadding(floor, step);
+  }
+
+  /// Builds the bridged policy for a single call, which the caller disposes.
+  ffi.CosePadding get _native => switch (this) {
+    _NoPadding() => ffi.CosePadding.none(),
+    _BucketPadding(:final floor, :final step) => ffi.CosePadding.buckets(
+      floor: BigInt.from(floor),
+      step: BigInt.from(step),
+    ),
+  };
+}
+
+/// Largest bucket parameter that fits Rust's `usize` on every target.
+const int _maxPaddingSize = 0xffffffff;
+
+/// Rejects a bucket parameter outside 1 to [_maxPaddingSize].
+void _checkPaddingRange(int value, String name) {
+  if (value < 1 || value > _maxPaddingSize) {
+    throw ArgumentError.value(value, name, 'must be 1 to 2^32 - 1');
+  }
+}
+
+/// A policy that leaves the signed envelope's length unchanged.
+final class _NoPadding extends Padding {
+  /// Creates an unpadded policy.
+  const _NoPadding() : super._();
+}
+
+/// A policy that rounds the signed envelope's length up to a bucket.
+final class _BucketPadding extends Padding {
+  /// Smallest padded plaintext size in bytes.
+  final int floor;
+
+  /// Divisor of the rounded-up growth between consecutive buckets.
+  final int step;
+
+  /// Creates a policy with already checked parameters.
+  const _BucketPadding(this.floor, this.step) : super._();
+}
 
 /// Converts the optional drift into its native form, rejecting negative ones.
 BigInt? _drift(int? maxDriftSecs) {
@@ -411,20 +477,31 @@ xhpke.Fingerprint recipient({required Uint8List ciphertext}) =>
 /// - [msgToAuth]: The same additional authenticated data used during sealing
 /// - [recipient]: The xHPKE public key to encrypt to
 /// - [domain]: Application domain for HPKE key derivation
+/// - [padding]: Sender's policy for zeros after the signed envelope
 ///
 /// Returns the serialized COSE_Encrypt0 structure. Throws if [msgToAuth] does
-/// not encode into the supported CBOR subset.
+/// not encode into the supported CBOR subset. A padded size beyond what the
+/// platform can address surfaces as the bridge's panic exception.
 Uint8List encrypt({
   required Uint8List sign1,
   required Object? msgToAuth,
   required xhpke.PublicKey recipient,
   required Uint8List domain,
-}) => ffi.coseEncrypt(
-  sign1: sign1,
-  msgToAuth: _encode(msgToAuth),
-  recipient: recipient.inner,
-  domain: domain,
-);
+  required Padding padding,
+}) {
+  final nativePadding = padding._native;
+  try {
+    return ffi.coseEncrypt(
+      sign1: sign1,
+      msgToAuth: _encode(msgToAuth),
+      recipient: recipient.inner,
+      domain: domain,
+      padding: nativePadding,
+    );
+  } finally {
+    nativePadding.dispose();
+  }
+}
 
 /// Decrypts a sealed message without verifying the signature.
 ///
@@ -438,7 +515,8 @@ Uint8List encrypt({
 ///
 /// Returns the decrypted COSE_Sign1 structure (not yet verified). Throws if
 /// the envelope is malformed, was encrypted to another key, or does not
-/// decrypt under [recipient], [msgToAuth] and [domain].
+/// decrypt under [recipient], [msgToAuth] and [domain]. Strips trailing zeros
+/// after the signed envelope and throws if any padding byte is nonzero.
 Uint8List decrypt({
   required Uint8List msgToOpen,
   required Object? msgToAuth,
@@ -462,23 +540,34 @@ Uint8List decrypt({
 /// - [signer]: The xDSA secret key to sign with
 /// - [recipient]: The xHPKE public key to encrypt to
 /// - [domain]: Application domain for HPKE key derivation
+/// - [padding]: Sender's policy for zeros after the signed envelope
 ///
 /// Returns the serialized COSE_Encrypt0 structure containing the encrypted
 /// COSE_Sign1. Throws if [msgToSeal] or [msgToAuth] does not encode into the
-/// supported CBOR subset.
+/// supported CBOR subset. A padded size beyond what the platform can address
+/// surfaces as the bridge's panic exception.
 Uint8List seal({
   required Object? msgToSeal,
   required Object? msgToAuth,
   required xdsa.SecretKey signer,
   required xhpke.PublicKey recipient,
   required Uint8List domain,
-}) => ffi.coseSeal(
-  msgToSeal: _encode(msgToSeal),
-  msgToAuth: _encode(msgToAuth),
-  signer: signer.inner,
-  recipient: recipient.inner,
-  domain: domain,
-);
+  required Padding padding,
+}) {
+  final nativePadding = padding._native;
+  try {
+    return ffi.coseSeal(
+      msgToSeal: _encode(msgToSeal),
+      msgToAuth: _encode(msgToAuth),
+      signer: signer.inner,
+      recipient: recipient.inner,
+      domain: domain,
+      padding: nativePadding,
+    );
+  } finally {
+    nativePadding.dispose();
+  }
+}
 
 /// Signs a message with a timestamp from the caller, then encrypts it to a
 /// recipient.
@@ -489,26 +578,37 @@ Uint8List seal({
 /// - [signer]: The xDSA secret key to sign with
 /// - [recipient]: The xHPKE public key to encrypt to
 /// - [domain]: Application domain for HPKE key derivation
+/// - [padding]: Sender's policy for zeros after the signed envelope
 /// - [timestamp]: Unix timestamp in seconds to embed in the signature
 ///
 /// Returns the serialized COSE_Encrypt0 structure containing the encrypted
 /// COSE_Sign1. Throws if [msgToSeal] or [msgToAuth] does not encode into the
-/// supported CBOR subset.
+/// supported CBOR subset. A padded size beyond what the platform can address
+/// surfaces as the bridge's panic exception.
 Uint8List sealAt({
   required Object? msgToSeal,
   required Object? msgToAuth,
   required xdsa.SecretKey signer,
   required xhpke.PublicKey recipient,
   required Uint8List domain,
+  required Padding padding,
   required int timestamp,
-}) => ffi.coseSealAt(
-  msgToSeal: _encode(msgToSeal),
-  msgToAuth: _encode(msgToAuth),
-  signer: signer.inner,
-  recipient: recipient.inner,
-  domain: domain,
-  timestamp: timestamp,
-);
+}) {
+  final nativePadding = padding._native;
+  try {
+    return ffi.coseSealAt(
+      msgToSeal: _encode(msgToSeal),
+      msgToAuth: _encode(msgToAuth),
+      signer: signer.inner,
+      recipient: recipient.inner,
+      domain: domain,
+      padding: nativePadding,
+      timestamp: timestamp,
+    );
+  } finally {
+    nativePadding.dispose();
+  }
+}
 
 /// Decrypts and verifies a sealed message.
 ///

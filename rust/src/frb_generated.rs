@@ -27,6 +27,7 @@
 
 // Section: imports
 
+use crate::api::cose::*;
 use crate::api::rsa::*;
 use crate::api::xdsa::*;
 use crate::api::xhpke::*;
@@ -42,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1937088178;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -579559962;
 
 // Section: executor
 
@@ -50,6 +51,67 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__cose__CosePadding_buckets_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "CosePadding_buckets",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_floor = <usize>::sse_decode(&mut deserializer);
+            let api_step = <usize>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Ok::<_, ()>(crate::api::cose::CosePadding::buckets(api_floor, api_step))?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__cose__CosePadding_none_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "CosePadding_none",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Ok::<_, ()>(crate::api::cose::CosePadding::none())?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__rsa__RsaFingerprint_from_bytes_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -3034,9 +3096,13 @@ fn wire__crate__api__cose__cose_encrypt_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_padding = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let mut api_recipient_guard = None;
+                let mut api_padding_guard = None;
                 let decode_indices_ =
                     flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                         flutter_rust_bridge::for_generated::LockableOrderInfo::new(
@@ -3044,19 +3110,27 @@ fn wire__crate__api__cose__cose_encrypt_impl(
                             0,
                             false,
                         ),
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_padding,
+                            1,
+                            false,
+                        ),
                     ]);
                 for i in decode_indices_ {
                     match i {
                         0 => api_recipient_guard = Some(api_recipient.lockable_decode_sync_ref()),
+                        1 => api_padding_guard = Some(api_padding.lockable_decode_sync_ref()),
                         _ => unreachable!(),
                     }
                 }
                 let api_recipient_guard = api_recipient_guard.unwrap();
+                let api_padding_guard = api_padding_guard.unwrap();
                 let output_ok = crate::api::cose::cose_encrypt(
                     api_sign1,
                     api_msg_to_auth,
                     &*api_recipient_guard,
                     api_domain,
+                    &*api_padding_guard,
                 )?;
                 std::result::Result::Ok(output_ok)
             })())
@@ -3295,10 +3369,14 @@ fn wire__crate__api__cose__cose_seal_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_padding = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let mut api_signer_guard = None;
                 let mut api_recipient_guard = None;
+                let mut api_padding_guard = None;
                 let decode_indices_ =
                     flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                         flutter_rust_bridge::for_generated::LockableOrderInfo::new(
@@ -3311,22 +3389,30 @@ fn wire__crate__api__cose__cose_seal_impl(
                             1,
                             false,
                         ),
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_padding,
+                            2,
+                            false,
+                        ),
                     ]);
                 for i in decode_indices_ {
                     match i {
                         0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
                         1 => api_recipient_guard = Some(api_recipient.lockable_decode_sync_ref()),
+                        2 => api_padding_guard = Some(api_padding.lockable_decode_sync_ref()),
                         _ => unreachable!(),
                     }
                 }
                 let api_signer_guard = api_signer_guard.unwrap();
                 let api_recipient_guard = api_recipient_guard.unwrap();
+                let api_padding_guard = api_padding_guard.unwrap();
                 let output_ok = crate::api::cose::cose_seal(
                     api_msg_to_seal,
                     api_msg_to_auth,
                     &*api_signer_guard,
                     &*api_recipient_guard,
                     api_domain,
+                    &*api_padding_guard,
                 )?;
                 std::result::Result::Ok(output_ok)
             })())
@@ -3363,11 +3449,15 @@ fn wire__crate__api__cose__cose_seal_at_impl(
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkePublicKey>,
             >>::sse_decode(&mut deserializer);
             let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_padding = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>,
+            >>::sse_decode(&mut deserializer);
             let api_timestamp = <i64>::sse_decode(&mut deserializer);
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let mut api_signer_guard = None;
                 let mut api_recipient_guard = None;
+                let mut api_padding_guard = None;
                 let decode_indices_ =
                     flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                         flutter_rust_bridge::for_generated::LockableOrderInfo::new(
@@ -3380,22 +3470,30 @@ fn wire__crate__api__cose__cose_seal_at_impl(
                             1,
                             false,
                         ),
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_padding,
+                            2,
+                            false,
+                        ),
                     ]);
                 for i in decode_indices_ {
                     match i {
                         0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
                         1 => api_recipient_guard = Some(api_recipient.lockable_decode_sync_ref()),
+                        2 => api_padding_guard = Some(api_padding.lockable_decode_sync_ref()),
                         _ => unreachable!(),
                     }
                 }
                 let api_signer_guard = api_signer_guard.unwrap();
                 let api_recipient_guard = api_recipient_guard.unwrap();
+                let api_padding_guard = api_padding_guard.unwrap();
                 let output_ok = crate::api::cose::cose_seal_at(
                     api_msg_to_seal,
                     api_msg_to_auth,
                     &*api_signer_guard,
                     &*api_recipient_guard,
                     api_domain,
+                    &*api_padding_guard,
                     api_timestamp,
                 )?;
                 std::result::Result::Ok(output_ok)
@@ -4288,6 +4386,9 @@ fn wire__crate__api__stream__stream_encrypt_impl(
 // Section: related_funcs
 
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
+    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>
+);
+flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RsaFingerprint>
 );
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
@@ -4328,6 +4429,16 @@ flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
 );
 
 // Section: dart2rust
+
+impl SseDecode for CosePadding {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <RustOpaqueMoi<
+            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>,
+        >>::sse_decode(deserializer);
+        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+    }
+}
 
 impl SseDecode for RsaFingerprint {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -4456,6 +4567,16 @@ impl SseDecode for XhpkeSender {
             flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>,
         >>::sse_decode(deserializer);
         return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+    }
+}
+
+impl SseDecode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <usize>::sse_decode(deserializer);
+        return decode_rust_opaque_moi(inner);
     }
 }
 
@@ -4701,7 +4822,7 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        95 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        97 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4714,112 +4835,129 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__rsa__RsaFingerprint_from_bytes_impl(ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__rsa__RsaFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__rsa__RsaPublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__rsa__RsaPublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__rsa__RsaPublicKey_from_der_impl(ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__rsa__RsaPublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        7 => wire__crate__api__rsa__RsaPublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__rsa__RsaPublicKey_to_der_impl(ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__rsa__RsaPublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__rsa__RsaPublicKey_verify_impl(ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__rsa__RsaSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__rsa__RsaSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__rsa__RsaSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__rsa__RsaSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__rsa__RsaSecretKey_generate_impl(ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__rsa__RsaSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__rsa__RsaSecretKey_sign_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__rsa__RsaSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__rsa__RsaSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__rsa__RsaSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__rsa__RsaSignature_from_bytes_impl(ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__rsa__RsaSignature_to_bytes_impl(ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__xdsa__XdsaFingerprint_from_bytes_impl(ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__xdsa__XdsaFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__xdsa__XdsaPublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        26 => wire__crate__api__xdsa__XdsaPublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        27 => wire__crate__api__xdsa__XdsaPublicKey_from_der_impl(ptr, rust_vec_len, data_len),
-        28 => wire__crate__api__xdsa__XdsaPublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__xdsa__XdsaPublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__xdsa__XdsaPublicKey_to_der_impl(ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__xdsa__XdsaPublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__xdsa__XdsaPublicKey_verify_impl(ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__xdsa__XdsaSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__xdsa__XdsaSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__xdsa__XdsaSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__xdsa__XdsaSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__xdsa__XdsaSecretKey_generate_impl(ptr, rust_vec_len, data_len),
-        38 => wire__crate__api__xdsa__XdsaSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__xdsa__XdsaSecretKey_sign_impl(ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__xdsa__XdsaSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__xdsa__XdsaSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__xdsa__XdsaSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__xdsa__XdsaSignature_from_bytes_impl(ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__xdsa__XdsaSignature_to_bytes_impl(ptr, rust_vec_len, data_len),
-        45 => {
+        1 => wire__crate__api__cose__CosePadding_buckets_impl(ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__cose__CosePadding_none_impl(ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__rsa__RsaFingerprint_from_bytes_impl(ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__rsa__RsaFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__rsa__RsaPublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__rsa__RsaPublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__rsa__RsaPublicKey_from_der_impl(ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__rsa__RsaPublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__rsa__RsaPublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__rsa__RsaPublicKey_to_der_impl(ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__rsa__RsaPublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__rsa__RsaPublicKey_verify_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__rsa__RsaSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__rsa__RsaSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__rsa__RsaSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__rsa__RsaSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__rsa__RsaSecretKey_generate_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__rsa__RsaSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__rsa__RsaSecretKey_sign_impl(ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__rsa__RsaSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__rsa__RsaSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__rsa__RsaSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__rsa__RsaSignature_from_bytes_impl(ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__rsa__RsaSignature_to_bytes_impl(ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__xdsa__XdsaFingerprint_from_bytes_impl(ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__xdsa__XdsaFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
+        27 => wire__crate__api__xdsa__XdsaPublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__xdsa__XdsaPublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__xdsa__XdsaPublicKey_from_der_impl(ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__xdsa__XdsaPublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__xdsa__XdsaPublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__xdsa__XdsaPublicKey_to_der_impl(ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__xdsa__XdsaPublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__xdsa__XdsaPublicKey_verify_impl(ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__xdsa__XdsaSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__xdsa__XdsaSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__xdsa__XdsaSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__xdsa__XdsaSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__xdsa__XdsaSecretKey_generate_impl(ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__xdsa__XdsaSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__xdsa__XdsaSecretKey_sign_impl(ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__xdsa__XdsaSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__xdsa__XdsaSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__xdsa__XdsaSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        45 => wire__crate__api__xdsa__XdsaSignature_from_bytes_impl(ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__xdsa__XdsaSignature_to_bytes_impl(ptr, rust_vec_len, data_len),
+        47 => {
             wire__crate__api__xhpke__XhpkeFingerprint_from_bytes_impl(ptr, rust_vec_len, data_len)
         }
-        46 => wire__crate__api__xhpke__XhpkeFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__xhpke__XhpkePublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__xhpke__XhpkePublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__xhpke__XhpkePublicKey_from_der_impl(ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__xhpke__XhpkePublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__xhpke__XhpkePublicKey_new_sender_impl(ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__xhpke__XhpkePublicKey_seal_impl(ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        54 => wire__crate__api__xhpke__XhpkePublicKey_to_der_impl(ptr, rust_vec_len, data_len),
-        55 => wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__xhpke__XhpkeReceiver_open_impl(ptr, rust_vec_len, data_len),
-        57 => wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__xhpke__XhpkeSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__xhpke__XhpkeSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__xhpke__XhpkeSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(ptr, rust_vec_len, data_len),
-        62 => {
+        48 => wire__crate__api__xhpke__XhpkeFingerprint_to_bytes_impl(ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__xhpke__XhpkePublicKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__xhpke__XhpkePublicKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__xhpke__XhpkePublicKey_from_der_impl(ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__xhpke__XhpkePublicKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__xhpke__XhpkePublicKey_new_sender_impl(ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__xhpke__XhpkePublicKey_seal_impl(ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__xhpke__XhpkePublicKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        56 => wire__crate__api__xhpke__XhpkePublicKey_to_der_impl(ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__xhpke__XhpkePublicKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        58 => wire__crate__api__xhpke__XhpkeReceiver_open_impl(ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__xhpke__XhpkeSecretKey_fingerprint_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__xhpke__XhpkeSecretKey_from_bytes_impl(ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__xhpke__XhpkeSecretKey_from_der_impl(ptr, rust_vec_len, data_len),
+        62 => wire__crate__api__xhpke__XhpkeSecretKey_from_pem_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__xhpke__XhpkeSecretKey_generate_impl(ptr, rust_vec_len, data_len),
+        64 => {
             wire__crate__api__xhpke__XhpkeSecretKey_new_receiver_impl(ptr, rust_vec_len, data_len)
         }
-        63 => wire__crate__api__xhpke__XhpkeSecretKey_open_impl(ptr, rust_vec_len, data_len),
-        64 => wire__crate__api__xhpke__XhpkeSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__xhpke__XhpkeSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
-        66 => wire__crate__api__xhpke__XhpkeSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
-        67 => wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__xhpke__XhpkeSender_seal_impl(ptr, rust_vec_len, data_len),
-        69 => wire__crate__api__argon2__argon2_key_impl(ptr, rust_vec_len, data_len),
-        70 => wire__crate__api__cbor__cbor_verify_impl(ptr, rust_vec_len, data_len),
-        71 => wire__crate__api__cose__cose_decrypt_impl(ptr, rust_vec_len, data_len),
-        72 => wire__crate__api__cose__cose_encrypt_impl(ptr, rust_vec_len, data_len),
-        73 => wire__crate__api__cose__cose_open_impl(ptr, rust_vec_len, data_len),
-        74 => wire__crate__api__cose__cose_open_at_impl(ptr, rust_vec_len, data_len),
-        75 => wire__crate__api__cose__cose_peek_impl(ptr, rust_vec_len, data_len),
-        76 => wire__crate__api__cose__cose_recipient_impl(ptr, rust_vec_len, data_len),
-        77 => wire__crate__api__cose__cose_seal_impl(ptr, rust_vec_len, data_len),
-        78 => wire__crate__api__cose__cose_seal_at_impl(ptr, rust_vec_len, data_len),
-        79 => wire__crate__api__cose__cose_sign_impl(ptr, rust_vec_len, data_len),
-        80 => wire__crate__api__cose__cose_sign_at_impl(ptr, rust_vec_len, data_len),
-        81 => wire__crate__api__cose__cose_sign_detached_impl(ptr, rust_vec_len, data_len),
-        82 => wire__crate__api__cose__cose_sign_detached_at_impl(ptr, rust_vec_len, data_len),
-        83 => wire__crate__api__cose__cose_signer_impl(ptr, rust_vec_len, data_len),
-        84 => wire__crate__api__cose__cose_verify_impl(ptr, rust_vec_len, data_len),
-        85 => wire__crate__api__cose__cose_verify_at_impl(ptr, rust_vec_len, data_len),
-        86 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
-        87 => wire__crate__api__cose__cose_verify_detached_at_impl(ptr, rust_vec_len, data_len),
-        88 => wire__crate__api__cwt__cwt_issue_impl(ptr, rust_vec_len, data_len),
-        89 => wire__crate__api__cwt__cwt_peek_impl(ptr, rust_vec_len, data_len),
-        90 => wire__crate__api__cwt__cwt_signer_impl(ptr, rust_vec_len, data_len),
-        91 => wire__crate__api__cwt__cwt_verify_impl(ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
-        93 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
-        94 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
-        96 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
-        97 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
-        98 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
+        65 => wire__crate__api__xhpke__XhpkeSecretKey_open_impl(ptr, rust_vec_len, data_len),
+        66 => wire__crate__api__xhpke__XhpkeSecretKey_public_key_impl(ptr, rust_vec_len, data_len),
+        67 => wire__crate__api__xhpke__XhpkeSecretKey_to_bytes_impl(ptr, rust_vec_len, data_len),
+        68 => wire__crate__api__xhpke__XhpkeSecretKey_to_der_impl(ptr, rust_vec_len, data_len),
+        69 => wire__crate__api__xhpke__XhpkeSecretKey_to_pem_impl(ptr, rust_vec_len, data_len),
+        70 => wire__crate__api__xhpke__XhpkeSender_seal_impl(ptr, rust_vec_len, data_len),
+        71 => wire__crate__api__argon2__argon2_key_impl(ptr, rust_vec_len, data_len),
+        72 => wire__crate__api__cbor__cbor_verify_impl(ptr, rust_vec_len, data_len),
+        73 => wire__crate__api__cose__cose_decrypt_impl(ptr, rust_vec_len, data_len),
+        74 => wire__crate__api__cose__cose_encrypt_impl(ptr, rust_vec_len, data_len),
+        75 => wire__crate__api__cose__cose_open_impl(ptr, rust_vec_len, data_len),
+        76 => wire__crate__api__cose__cose_open_at_impl(ptr, rust_vec_len, data_len),
+        77 => wire__crate__api__cose__cose_peek_impl(ptr, rust_vec_len, data_len),
+        78 => wire__crate__api__cose__cose_recipient_impl(ptr, rust_vec_len, data_len),
+        79 => wire__crate__api__cose__cose_seal_impl(ptr, rust_vec_len, data_len),
+        80 => wire__crate__api__cose__cose_seal_at_impl(ptr, rust_vec_len, data_len),
+        81 => wire__crate__api__cose__cose_sign_impl(ptr, rust_vec_len, data_len),
+        82 => wire__crate__api__cose__cose_sign_at_impl(ptr, rust_vec_len, data_len),
+        83 => wire__crate__api__cose__cose_sign_detached_impl(ptr, rust_vec_len, data_len),
+        84 => wire__crate__api__cose__cose_sign_detached_at_impl(ptr, rust_vec_len, data_len),
+        85 => wire__crate__api__cose__cose_signer_impl(ptr, rust_vec_len, data_len),
+        86 => wire__crate__api__cose__cose_verify_impl(ptr, rust_vec_len, data_len),
+        87 => wire__crate__api__cose__cose_verify_at_impl(ptr, rust_vec_len, data_len),
+        88 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
+        89 => wire__crate__api__cose__cose_verify_detached_at_impl(ptr, rust_vec_len, data_len),
+        90 => wire__crate__api__cwt__cwt_issue_impl(ptr, rust_vec_len, data_len),
+        91 => wire__crate__api__cwt__cwt_peek_impl(ptr, rust_vec_len, data_len),
+        92 => wire__crate__api__cwt__cwt_signer_impl(ptr, rust_vec_len, data_len),
+        93 => wire__crate__api__cwt__cwt_verify_impl(ptr, rust_vec_len, data_len),
+        94 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
+        95 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
+        96 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
+        98 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
+        99 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
+        100 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
 
 // Section: rust2dart
+
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<CosePadding> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
+            .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<CosePadding> {}
+
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<CosePadding>> for CosePadding {
+    fn into_into_dart(self) -> FrbWrapper<CosePadding> {
+        self.into()
+    }
+}
 
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<RsaFingerprint> {
@@ -5016,6 +5154,13 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<XhpkeSender>> for XhpkeSender 
     }
 }
 
+impl SseEncode for CosePadding {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
+    }
+}
+
 impl SseEncode for RsaFingerprint {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -5104,6 +5249,17 @@ impl SseEncode for XhpkeSender {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XhpkeSender>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
+    }
+}
+
+impl SseEncode
+    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        let (ptr, size) = self.sse_encode_raw();
+        <usize>::sse_encode(ptr, serializer);
+        <i32>::sse_encode(size, serializer);
     }
 }
 
@@ -5358,6 +5514,7 @@ mod io {
     // Section: imports
 
     use super::*;
+    use crate::api::cose::*;
     use crate::api::rsa::*;
     use crate::api::xdsa::*;
     use crate::api::xhpke::*;
@@ -5370,6 +5527,20 @@ mod io {
     // Section: boilerplate
 
     flutter_rust_bridge::frb_generated_boilerplate_io!();
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_darkbio_crypto_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCosePadding(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>::increment_strong_count(ptr as _);
+    }
+
+    #[unsafe(no_mangle)]
+    pub extern "C" fn frbgen_darkbio_crypto_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCosePadding(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>::decrement_strong_count(ptr as _);
+    }
 
     #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_darkbio_crypto_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRsaFingerprint(
@@ -5565,6 +5736,7 @@ mod web {
     // Section: imports
 
     use super::*;
+    use crate::api::cose::*;
     use crate::api::rsa::*;
     use crate::api::xdsa::*;
     use crate::api::xhpke::*;
@@ -5579,6 +5751,20 @@ mod web {
     // Section: boilerplate
 
     flutter_rust_bridge::frb_generated_boilerplate_web!();
+
+    #[wasm_bindgen]
+    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCosePadding(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>::increment_strong_count(ptr as _);
+    }
+
+    #[wasm_bindgen]
+    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCosePadding(
+        ptr: *const std::ffi::c_void,
+    ) {
+        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>::decrement_strong_count(ptr as _);
+    }
 
     #[wasm_bindgen]
     pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRsaFingerprint(
