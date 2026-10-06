@@ -146,11 +146,12 @@ sealed class Padding {
     return _BucketPadding(floor, step);
   }
 
-  (BigInt, BigInt)? get _native => switch (this) {
-    _NoPadding() => null,
-    _BucketPadding(:final floor, :final step) => (
-      BigInt.from(floor),
-      BigInt.from(step),
+  /// Builds the bridged policy for a single call, which the caller disposes.
+  ffi.CosePadding get _native => switch (this) {
+    _NoPadding() => ffi.CosePadding.none(),
+    _BucketPadding(:final floor, :final step) => ffi.CosePadding.buckets(
+      floor: BigInt.from(floor),
+      step: BigInt.from(step),
     ),
   };
 }
@@ -487,13 +488,20 @@ Uint8List encrypt({
   required xhpke.PublicKey recipient,
   required Uint8List domain,
   required Padding padding,
-}) => ffi.coseEncrypt(
-  sign1: sign1,
-  msgToAuth: _encode(msgToAuth),
-  recipient: recipient.inner,
-  domain: domain,
-  padding: padding._native,
-);
+}) {
+  final nativePadding = padding._native;
+  try {
+    return ffi.coseEncrypt(
+      sign1: sign1,
+      msgToAuth: _encode(msgToAuth),
+      recipient: recipient.inner,
+      domain: domain,
+      padding: nativePadding,
+    );
+  } finally {
+    nativePadding.dispose();
+  }
+}
 
 /// Decrypts a sealed message without verifying the signature.
 ///
@@ -545,14 +553,21 @@ Uint8List seal({
   required xhpke.PublicKey recipient,
   required Uint8List domain,
   required Padding padding,
-}) => ffi.coseSeal(
-  msgToSeal: _encode(msgToSeal),
-  msgToAuth: _encode(msgToAuth),
-  signer: signer.inner,
-  recipient: recipient.inner,
-  domain: domain,
-  padding: padding._native,
-);
+}) {
+  final nativePadding = padding._native;
+  try {
+    return ffi.coseSeal(
+      msgToSeal: _encode(msgToSeal),
+      msgToAuth: _encode(msgToAuth),
+      signer: signer.inner,
+      recipient: recipient.inner,
+      domain: domain,
+      padding: nativePadding,
+    );
+  } finally {
+    nativePadding.dispose();
+  }
+}
 
 /// Signs a message with a timestamp from the caller, then encrypts it to a
 /// recipient.
@@ -578,15 +593,22 @@ Uint8List sealAt({
   required Uint8List domain,
   required Padding padding,
   required int timestamp,
-}) => ffi.coseSealAt(
-  msgToSeal: _encode(msgToSeal),
-  msgToAuth: _encode(msgToAuth),
-  signer: signer.inner,
-  recipient: recipient.inner,
-  domain: domain,
-  padding: padding._native,
-  timestamp: timestamp,
-);
+}) {
+  final nativePadding = padding._native;
+  try {
+    return ffi.coseSealAt(
+      msgToSeal: _encode(msgToSeal),
+      msgToAuth: _encode(msgToAuth),
+      signer: signer.inner,
+      recipient: recipient.inner,
+      domain: domain,
+      padding: nativePadding,
+      timestamp: timestamp,
+    );
+  } finally {
+    nativePadding.dispose();
+  }
+}
 
 /// Decrypts and verifies a sealed message.
 ///

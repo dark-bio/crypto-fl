@@ -11,12 +11,30 @@ use flutter_rust_bridge::frb;
 use super::xdsa::{XdsaFingerprint, XdsaPublicKey, XdsaSecretKey};
 use super::xhpke::{XhpkeFingerprint, XhpkePublicKey, XhpkeSecretKey};
 
-/// Converts the padding policy from Dart, buckets as `(floor, step)` or none,
-/// into crypto-rs's, which does all the size arithmetic.
-fn native_padding(policy: Option<(usize, usize)>) -> darkbio_crypto::cose::Padding {
-    match policy {
-        Some((floor, step)) => darkbio_crypto::cose::Padding::Buckets { floor, step },
-        None => darkbio_crypto::cose::Padding::None,
+/// CosePadding is a sender's policy for the zero bytes appended to the signed
+/// envelope inside the encryption.
+#[frb(opaque)]
+pub struct CosePadding {
+    inner: darkbio_crypto::cose::Padding,
+}
+
+impl CosePadding {
+    /// Creates a policy that adds no padding.
+    #[frb(sync)]
+    pub fn none() -> Self {
+        Self {
+            inner: darkbio_crypto::cose::Padding::None,
+        }
+    }
+
+    /// Creates a policy that pads to the smallest size that fits. Sizes start at
+    /// `floor`, and each next one is the previous one plus `1/step` of it,
+    /// rounded up.
+    #[frb(sync)]
+    pub fn buckets(floor: usize, step: usize) -> Self {
+        Self {
+            inner: darkbio_crypto::cose::Padding::Buckets { floor, step },
+        }
     }
 }
 
@@ -283,7 +301,7 @@ pub fn cose_encrypt(
     msg_to_auth: Vec<u8>,
     recipient: &XhpkePublicKey,
     domain: Vec<u8>,
-    padding: Option<(usize, usize)>,
+    padding: &CosePadding,
 ) -> Result<Vec<u8>, String> {
     darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
@@ -292,7 +310,7 @@ pub fn cose_encrypt(
         darkbio_crypto::cbor::Raw(msg_to_auth),
         &recipient.inner,
         &domain,
-        &native_padding(padding),
+        &padding.inner,
     )
     .map_err(|e| e.to_string())
 }
@@ -342,7 +360,7 @@ pub fn cose_seal(
     signer: &XdsaSecretKey,
     recipient: &XhpkePublicKey,
     domain: Vec<u8>,
-    padding: Option<(usize, usize)>,
+    padding: &CosePadding,
 ) -> Result<Vec<u8>, String> {
     darkbio_crypto::cbor::verify(&msg_to_seal).map_err(|e| e.to_string())?;
     darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
@@ -353,7 +371,7 @@ pub fn cose_seal(
         &signer.inner,
         &recipient.inner,
         &domain,
-        &native_padding(padding),
+        &padding.inner,
     )
     .map_err(|e| e.to_string())
 }
@@ -375,7 +393,7 @@ pub fn cose_seal_at(
     signer: &XdsaSecretKey,
     recipient: &XhpkePublicKey,
     domain: Vec<u8>,
-    padding: Option<(usize, usize)>,
+    padding: &CosePadding,
     timestamp: i64,
 ) -> Result<Vec<u8>, String> {
     darkbio_crypto::cbor::verify(&msg_to_seal).map_err(|e| e.to_string())?;
@@ -387,7 +405,7 @@ pub fn cose_seal_at(
         &signer.inner,
         &recipient.inner,
         &domain,
-        &native_padding(padding),
+        &padding.inner,
         timestamp,
     )
     .map_err(|e| e.to_string())

@@ -168,6 +168,71 @@ void main() {
     }
   });
 
+  // Tests that a policy still seals after failed calls, since every call builds
+  // and disposes its own bridged copy.
+  test('padding remains reusable after sealing failures', () {
+    final signer = xdsa.SecretKey.generate();
+    final recipient = xhpke.SecretKey.generate();
+    final sender = signer.publicKey();
+    final receiver = recipient.publicKey();
+    addTearDown(signer.dispose);
+    addTearDown(recipient.dispose);
+    final signed = cose.sign(
+      msgToEmbed: 'payload',
+      msgToAuth: null,
+      signer: signer,
+      domain: domain,
+    );
+
+    for (final (i, padding) in [
+      const cose.Padding.none(),
+      cose.Padding.buckets(floor: 8192, step: 20),
+    ].indexed) {
+      final calls = <Uint8List Function(Object?)>[
+        (aad) => cose.seal(
+          msgToSeal: 'payload',
+          msgToAuth: aad,
+          signer: signer,
+          recipient: receiver,
+          domain: domain,
+          padding: padding,
+        ),
+        (aad) => cose.sealAt(
+          msgToSeal: 'payload',
+          msgToAuth: aad,
+          signer: signer,
+          recipient: receiver,
+          domain: domain,
+          padding: padding,
+          timestamp: 1700000000,
+        ),
+        (aad) => cose.encrypt(
+          sign1: signed,
+          msgToAuth: aad,
+          recipient: receiver,
+          domain: domain,
+          padding: padding,
+        ),
+      ];
+      for (final (j, call) in calls.indexed) {
+        final id = '$i/$j';
+        expect(() => call('\uD800'), throwsArgumentError, reason: id);
+        expect(() => call(1.5), throwsRejection(), reason: id);
+        expect(
+          cose.open<String>(
+            msgToOpen: call(null),
+            msgToAuth: null,
+            recipient: recipient,
+            sender: sender,
+            domain: domain,
+          ),
+          'payload',
+          reason: id,
+        );
+      }
+    }
+  });
+
   // Tests both policies against the fixed v0.16 signature and its exact zeros.
   test('sealed plaintext padding', () {
     // Reuse the shared fixture so the expected signature is independent

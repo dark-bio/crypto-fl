@@ -8,8 +8,6 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'xdsa.dart';
 import 'xhpke.dart';
 
-// These functions are ignored because they are not marked as `pub`: `native_padding`
-
 /// Creates a COSE_Sign1 signature with an embedded payload.
 ///
 /// - `msg_to_embed`: The payload to embed and sign
@@ -207,7 +205,7 @@ Uint8List coseEncrypt({
   required List<int> msgToAuth,
   required XhpkePublicKey recipient,
   required List<int> domain,
-  (BigInt, BigInt)? padding,
+  required CosePadding padding,
 }) => RustLib.instance.api.crateApiCoseCoseEncrypt(
   sign1: sign1,
   msgToAuth: msgToAuth,
@@ -254,7 +252,7 @@ Uint8List coseSeal({
   required XdsaSecretKey signer,
   required XhpkePublicKey recipient,
   required List<int> domain,
-  (BigInt, BigInt)? padding,
+  required CosePadding padding,
 }) => RustLib.instance.api.crateApiCoseCoseSeal(
   msgToSeal: msgToSeal,
   msgToAuth: msgToAuth,
@@ -280,7 +278,7 @@ Uint8List coseSealAt({
   required XdsaSecretKey signer,
   required XhpkePublicKey recipient,
   required List<int> domain,
-  (BigInt, BigInt)? padding,
+  required CosePadding padding,
   required PlatformInt64 timestamp,
 }) => RustLib.instance.api.crateApiCoseCoseSealAt(
   msgToSeal: msgToSeal,
@@ -342,3 +340,19 @@ Uint8List coseOpenAt({
   maxDriftSecs: maxDriftSecs,
   now: now,
 );
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CosePadding>>
+abstract class CosePadding implements RustOpaqueInterface {
+  /// Creates a policy that pads to the smallest size that fits. Sizes start at
+  /// `floor`, and each next one is the previous one plus `1/step` of it,
+  /// rounded up.
+  static CosePadding buckets({required BigInt floor, required BigInt step}) =>
+      RustLib.instance.api.crateApiCoseCosePaddingBuckets(
+        floor: floor,
+        step: step,
+      );
+
+  /// Creates a policy that adds no padding.
+  static CosePadding none() =>
+      RustLib.instance.api.crateApiCoseCosePaddingNone();
+}
