@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.20.1
+
+- Wrap darkbio-crypto v0.20.1
+- Build with ctutils 0.4.6 and tokio 1.54.1, which fix RUSTSEC-2026-0385 and RUSTSEC-2026-0386
+
 ## 0.20.0
 
 - Wrap darkbio-crypto v0.20.0
