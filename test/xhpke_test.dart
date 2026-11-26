@@ -136,6 +136,18 @@ void main() {
     expect(xhpke.PublicKey.fromPem(public.toPem()).toBytes(), key);
   });
 
+  // Tests that a public key restored from its bytes finds the same set entry.
+  test('public key equality', () {
+    final key = xhpke.SecretKey.generate().publicKey();
+    final restored = xhpke.PublicKey.fromBytes(key.toBytes());
+    final other = xhpke.SecretKey.generate().publicKey();
+
+    expect(restored, key);
+    expect(restored.hashCode, key.hashCode);
+    expect(other, isNot(key));
+    expect({key, restored, other}, hasLength(2));
+  });
+
   // Tests that fingerprints compare and hash by their bytes.
   test('fingerprint equality', () {
     final key = xhpke.SecretKey.generate().publicKey();
@@ -180,7 +192,7 @@ void main() {
 
   // Tests that disposed secret keys, senders and receivers refuse every
   // operation, directly and through COSE, that a receiver created from a key
-  // before its disposal stays usable, and that disposing again does nothing.
+  // before its disposal stays usable, and that repeated disposal is idempotent.
   test('dispose', () {
     final secret = xhpke.SecretKey.generate();
     final signer = xdsa.SecretKey.generate();

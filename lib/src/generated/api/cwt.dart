@@ -7,11 +7,7 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'xdsa.dart';
 
-/// Issues a CWT by signing pre-encoded CBOR claims with COSE Sign1.
-///
-/// - `claims_cbor`: CBOR-encoded claims map
-/// - `signer`: The xDSA secret key to sign with
-/// - `domain`: Application-specific domain separator
+/// Signs a canonical CBOR claims map with the current COSE timestamp.
 Uint8List cwtIssue({
   required List<int> claimsCbor,
   required XdsaSecretKey signer,
@@ -22,17 +18,23 @@ Uint8List cwtIssue({
   domain: domain,
 );
 
-/// Verifies a CWT's COSE signature and temporal validity, returning
-/// the raw CBOR-encoded claims.
+/// Signs a canonical CBOR claims map with a COSE timestamp in Unix seconds.
+Uint8List cwtIssueAt({
+  required List<int> claimsCbor,
+  required XdsaSecretKey signer,
+  required List<int> domain,
+  required PlatformInt64 timestamp,
+}) => RustLib.instance.api.crateApiCwtCwtIssueAt(
+  claimsCbor: claimsCbor,
+  signer: signer,
+  domain: domain,
+  timestamp: timestamp,
+);
+
+/// Verifies the COSE signature and returns the canonical CBOR claims map.
 ///
-/// When `now` is provided, temporal claims are validated: nbf must be
-/// present and `nbf <= now`, and if exp is present then `now < exp`.
-/// When `now` is `None`, temporal validation is skipped.
-///
-/// - `token`: The serialized CWT
-/// - `verifier`: The xDSA public key to verify against
-/// - `domain`: Application-specific domain separator
-/// - `now`: Current Unix timestamp for temporal validation (None to skip)
+/// With a check time in Unix seconds, `nbf` must be present and at most
+/// `now`. If present, `exp` must be greater than `now`.
 Uint8List cwtVerify({
   required List<int> token,
   required XdsaPublicKey verifier,
@@ -51,9 +53,8 @@ Uint8List cwtVerify({
 XdsaFingerprint cwtSigner({required List<int> token}) =>
     RustLib.instance.api.crateApiCwtCwtSigner(token: token);
 
-/// Extracts and decodes claims from a CWT without verifying the signature.
+/// Extracts CBOR claims from a CWT without authenticating them.
 ///
-/// **Warning**: The returned payload is unauthenticated and should not be
-/// trusted until verified with `cwt_verify`.
+/// Verify the token before trusting the claims.
 Uint8List cwtPeek({required List<int> token}) =>
     RustLib.instance.api.crateApiCwtCwtPeek(token: token);

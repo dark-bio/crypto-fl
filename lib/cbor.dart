@@ -37,7 +37,7 @@
 ///   try {
 ///     cbor.verify(Uint8List.fromList([0xa2, 0x02, 0x00, 0x01, 0x00]));
 ///   } catch (err) {
-///     // Rejected, the error names the broken rule
+///     // Rejected with the rule that failed
 ///   }
 /// }
 /// ```
@@ -47,8 +47,8 @@ import 'dart:typed_data';
 
 import 'src/generated/api/cbor.dart' as ffi;
 
-/// Checks that [data] holds exactly one complete CBOR item within the subset
-/// this package accepts.
+/// Verifies that [data] is exactly one complete CBOR item within the
+/// restricted subset.
 ///
 /// Checks UTF-8 text, deterministic integer and length encodings, integer map
 /// keys in order without duplicates, and the nesting limit. It does not

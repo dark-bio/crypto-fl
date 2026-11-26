@@ -56,6 +56,18 @@ void main() {
     expect(rsa.Signature.fromBytes(sig).toBytes(), sig);
   });
 
+  // Tests that a public key restored from DER finds the same set entry.
+  test('public key equality', () {
+    final key = secret.publicKey();
+    final restored = rsa.PublicKey.fromDer(key.toDer());
+    final other = rsa.SecretKey.generate().publicKey();
+
+    expect(restored, key);
+    expect(restored.hashCode, key.hashCode);
+    expect(other, isNot(key));
+    expect({key, restored, other}, hasLength(2));
+  });
+
   // Tests that fingerprints compare and hash by their bytes.
   test('fingerprint equality', () {
     final key = secret.publicKey();
@@ -112,8 +124,8 @@ fQIDAQAB
   });
 
   // Tests that a disposed secret key refuses every operation, that values
-  // derived from it earlier stay usable, and that disposing it again does
-  // nothing.
+  // derived from it earlier stay usable, and that repeated disposal is
+  // idempotent.
   test('dispose', () {
     final secret = rsa.SecretKey.generate();
     final message = utf8.encode('message');

@@ -11,7 +11,7 @@ set -e
 
 PREFIX="darkbio_crypto_"
 
-# FRB symbols that need to be renamed (without leading underscore - objcopy adds it)
+# FRB symbols to rename (without the leading underscore that objcopy adds)
 FRB_SYMBOLS=(
     # Core dispatcher symbols
     "frb_get_rust_content_hash"

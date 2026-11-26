@@ -4,16 +4,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//! Canonical CBOR subset validation for the Dart bindings.
+
 use flutter_rust_bridge::frb;
 
-/// Validates that the given bytes are well-formed CBOR.
+/// Validates that `data` is one complete canonical CBOR item in the restricted
+/// subset.
 ///
-/// This performs strict validation including:
-/// - Valid CBOR structure (headers, nesting)
-/// - UTF-8 validation for text strings
-/// - Integer map keys in deterministic order
-///
-/// Returns an error if the bytes are not valid CBOR.
+/// Checks structure, nesting depth, UTF-8 text strings, and deterministic
+/// integer map key order without duplicates.
 #[frb(sync)]
 pub fn cbor_verify(data: Vec<u8>) -> Result<(), String> {
     darkbio_crypto::cbor::verify(&data).map_err(|e| e.to_string())

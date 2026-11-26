@@ -20,7 +20,7 @@ import 'dart:typed_data';
 
 import 'src/generated/api/rand.dart' as ffi;
 
-/// Creates a buffer of [length] bytes filled with randomness.
+/// Returns [length] cryptographically secure random bytes.
 ///
 /// Throws if [length] is negative or above 2^32 - 1.
 Uint8List bytes(int length) {

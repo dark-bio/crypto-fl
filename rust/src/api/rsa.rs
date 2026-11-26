@@ -4,12 +4,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use flutter_rust_bridge::frb;
+//! RSA-2048 signatures for the Dart bindings.
 
-/// RsaSecretKey is a 2048-bit RSA private key for creating digital signatures
-/// using SHA-256 as the underlying hash algorithm.
+use flutter_rust_bridge::frb;
+use zeroize::Zeroizing;
+
+/// A 2048-bit RSA private key for PKCS #1 v1.5 signing with SHA-256.
 #[frb(opaque)]
 pub struct RsaSecretKey {
+    /// Wrapped upstream RSA secret key.
     pub(crate) inner: darkbio_crypto::rsa::SecretKey,
 }
 
@@ -22,15 +25,17 @@ impl RsaSecretKey {
         }
     }
 
-    /// Creates a private key from a 520-byte array.
-    /// Format: p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes).
+    /// Creates a private key from a 520-byte big-endian encoding of
+    /// `p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes)`.
     #[frb(sync)]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
-        let bytes_array: [u8; 520] = bytes
+        let bytes = Zeroizing::new(bytes);
+        let components = bytes
+            .as_slice()
             .try_into()
             .map_err(|_| "Invalid key length, expected 520 bytes".to_string())?;
         Ok(Self {
-            inner: darkbio_crypto::rsa::SecretKey::from_bytes(&bytes_array)
+            inner: darkbio_crypto::rsa::SecretKey::from_bytes(components)
                 .map_err(|e| e.to_string())?,
         })
     }
@@ -39,7 +44,8 @@ impl RsaSecretKey {
     #[frb(sync)]
     pub fn from_der(der: Vec<u8>) -> Result<Self, String> {
         Ok(Self {
-            inner: darkbio_crypto::rsa::SecretKey::from_der(&der).map_err(|e| e.to_string())?,
+            inner: darkbio_crypto::rsa::SecretKey::from_der(&Zeroizing::new(der))
+                .map_err(|e| e.to_string())?,
         })
     }
 
@@ -47,7 +53,8 @@ impl RsaSecretKey {
     #[frb(sync)]
     pub fn from_pem(pem: String) -> Result<Self, String> {
         Ok(Self {
-            inner: darkbio_crypto::rsa::SecretKey::from_pem(&pem).map_err(|e| e.to_string())?,
+            inner: darkbio_crypto::rsa::SecretKey::from_pem(&Zeroizing::new(pem))
+                .map_err(|e| e.to_string())?,
         })
     }
 
@@ -94,15 +101,16 @@ impl RsaSecretKey {
     }
 }
 
-/// RsaPublicKey is a 2048-bit RSA public key for verifying digital signatures.
+/// A 2048-bit RSA public key for verifying PKCS #1 v1.5 signatures with SHA-256.
 #[frb(opaque)]
 pub struct RsaPublicKey {
+    /// Wrapped upstream RSA public key.
     pub(crate) inner: darkbio_crypto::rsa::PublicKey,
 }
 
 impl RsaPublicKey {
-    /// Creates a public key from a 264-byte array.
-    /// Format: n (256 bytes) || e (8 bytes).
+    /// Creates a public key from a 264-byte big-endian encoding of
+    /// `n (256 bytes) || e (8 bytes)`.
     #[frb(sync)]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
         let bytes_array: [u8; 264] = bytes
@@ -165,9 +173,10 @@ impl RsaPublicKey {
     }
 }
 
-/// RsaSignature is a 256-byte RSA digital signature.
+/// A 256-byte RSA-2048 digital signature.
 #[frb(opaque)]
 pub struct RsaSignature {
+    /// Wrapped upstream RSA signature.
     pub(crate) inner: darkbio_crypto::rsa::Signature,
 }
 
@@ -190,9 +199,10 @@ impl RsaSignature {
     }
 }
 
-/// RsaFingerprint is a 32-byte unique identifier for an RSA key.
+/// A 32-byte unique identifier for an RSA key.
 #[frb(opaque)]
 pub struct RsaFingerprint {
+    /// Wrapped upstream RSA fingerprint.
     pub(crate) inner: darkbio_crypto::rsa::Fingerprint,
 }
 

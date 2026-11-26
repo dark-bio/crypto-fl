@@ -125,7 +125,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -579559962;
+  int get rustContentHash => 664382909;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -482,6 +482,13 @@ abstract class RustLibApi extends BaseApi {
     required List<int> claimsCbor,
     required XdsaSecretKey signer,
     required List<int> domain,
+  });
+
+  Uint8List crateApiCwtCwtIssueAt({
+    required List<int> claimsCbor,
+    required XdsaSecretKey signer,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
   });
 
   Uint8List crateApiCwtCwtPeek({required List<int> token});
@@ -3521,13 +3528,49 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Uint8List crateApiCwtCwtIssueAt({
+    required List<int> claimsCbor,
+    required XdsaSecretKey signer,
+    required List<int> domain,
+    required PlatformInt64 timestamp,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(claimsCbor, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerXdsaSecretKey(
+            signer,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(domain, serializer);
+          sse_encode_i_64(timestamp, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 91)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiCwtCwtIssueAtConstMeta,
+        argValues: [claimsCbor, signer, domain, timestamp],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiCwtCwtIssueAtConstMeta => const TaskConstMeta(
+    debugName: "cwt_issue_at",
+    argNames: ["claimsCbor", "signer", "domain", "timestamp"],
+  );
+
+  @override
   Uint8List crateApiCwtCwtPeek({required List<int> token}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 91)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 92)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3550,7 +3593,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 92)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 93)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -3585,7 +3628,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_list_prim_u_8_loose(domain, serializer);
           sse_encode_opt_box_autoadd_u_64(now, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 93)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 94)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3616,7 +3659,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(prk, serializer);
           sse_encode_list_prim_u_8_loose(info, serializer);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 94)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 95)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3645,7 +3688,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(secret, serializer);
           sse_encode_list_prim_u_8_loose(salt, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 95)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 96)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3678,7 +3721,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_list_prim_u_8_loose(salt, serializer);
           sse_encode_list_prim_u_8_loose(info, serializer);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 96)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 97)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3705,7 +3748,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 97,
+            funcId: 98,
             port: port_,
           );
         },
@@ -3730,7 +3773,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_usize(length, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 98)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 99)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3757,7 +3800,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(key, serializer);
           sse_encode_list_prim_u_8_loose(ciphertext, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 99)!;
+          return pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 100,
+          )!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
@@ -3790,7 +3837,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           return pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 100,
+            funcId: 101,
           )!;
         },
         codec: SseCodec(
@@ -5925,7 +5972,7 @@ class XdsaSecretKeyImpl extends RustOpaque implements XdsaSecretKey {
   XdsaPublicKey publicKey() =>
       RustLib.instance.api.crateApiXdsaXdsaSecretKeyPublicKey(that: this);
 
-  /// Signs a message, returning a composite signature.
+  /// Signs a message with hedged ML-DSA-65 and Ed25519.
   XdsaSignature sign({required List<int> message}) => RustLib.instance.api
       .crateApiXdsaXdsaSecretKeySign(that: this, message: message);
 
@@ -6028,13 +6075,8 @@ class XhpkePublicKeyImpl extends RustOpaque implements XhpkePublicKey {
       .api
       .crateApiXhpkeXhpkePublicKeyNewSender(that: this, domain: domain);
 
-  /// Encrypts a message to this public key.
-  ///
-  /// Returns a tuple of (1120-byte session key, ciphertext).
-  ///
-  /// - `msg_to_seal`: The plaintext to encrypt
-  /// - `msg_to_auth`: Additional authenticated data (not encrypted)
-  /// - `domain`: Application-specific domain separator
+  /// Encrypts `msg_to_seal` to this public key under `msg_to_auth` and
+  /// `domain`, returning the 1120-byte session key and ciphertext.
   (Uint8List, Uint8List) seal({
     required List<int> msgToSeal,
     required List<int> msgToAuth,
@@ -6124,12 +6166,8 @@ class XhpkeSecretKeyImpl extends RustOpaque implements XhpkeSecretKey {
     domain: domain,
   );
 
-  /// Decrypts a message that was encrypted to this key's public counterpart.
-  ///
-  /// - `session_key`: The 1120-byte encapsulated session key
-  /// - `msg_to_open`: The ciphertext to decrypt
-  /// - `msg_to_auth`: Additional authenticated data (not encrypted)
-  /// - `domain`: Application-specific domain separator
+  /// Decrypts a message sealed to this key's public counterpart using the
+  /// 1120-byte encapsulated `session_key`, `msg_to_auth` and `domain`.
   Uint8List open({
     required List<int> sessionKey,
     required List<int> msgToOpen,

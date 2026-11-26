@@ -43,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -579559962;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 664382909;
 
 // Section: executor
 
@@ -4042,6 +4042,62 @@ fn wire__crate__api__cwt__cwt_issue_impl(
         },
     )
 }
+fn wire__crate__api__cwt__cwt_issue_at_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "cwt_issue_at",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_claims_cbor = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_signer = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<XdsaSecretKey>,
+            >>::sse_decode(&mut deserializer);
+            let api_domain = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_timestamp = <i64>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let mut api_signer_guard = None;
+                let decode_indices_ =
+                    flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                        flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                            &api_signer,
+                            0,
+                            false,
+                        ),
+                    ]);
+                for i in decode_indices_ {
+                    match i {
+                        0 => api_signer_guard = Some(api_signer.lockable_decode_sync_ref()),
+                        _ => unreachable!(),
+                    }
+                }
+                let api_signer_guard = api_signer_guard.unwrap();
+                let output_ok = crate::api::cwt::cwt_issue_at(
+                    api_claims_cbor,
+                    &*api_signer_guard,
+                    api_domain,
+                    api_timestamp,
+                )?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__cwt__cwt_peek_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -4822,7 +4878,7 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        97 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        98 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -4929,15 +4985,16 @@ fn pde_ffi_dispatcher_sync_impl(
         88 => wire__crate__api__cose__cose_verify_detached_impl(ptr, rust_vec_len, data_len),
         89 => wire__crate__api__cose__cose_verify_detached_at_impl(ptr, rust_vec_len, data_len),
         90 => wire__crate__api__cwt__cwt_issue_impl(ptr, rust_vec_len, data_len),
-        91 => wire__crate__api__cwt__cwt_peek_impl(ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__cwt__cwt_signer_impl(ptr, rust_vec_len, data_len),
-        93 => wire__crate__api__cwt__cwt_verify_impl(ptr, rust_vec_len, data_len),
-        94 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
-        95 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
-        96 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
-        98 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
-        99 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
-        100 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
+        91 => wire__crate__api__cwt__cwt_issue_at_impl(ptr, rust_vec_len, data_len),
+        92 => wire__crate__api__cwt__cwt_peek_impl(ptr, rust_vec_len, data_len),
+        93 => wire__crate__api__cwt__cwt_signer_impl(ptr, rust_vec_len, data_len),
+        94 => wire__crate__api__cwt__cwt_verify_impl(ptr, rust_vec_len, data_len),
+        95 => wire__crate__api__hkdf__hkdf_expand_impl(ptr, rust_vec_len, data_len),
+        96 => wire__crate__api__hkdf__hkdf_extract_impl(ptr, rust_vec_len, data_len),
+        97 => wire__crate__api__hkdf__hkdf_key_impl(ptr, rust_vec_len, data_len),
+        99 => wire__crate__api__rand__random_bytes_impl(ptr, rust_vec_len, data_len),
+        100 => wire__crate__api__stream__stream_decrypt_impl(ptr, rust_vec_len, data_len),
+        101 => wire__crate__api__stream__stream_encrypt_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

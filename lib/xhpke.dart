@@ -4,9 +4,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/// HPKE cryptography wrappers and parametrization.
+/// X-Wing HPKE encryption.
 ///
 /// https://datatracker.ietf.org/doc/html/rfc9180
+/// https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-xwing-kem
 ///
 /// Messages are encrypted to a public key with X-Wing, a hybrid of ML-KEM-768
 /// and X25519, and sealed with ChaCha20-Poly1305. Encryption and decryption use
@@ -49,11 +50,13 @@ import 'src/generated/api/xhpke.dart' as ffi;
 
 /// An X-Wing private key for decrypting HPKE messages.
 class SecretKey {
+  /// Native xHPKE secret key handle.
   final ffi.XhpkeSecretKey _inner;
+
+  /// Wraps a native xHPKE secret key.
   SecretKey._(this._inner);
 
-  /// The native key, refused once disposed, before the bridge allocates
-  /// anything for a call on it.
+  /// Returns the live native key or throws after disposal.
   ffi.XhpkeSecretKey get _live {
     if (_inner.isDisposed) {
       throw StateError('secret key used after dispose');
@@ -72,42 +75,40 @@ class SecretKey {
 
   /// Parses a DER buffer into a private key.
   ///
-  /// Throws if [der] is not a PKCS #8 v1 encoded X-Wing private key, or if
+  /// Throws if [der] is not a PKCS #8 v1-encoded X-Wing private key, or if
   /// bytes follow it.
   static SecretKey fromDer(Uint8List der) =>
       SecretKey._(ffi.XhpkeSecretKey.fromDer(der: der));
 
-  /// Parses a PEM string into a private key.
+  /// Parses one `PRIVATE KEY` PEM block starting at the first character.
   ///
-  /// Throws if [pem] is not a single `PRIVATE KEY` block holding an X-Wing
-  /// private key. The block starts at the first byte, uses strict base64 and
-  /// ends all its lines in LF or all in CRLF.
+  /// The strict base64 body requires nonempty lines and consistent LF or CRLF
+  /// line endings. Throws if [pem] is malformed or holds another kind of key.
   static SecretKey fromPem(String pem) =>
       SecretKey._(ffi.XhpkeSecretKey.fromPem(pem: pem));
 
   /// Retrieves the public counterpart of the secret key.
   PublicKey publicKey() => PublicKey._(_live.publicKey());
 
-  /// Returns a 256-bit unique identifier for this key. For HPKE, that is the
-  /// SHA256 hash of the raw public key.
+  /// Returns a 256-bit unique identifier for this key, the SHA-256 hash of the
+  /// public key bytes.
   Fingerprint fingerprint() => Fingerprint._(_live.fingerprint());
 
-  /// Consumes a standalone cryptographic construct encrypted to this secret
-  /// key. The method will deconstruct the given encapsulated key and ciphertext
-  /// and will also verify the authenticity of the (unencrypted) message-to-auth
-  /// (not included in the ciphertext).
+  /// Decrypts [msgToOpen] sealed to this key using [sessionKey] and checks the
+  /// authenticated [msgToAuth] under [domain].
   ///
-  /// X-Wing is used in HPKE's base mode, which does not authenticate the
-  /// sender, so the ciphertext alone does not prove who sent it.
+  /// HPKE runs in base mode, which does not authenticate the sender. The
+  /// recipient cannot verify who sealed the message.
   ///
-  /// - [sessionKey]: The 1120-byte encapsulated session key from [PublicKey.seal]
-  /// - [msgToOpen]: The ciphertext to decrypt
-  /// - [msgToAuth]: Additional authenticated data (must match what was used in seal)
-  /// - [domain]: Application domain, the same as the sender's
+  /// - [sessionKey] - The 1120-byte encapsulated session key from
+  ///   [PublicKey.seal]
+  /// - [msgToOpen] - The ciphertext to decrypt
+  /// - [msgToAuth] - The same second message used during sealing
+  /// - [domain] - Application domain, matching the sender's
   ///
-  /// Throws if [sessionKey] is not 1120 bytes long, or if decryption fails.
-  /// A wrong key, a tampered ciphertext and a mismatched [msgToAuth] or
-  /// [domain] all fail alike.
+  /// Throws if [sessionKey] is not 1120 bytes long, or if decryption fails. A
+  /// wrong key, tampered ciphertext, or mismatched [msgToAuth] or [domain] all
+  /// fail alike.
   Uint8List open({
     required Uint8List sessionKey,
     required Uint8List msgToOpen,
@@ -120,120 +121,130 @@ class SecretKey {
     domain: domain,
   );
 
-  /// Creates an HPKE receiver context for multi-message decryption using
-  /// the encapsulated key from [PublicKey.newSender].
+  /// Creates an HPKE receiver context for multi-message decryption using the
+  /// encapsulated key from [PublicKey.newSender].
   ///
-  /// Messages must be decrypted in the same order they were encrypted. X-Wing
-  /// is used in HPKE's base mode, which does not authenticate the sender, so
-  /// the context alone does not prove who sent the messages.
+  /// Messages must be opened in the order the [Sender] sealed them. HPKE runs
+  /// in base mode, which does not authenticate the sender, so the recipient
+  /// cannot verify who created the context.
   ///
-  /// - [encapKey]: The 1120-byte encapsulated key from [PublicKey.newSender]
-  /// - [domain]: Application domain, the same as the sender's
+  /// - [encapKey] - The 1120-byte encapsulated key from [PublicKey.newSender]
+  /// - [domain] - Application domain, matching the sender's
   ///
-  /// Throws if [encapKey] is not 1120 bytes long or not a valid encapsulated
-  /// key.
+  /// Throws if [encapKey] is not 1120 bytes long or is malformed.
   Receiver newReceiver({
     required Uint8List encapKey,
     required Uint8List domain,
   }) => Receiver._(_live.newReceiver(encapKey: encapKey, domain: domain));
 
-  /// Converts a private key into a 32-byte seed.
+  /// Converts the private key into its 32-byte seed.
   Uint8List toBytes() => _live.toBytes();
 
-  /// Serializes a private key into a DER buffer.
+  /// Serializes the private key into a DER buffer.
   Uint8List toDer() => _live.toDer();
 
-  /// Serializes a private key into a PEM string.
+  /// Serializes the private key into a `PRIVATE KEY` PEM block with LF line
+  /// endings.
   String toPem() => _live.toPem();
 
-  /// Wipes the secret key held in Rust memory. Every later use of this key
-  /// throws a [StateError], and disposing it again does nothing. Copies already
-  /// exported, such as by [toBytes], and receivers already created from it are
-  /// not affected. Without a dispose, the key is only wiped if the garbage
-  /// collector finalizes it, which is not guaranteed.
+  /// Wipes the decryption key in Rust memory. Subsequent key operations throw
+  /// a [StateError]. Disposal is idempotent. Existing receivers and exported
+  /// copies, such as from [toBytes], have independent lifetimes. Without
+  /// explicit disposal, cleanup depends on garbage collection.
   void dispose() => _inner.dispose();
 }
 
 /// An X-Wing public key for encrypting HPKE messages.
 class PublicKey {
+  /// Native xHPKE public key handle.
   final ffi.XhpkePublicKey _inner;
+
+  /// Wraps a native xHPKE public key.
   PublicKey._(this._inner);
 
   /// Converts a 1216-byte array into a public key.
   ///
   /// Throws if [bytes] is not 1216 bytes long, or if a coefficient of its
-  /// ML-KEM-768 key falls outside the valid range [0, 3329).
+  /// ML-KEM-768 key falls outside [0, 3329).
   static PublicKey fromBytes(Uint8List bytes) =>
       PublicKey._(ffi.XhpkePublicKey.fromBytes(bytes: bytes));
 
   /// Parses a DER buffer into a public key.
   ///
-  /// Throws if [der] is not a SubjectPublicKeyInfo encoded X-Wing public key,
+  /// Throws if [der] is not a SubjectPublicKeyInfo-encoded X-Wing public key,
   /// or if bytes follow it.
   static PublicKey fromDer(Uint8List der) =>
       PublicKey._(ffi.XhpkePublicKey.fromDer(der: der));
 
-  /// Parses a PEM string into a public key.
+  /// Parses one `PUBLIC KEY` PEM block starting at the first character.
   ///
-  /// Throws if [pem] is not a single `PUBLIC KEY` block holding an X-Wing
-  /// public key. The block starts at the first byte, uses strict base64 and
-  /// ends all its lines in LF or all in CRLF.
+  /// The strict base64 body requires nonempty lines and consistent LF or CRLF
+  /// line endings. Throws if [pem] is malformed or holds another kind of key.
   static PublicKey fromPem(String pem) =>
       PublicKey._(ffi.XhpkePublicKey.fromPem(pem: pem));
 
-  /// Returns a 256-bit unique identifier for this key. For HPKE, that is the
-  /// SHA256 hash of the raw public key.
+  /// Returns a 256-bit unique identifier for this key, the SHA-256 hash of the
+  /// public key bytes.
   Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
 
-  /// Creates an HPKE sender context for multi-message encryption.
+  /// Creates an HPKE sender context for multi-message encryption to this
+  /// public key.
   ///
-  /// Returns the sender context and a 1120-byte encapsulated key that must
-  /// be transmitted to the recipient for [SecretKey.newReceiver].
+  /// Returns the sender context and a 1120-byte encapsulated key to transmit
+  /// to the recipient for [SecretKey.newReceiver]. Messages must be opened in
+  /// order by the matching [Receiver]. HPKE runs in base mode, which does not
+  /// authenticate the sender.
   ///
-  /// Messages encrypted with the returned context must be decrypted in order
-  /// by the corresponding receiver. X-Wing is used in HPKE's base mode, which
-  /// does not authenticate the sender, so the recipient cannot tell who sent
-  /// them from the context alone.
-  ///
-  /// - [domain]: Application domain, the same as the recipient's
+  /// - [domain] - Application domain, fixed for every message of the context
   (Sender, Uint8List) newSender({required Uint8List domain}) {
     final (sender, encapKey) = _inner.newSender(domain: domain);
     return (Sender._(sender), encapKey);
   }
 
-  /// Creates a standalone cryptographic construct encrypted to this public
-  /// key. The construct will contain the given message-to-seal (encrypted) and
-  /// also an authenticity proof for the (unencrypted) message-to-auth (message
-  /// not included).
+  /// Encrypts [msgToSeal] to this public key and authenticates [msgToAuth]
+  /// under [domain] without including [msgToAuth] in the output.
   ///
   /// Returns the 1120-byte encapsulated session key and the ciphertext.
-  /// Opening them with [SecretKey.open] needs both, along with [msgToAuth] and
-  /// [domain]. X-Wing is used in HPKE's base mode, which does not authenticate
-  /// the sender, so the recipient cannot tell who sent the ciphertext from it
-  /// alone.
+  /// Opening them with [SecretKey.open] requires both, along with the same
+  /// [msgToAuth] and [domain]. HPKE runs in base mode, which does not
+  /// authenticate the sender.
   ///
-  /// - [msgToSeal]: The plaintext to encrypt
-  /// - [msgToAuth]: Additional authenticated data (not encrypted, but bound)
-  /// - [domain]: Application domain, the same as the recipient's
+  /// - [msgToSeal] - The plaintext to encrypt
+  /// - [msgToAuth] - The message to authenticate but not include
+  /// - [domain] - Application domain, which both sides must agree on
   (Uint8List, Uint8List) seal({
     required Uint8List msgToSeal,
     required Uint8List msgToAuth,
     required Uint8List domain,
   }) => _inner.seal(msgToSeal: msgToSeal, msgToAuth: msgToAuth, domain: domain);
 
-  /// Converts a public key into a 1216-byte array.
+  /// Converts the public key into a 1216-byte array.
   Uint8List toBytes() => _inner.toBytes();
 
-  /// Serializes a public key into a DER buffer.
+  /// Serializes the public key into a DER buffer.
   Uint8List toDer() => _inner.toDer();
 
-  /// Serializes a public key into a PEM string.
+  /// Serializes the public key into a `PUBLIC KEY` PEM block with LF line
+  /// endings.
   String toPem() => _inner.toPem();
+
+  /// Whether [other] is an xHPKE public key with the same bytes.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicKey && listEquals(toBytes(), other.toBytes()));
+
+  /// A hash of the encoded public key.
+  @override
+  int get hashCode => Object.hashAll(toBytes());
 }
 
 /// A 256-bit unique identifier for an xHPKE key.
 class Fingerprint {
+  /// Native xHPKE fingerprint handle.
   final ffi.XhpkeFingerprint _inner;
+
+  /// Wraps a native xHPKE fingerprint.
   Fingerprint._(this._inner);
 
   /// Creates a fingerprint from a 32-byte array.
@@ -248,8 +259,10 @@ class Fingerprint {
   /// Whether [other] is an xHPKE fingerprint with the same bytes.
   @override
   bool operator ==(Object other) =>
-      other is Fingerprint && listEquals(toBytes(), other.toBytes());
+      identical(this, other) ||
+      (other is Fingerprint && listEquals(toBytes(), other.toBytes()));
 
+  /// A hash of the fingerprint bytes.
   @override
   int get hashCode => Object.hashAll(toBytes());
 }
@@ -262,11 +275,13 @@ class Fingerprint {
 /// The corresponding [Receiver] must process messages in the same order
 /// they were sealed.
 class Sender {
+  /// Native xHPKE sender context handle.
   final ffi.XhpkeSender _inner;
+
+  /// Wraps a native xHPKE sender context.
   Sender._(this._inner);
 
-  /// The native context, refused once disposed, before the bridge allocates
-  /// anything for a call on it.
+  /// Returns the live native sender context or throws after disposal.
   ffi.XhpkeSender get _live {
     if (_inner.isDisposed) {
       throw StateError('sender used after dispose');
@@ -276,31 +291,31 @@ class Sender {
 
   /// Encrypts a message using the next nonce in the sequence.
   ///
-  /// - [msgToSeal]: The plaintext to encrypt
-  /// - [msgToAuth]: Additional authenticated data (not encrypted, but bound)
+  /// - [msgToSeal] - The plaintext to encrypt
+  /// - [msgToAuth] - The message to authenticate but not include
   Uint8List seal({
     required Uint8List msgToSeal,
     required Uint8List msgToAuth,
   }) => _live.seal(msgToSeal: msgToSeal, msgToAuth: msgToAuth);
 
-  /// Wipes the keys of this context held in Rust memory. Every later use of the
-  /// sender throws a [StateError], and disposing it again does nothing. Without
-  /// a dispose, the keys are only wiped if the garbage collector finalizes the
-  /// sender, which is not guaranteed.
+  /// Wipes the sender's keys in Rust memory. Subsequent sealing calls throw a
+  /// [StateError]. Disposal is idempotent. Without explicit disposal, cleanup
+  /// depends on garbage collection.
   void dispose() => _inner.dispose();
 }
 
 /// A stateful HPKE receiver context for multi-message decryption.
 ///
-/// Each call to [open] decrypts a message using an auto-incrementing nonce.
-/// Messages must be provided in the same order they were sealed by the
-/// corresponding [Sender].
+/// Each call to [open] decrypts a message using the next nonce in the
+/// sequence. Messages must be opened in the order the [Sender] sealed them.
 class Receiver {
+  /// Native xHPKE receiver context handle.
   final ffi.XhpkeReceiver _inner;
+
+  /// Wraps a native xHPKE receiver context.
   Receiver._(this._inner);
 
-  /// The native context, refused once disposed, before the bridge allocates
-  /// anything for a call on it.
+  /// Returns the live native receiver context or throws after disposal.
   ffi.XhpkeReceiver get _live {
     if (_inner.isDisposed) {
       throw StateError('receiver used after dispose');
@@ -310,8 +325,8 @@ class Receiver {
 
   /// Decrypts a message using the next nonce in the sequence.
   ///
-  /// - [msgToOpen]: The ciphertext to decrypt
-  /// - [msgToAuth]: Additional authenticated data (must match what was used in seal)
+  /// - [msgToOpen] - The ciphertext from [Sender.seal]
+  /// - [msgToAuth] - The same second message used during sealing
   ///
   /// Throws if decryption fails. A tampered or out-of-order ciphertext and a
   /// mismatched [msgToAuth] all fail alike.
@@ -320,10 +335,9 @@ class Receiver {
     required Uint8List msgToAuth,
   }) => _live.open(msgToOpen: msgToOpen, msgToAuth: msgToAuth);
 
-  /// Wipes the keys of this context held in Rust memory. Every later use of the
-  /// receiver throws a [StateError], and disposing it again does nothing.
-  /// Without a dispose, the keys are only wiped if the garbage collector
-  /// finalizes the receiver, which is not guaranteed.
+  /// Wipes the receiver's keys in Rust memory. Subsequent opening calls throw
+  /// a [StateError]. Disposal is idempotent. Without explicit disposal,
+  /// cleanup depends on garbage collection.
   void dispose() => _inner.dispose();
 }
 

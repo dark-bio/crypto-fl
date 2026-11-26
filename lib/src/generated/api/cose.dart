@@ -8,12 +8,10 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'xdsa.dart';
 import 'xhpke.dart';
 
-/// Creates a COSE_Sign1 signature with an embedded payload.
-///
-/// - `msg_to_embed`: The payload to embed and sign
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `signer`: The private key to sign with
-/// - `domain`: Application-specific domain separator
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SecretRaw`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `encode_cbor_to`
+
+/// Signs an embedded payload with the current system time.
 Uint8List coseSign({
   required List<int> msgToEmbed,
   required List<int> msgToAuth,
@@ -26,14 +24,7 @@ Uint8List coseSign({
   domain: domain,
 );
 
-/// Creates a COSE_Sign1 signature with an embedded payload and an explicit
-/// timestamp.
-///
-/// - `msg_to_embed`: The payload to embed and sign
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `signer`: The private key to sign with
-/// - `domain`: Application-specific domain separator
-/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+/// Signs an embedded payload with the supplied Unix timestamp in seconds.
 Uint8List coseSignAt({
   required List<int> msgToEmbed,
   required List<int> msgToAuth,
@@ -48,11 +39,7 @@ Uint8List coseSignAt({
   timestamp: timestamp,
 );
 
-/// Creates a COSE_Sign1 signature without an embedded payload (detached mode).
-///
-/// - `msg_to_auth`: The message to authenticate (external AAD)
-/// - `signer`: The private key to sign with
-/// - `domain`: Application-specific domain separator
+/// Creates a detached COSE_Sign1 signature with the current system time.
 Uint8List coseSignDetached({
   required List<int> msgToAuth,
   required XdsaSecretKey signer,
@@ -63,13 +50,8 @@ Uint8List coseSignDetached({
   domain: domain,
 );
 
-/// Creates a COSE_Sign1 signature without an embedded payload (detached mode)
-/// and with an explicit timestamp.
-///
-/// - `msg_to_auth`: The message to authenticate (external AAD)
-/// - `signer`: The private key to sign with
-/// - `domain`: Application-specific domain separator
-/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+/// Creates a detached COSE_Sign1 signature with the supplied Unix timestamp in
+/// seconds.
 Uint8List coseSignDetachedAt({
   required List<int> msgToAuth,
   required XdsaSecretKey signer,
@@ -82,13 +64,8 @@ Uint8List coseSignDetachedAt({
   timestamp: timestamp,
 );
 
-/// Verifies a COSE_Sign1 signature and returns the embedded payload.
-///
-/// - `msg_to_check`: The COSE_Sign1 structure to verify
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `verifier`: The public key to verify against
-/// - `domain`: Application-specific domain separator
-/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// Verifies a COSE_Sign1 signature using the current system time and returns
+/// the canonical CBOR payload.
 Uint8List coseVerify({
   required List<int> msgToCheck,
   required List<int> msgToAuth,
@@ -103,15 +80,8 @@ Uint8List coseVerify({
   maxDriftSecs: maxDriftSecs,
 );
 
-/// Verifies a COSE_Sign1 signature against an explicit current time and
-/// returns the embedded payload.
-///
-/// - `msg_to_check`: The COSE_Sign1 structure to verify
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `verifier`: The public key to verify against
-/// - `domain`: Application-specific domain separator
-/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
-/// - `now`: Unix timestamp in seconds to measure the drift against
+/// Verifies a COSE_Sign1 signature against the supplied Unix time in seconds
+/// and returns the canonical CBOR payload.
 Uint8List coseVerifyAt({
   required List<int> msgToCheck,
   required List<int> msgToAuth,
@@ -128,13 +98,7 @@ Uint8List coseVerifyAt({
   now: now,
 );
 
-/// Verifies a COSE_Sign1 signature with a detached payload.
-///
-/// - `msg_to_check`: The COSE_Sign1 structure to verify
-/// - `msg_to_auth`: The detached message to authenticate
-/// - `verifier`: The public key to verify against
-/// - `domain`: Application-specific domain separator
-/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// Verifies a detached COSE_Sign1 signature using the current system time.
 void coseVerifyDetached({
   required List<int> msgToCheck,
   required List<int> msgToAuth,
@@ -149,15 +113,8 @@ void coseVerifyDetached({
   maxDriftSecs: maxDriftSecs,
 );
 
-/// Verifies a COSE_Sign1 signature with a detached payload against an
-/// explicit current time.
-///
-/// - `msg_to_check`: The COSE_Sign1 structure to verify
-/// - `msg_to_auth`: The detached message to authenticate
-/// - `verifier`: The public key to verify against
-/// - `domain`: Application-specific domain separator
-/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
-/// - `now`: Unix timestamp in seconds to measure the drift against
+/// Verifies a detached COSE_Sign1 signature against the supplied Unix time in
+/// seconds.
 void coseVerifyDetachedAt({
   required List<int> msgToCheck,
   required List<int> msgToAuth,
@@ -178,10 +135,9 @@ void coseVerifyDetachedAt({
 XdsaFingerprint coseSigner({required List<int> signature}) =>
     RustLib.instance.api.crateApiCoseCoseSigner(signature: signature);
 
-/// Extracts the embedded payload from a COSE_Sign1 without verifying.
+/// Extracts the canonical CBOR payload from a COSE_Sign1 without verifying.
 ///
-/// Warning: This does NOT verify the signature. The returned payload is
-/// unauthenticated and should not be trusted until verified with `verify`.
+/// The payload is unauthenticated and must not be trusted until verified.
 Uint8List cosePeek({required List<int> signature}) =>
     RustLib.instance.api.crateApiCoseCosePeek(signature: signature);
 
@@ -189,17 +145,7 @@ Uint8List cosePeek({required List<int> signature}) =>
 XhpkeFingerprint coseRecipient({required List<int> ciphertext}) =>
     RustLib.instance.api.crateApiCoseCoseRecipient(ciphertext: ciphertext);
 
-/// Encrypts an already-signed COSE_Sign1 to a recipient.
-///
-/// For most use cases, prefer `seal` which signs and encrypts in one step.
-/// Use this only when re-encrypting a message (from `decrypt`) to a different
-/// recipient without access to the original signer's key.
-///
-/// - `sign1`: The COSE_Sign1 structure (e.g., from `decrypt`)
-/// - `msg_to_auth`: The same additional authenticated data used during sealing
-/// - `recipient`: The xHPKE public key to encrypt to
-/// - `domain`: Application domain for HPKE key derivation
-/// - `padding`: Sender's padding policy, buckets as `(floor, step)` or none
+/// Encrypts an already signed COSE_Sign1 envelope to a recipient.
 Uint8List coseEncrypt({
   required List<int> sign1,
   required List<int> msgToAuth,
@@ -214,18 +160,8 @@ Uint8List coseEncrypt({
   padding: padding,
 );
 
-/// Decrypts a sealed message without verifying the signature.
-///
-/// This allows inspecting the signer before verification. Use `signer` to
-/// extract the signer's fingerprint, then `verify` to verify.
-///
-/// - `msg_to_open`: The serialized COSE_Encrypt0 structure
-/// - `msg_to_auth`: The same additional authenticated data used during sealing
-/// - `recipient`: The xHPKE secret key to decrypt with
-/// - `domain`: Application domain for HPKE key derivation
-///
-/// Returns the decrypted COSE_Sign1 structure (not yet verified), stripping
-/// trailing zeros and rejecting any nonzero padding byte.
+/// Decrypts a COSE_Encrypt0 envelope and strips trailing zero padding without
+/// verifying the inner signature.
 Uint8List coseDecrypt({
   required List<int> msgToOpen,
   required List<int> msgToAuth,
@@ -238,14 +174,7 @@ Uint8List coseDecrypt({
   domain: domain,
 );
 
-/// Signs a message then encrypts it to a recipient (sign-then-encrypt).
-///
-/// - `msg_to_seal`: The payload to sign and encrypt
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `signer`: The private key to sign with
-/// - `recipient`: The public key to encrypt to
-/// - `domain`: Application-specific domain separator
-/// - `padding`: Sender's padding policy, buckets as `(floor, step)` or none
+/// Signs and encrypts a payload using the current system time.
 Uint8List coseSeal({
   required List<int> msgToSeal,
   required List<int> msgToAuth,
@@ -262,16 +191,7 @@ Uint8List coseSeal({
   padding: padding,
 );
 
-/// Signs a message with an explicit timestamp then encrypts it to a recipient
-/// (sign-then-encrypt).
-///
-/// - `msg_to_seal`: The payload to sign and encrypt
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `signer`: The private key to sign with
-/// - `recipient`: The public key to encrypt to
-/// - `domain`: Application-specific domain separator
-/// - `padding`: Sender's padding policy, buckets as `(floor, step)` or none
-/// - `timestamp`: Unix timestamp in seconds to embed in the signature
+/// Signs and encrypts a payload with the supplied Unix timestamp in seconds.
 Uint8List coseSealAt({
   required List<int> msgToSeal,
   required List<int> msgToAuth,
@@ -290,14 +210,7 @@ Uint8List coseSealAt({
   timestamp: timestamp,
 );
 
-/// Decrypts and verifies a sealed message.
-///
-/// - `msg_to_open`: The COSE structure to decrypt and verify
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `recipient`: The private key to decrypt with
-/// - `sender`: The public key to verify the signature against
-/// - `domain`: Application-specific domain separator
-/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
+/// Decrypts and verifies a sealed message using the current system time.
 Uint8List coseOpen({
   required List<int> msgToOpen,
   required List<int> msgToAuth,
@@ -314,15 +227,8 @@ Uint8List coseOpen({
   maxDriftSecs: maxDriftSecs,
 );
 
-/// Decrypts and verifies a sealed message against an explicit current time.
-///
-/// - `msg_to_open`: The COSE structure to decrypt and verify
-/// - `msg_to_auth`: Additional authenticated data (external AAD)
-/// - `recipient`: The private key to decrypt with
-/// - `sender`: The public key to verify the signature against
-/// - `domain`: Application-specific domain separator
-/// - `max_drift_secs`: Maximum allowed clock drift (None for no time check)
-/// - `now`: Unix timestamp in seconds to measure the drift against
+/// Decrypts and verifies a sealed message against the supplied Unix time in
+/// seconds.
 Uint8List coseOpenAt({
   required List<int> msgToOpen,
   required List<int> msgToAuth,

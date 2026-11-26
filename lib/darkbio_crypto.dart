@@ -20,7 +20,7 @@
 /// - `cbor`: validation of the CBOR subset that `cose` and `cwt` accept
 /// - `rsa`: RSA-2048 signatures with SHA-256
 /// - `stream`: STREAM authenticated encryption with ChaCha20-Poly1305
-/// - `argon2`: password based key derivation
+/// - `argon2`: password-based key derivation
 /// - `hkdf`: HKDF-SHA256 key derivation
 /// - `rand`: random bytes from the operating system
 ///

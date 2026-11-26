@@ -233,7 +233,7 @@ void main() {
     }
   });
 
-  // Tests both policies against the fixed v0.16 signature and its exact zeros.
+  // Tests the exact envelope size and zero padding for fresh and fixed signatures.
   test('sealed plaintext padding', () {
     // Reuse the shared fixture so the expected signature is independent
     final fx = fixture('cose/v0.16');
@@ -269,12 +269,16 @@ void main() {
         domain: domain,
         padding: padding,
       );
-      for (final (i, envelope) in [sealed, encrypted].indexed) {
-        final id = '$plaintextLength/$i';
+      // Only re-encryption preserves the signature from the fixture
+      for (final (id, envelope, fixed) in [
+        ('seal/$plaintextLength', sealed, false),
+        ('encrypt/$plaintextLength', encrypted, true),
+      ]) {
         expect(envelope.length, sealedLength, reason: id);
         final plaintext = _openPlaintext(envelope, aad, recipient, domain);
         expect(plaintext.length, plaintextLength, reason: id);
-        expect(plaintext.sublist(0, 3461), sign1, reason: id);
+        final prefix = plaintext.sublist(0, 3461);
+        if (fixed) expect(prefix, sign1, reason: id);
         expect(plaintext.sublist(3461), Uint8List(zeros), reason: id);
         expect(
           cose.decrypt(
@@ -283,7 +287,7 @@ void main() {
             recipient: recipient,
             domain: domain,
           ),
-          sign1,
+          prefix,
           reason: id,
         );
         expect(
@@ -301,12 +305,14 @@ void main() {
     }
   });
 
+  // Tests bucket sizes as the CBOR payload length and timestamp change width.
   test('sealed padding across CBOR widths', () {
     final signer = xdsa.SecretKey.generate();
     final recipient = xhpke.SecretKey.generate();
     addTearDown(signer.dispose);
     addTearDown(recipient.dispose);
 
+    // Use the shared bucket sequence for the smaller payloads
     final sizes = [
       8192,
       8602,
@@ -345,15 +351,18 @@ void main() {
       (Uint8List(0), 9223372036854775807),
     ]) {
       final id = '${payload.length}/$timestamp';
-      final signed = cose.signAt(
-        msgToEmbed: payload,
-        msgToAuth: null,
-        signer: signer,
-        domain: domain,
-        timestamp: timestamp,
-      );
+      // A second signature has the same encoded length as the sealed one
+      final signedLength = cose
+          .signAt(
+            msgToEmbed: payload,
+            msgToAuth: null,
+            signer: signer,
+            domain: domain,
+            timestamp: timestamp,
+          )
+          .length;
       final buckets = payload.length < 65532 ? sizes : [100000];
-      final expected = buckets.firstWhere((size) => size >= signed.length);
+      final expected = buckets.firstWhere((size) => size >= signedLength);
       final padding = cose.Padding.buckets(floor: buckets.first, step: 20);
       final envelope = cose.sealAt(
         msgToSeal: payload,
@@ -364,10 +373,20 @@ void main() {
         padding: padding,
         timestamp: timestamp,
       );
+      // Check the unpadded prefix and zeros before verifying the timed payload
       final plaintext = _openPlaintext(envelope, null, recipient, domain);
       expect(plaintext.length, expected, reason: id);
-      expect(plaintext.sublist(0, signed.length), signed, reason: id);
-      expect(plaintext.sublist(signed.length), everyElement(0), reason: id);
+      expect(
+        cose.decrypt(
+          msgToOpen: envelope,
+          msgToAuth: null,
+          recipient: recipient,
+          domain: domain,
+        ),
+        plaintext.sublist(0, signedLength),
+        reason: id,
+      );
+      expect(plaintext.sublist(signedLength), everyElement(0), reason: id);
       expect(
         cose.openAt<List<int>>(
           msgToOpen: envelope,
@@ -818,6 +837,30 @@ void main() {
     }
   });
 
+  // Tests that distinct Dart keys cannot collapse into one signed CBOR entry,
+  // including maps nested inside lazy iterables.
+  test('duplicate encoded map keys', () {
+    final signer = xdsa.SecretKey.generate();
+    addTearDown(signer.dispose);
+    final duplicate = {1: 'first', BigInt.one: 'second'};
+    final cases = <Object?>[
+      duplicate,
+      [duplicate].map((v) => v),
+    ];
+    for (final (i, value) in cases.indexed) {
+      expect(
+        () => cose.sign(
+          msgToEmbed: value,
+          msgToAuth: null,
+          signer: signer,
+          domain: domain,
+        ),
+        throwsArgumentError,
+        reason: '$i',
+      );
+    }
+  });
+
   // Tests that text holding a lone surrogate is refused rather than signed as
   // U+FFFD, while a surrogate pair signs and reads back intact.
   test('lone surrogates', () {
@@ -827,6 +870,7 @@ void main() {
       '\uDC00',
       'a\uDC00\uD800b',
       ['\uD800x'],
+      ['\uD800x'].map((v) => v),
       {1: '\uD800'},
     ];
     for (final (i, value) in cases.indexed) {
@@ -974,10 +1018,10 @@ void main() {
       now: now,
     );
     final cases = [
-      (timestamp + 60, true), // a signature 60 s old
-      (timestamp - 60, true), // a signature 60 s in the future
-      (timestamp + 61, false), // a signature 61 s old
-      (timestamp - 61, false), // a signature 61 s in the future
+      (timestamp + 60, true), // a signature 60s old
+      (timestamp - 60, true), // a signature 60s in the future
+      (timestamp + 61, false), // a signature 61s old
+      (timestamp - 61, false), // a signature 61s in the future
     ];
     for (final (i, (now, fresh)) in cases.indexed) {
       if (fresh) {
@@ -1020,7 +1064,7 @@ void main() {
       timestamp: timestamp,
     );
     final checks = <void Function(int now)>[
-      // the embedded signature
+      // Embedded signature
       (now) => cose.verifyAt<String>(
         msgToCheck: signed,
         msgToAuth: 'context',
@@ -1029,7 +1073,7 @@ void main() {
         maxDriftSecs: 0,
         now: now,
       ),
-      // the detached signature
+      // Detached signature
       (now) => cose.verifyDetachedAt(
         msgToCheck: detached,
         msgToAuth: 'payload',
@@ -1038,7 +1082,7 @@ void main() {
         maxDriftSecs: 0,
         now: now,
       ),
-      // the sealed message
+      // Sealed message
       (now) => cose.openAt<String>(
         msgToOpen: sealed,
         msgToAuth: 'context',

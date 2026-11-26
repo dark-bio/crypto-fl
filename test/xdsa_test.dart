@@ -35,6 +35,21 @@ void main() {
     );
   });
 
+  // Tests that signing the same message twice produces distinct valid signatures.
+  test('hedged signing', () {
+    final secret = xdsa.SecretKey.generate();
+    addTearDown(secret.dispose);
+    final public = secret.publicKey();
+    final message = utf8.encode('message');
+    final first = secret.sign(message);
+    final second = secret.sign(message);
+
+    // Both signatures authenticate the same message under the same key
+    expect(first.toBytes(), isNot(equals(second.toBytes())));
+    public.verify(message, first);
+    public.verify(message, second);
+  });
+
   // Tests that tampering with either half of the composite signature, the
   // ML-DSA one in front or the Ed25519 one at the end, is rejected.
   test('composite halves', () {
@@ -99,6 +114,33 @@ void main() {
     );
   });
 
+  // Tests that a blank line between base64 lines invalidates a PEM key.
+  test('blank PEM body line', () {
+    final lines = xdsa.SecretKey.generate().publicKey().toPem().split('\n');
+    final withBlank = [...lines]..insert(2, '');
+    for (final ending in ['\n', '\r\n']) {
+      final tag = ending == '\n' ? 'LF' : 'CRLF';
+      xdsa.PublicKey.fromPem(lines.join(ending));
+      expect(
+        () => xdsa.PublicKey.fromPem(withBlank.join(ending)),
+        throwsRejection(),
+        reason: tag,
+      );
+    }
+  });
+
+  // Tests that a public key restored from PEM finds the same set entry.
+  test('public key equality', () {
+    final key = xdsa.SecretKey.generate().publicKey();
+    final restored = xdsa.PublicKey.fromPem(key.toPem());
+    final other = xdsa.SecretKey.generate().publicKey();
+
+    expect(restored, key);
+    expect(restored.hashCode, key.hashCode);
+    expect(other, isNot(key));
+    expect({key, restored, other}, hasLength(2));
+  });
+
   // Tests that fingerprints compare and hash by their bytes.
   test('fingerprint equality', () {
     final key = xdsa.SecretKey.generate().publicKey();
@@ -131,7 +173,7 @@ void main() {
 
   // Tests that a disposed secret key refuses every operation, directly and
   // through COSE and CWT, that values derived from it earlier stay usable, and
-  // that disposing it again does nothing.
+  // that repeated disposal is idempotent.
   test('dispose', () {
     final secret = xdsa.SecretKey.generate();
     final domain = utf8.encode('dispose');
@@ -158,6 +200,12 @@ void main() {
           ..notBefore = 1,
         signer: secret,
         domain: domain,
+      ),
+      'cwt.issueAt': () => cwt.issueAt(
+        claims: cwt.Claims(),
+        signer: secret,
+        domain: domain,
+        timestamp: 0,
       ),
     };
     for (final MapEntry(key: name, value: run) in operations.entries) {
