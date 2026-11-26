@@ -43,7 +43,8 @@ pub fn stream_encrypt(key: Vec<u8>, plaintext: Vec<u8>) -> Result<Vec<u8>, Strin
 /// Returns the plaintext once every chunk authenticates under the 32-byte key.
 #[frb(sync)]
 pub fn stream_decrypt(key: Vec<u8>, ciphertext: Vec<u8>) -> Result<Vec<u8>, String> {
-    // Pre-size to the ciphertext length so partial plaintext is never left behind on reallocation
+    // Pre-size to the ciphertext length so partial plaintext is not left on
+    // reallocation
     let mut reader = Stream::decrypt(payload_key(key)?, ciphertext.as_slice());
     let mut plaintext = Zeroizing::new(Vec::with_capacity(ciphertext.len()));
     reader

@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/// COSE wrappers for xDSA and xHPKE.
+/// COSE signing and encryption with xDSA and xHPKE.
 ///
 /// https://datatracker.ietf.org/doc/html/rfc9052
 /// https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke
@@ -49,17 +49,16 @@
 ///
 /// ## Domain separation and freshness
 ///
-/// Choose distinct domains for distinct application operations. Domains
-/// prevent a message for one purpose from being accepted for another; they do
-/// not stop repeated use within the same domain. Verification accepts a
-/// signature whose timestamp is at most `maxDriftSecs` seconds in the past or
-/// future. `null` skips this timestamp check. Applications that require
-/// one-time acceptance must also track a message identifier, nonce, or
-/// challenge to reject replays.
+/// Choose distinct domains for distinct application operations. Domains bind a
+/// message to its purpose, without preventing repeated use within the same
+/// domain. Verification accepts a signature whose timestamp is at most
+/// `maxDriftSecs` seconds in the past or future. Passing `null` skips this
+/// timestamp check. Applications that require one-time acceptance must also
+/// track a message identifier, nonce or challenge to reject replays.
 ///
-/// Signing stamps the current system time, and verification measures the
-/// drift against it. The functions ending in `At` take that time from the
-/// caller instead, for an application that keeps its own clock, such as one
+/// Signing stamps the current system time, and verification measures drift
+/// against it. The functions ending in `At` take that time from the caller
+/// instead, for applications that keep their own clock such as one
 /// synchronized with a server.
 ///
 /// ## Wire profile
@@ -70,7 +69,7 @@
 ///   not accepted. Headers use deterministic integer-key maps.
 /// - The private algorithm IDs are `-70000` for xDSA and `-70001` for xHPKE.
 ///   The protected `kid` is the appropriate public key's fingerprint.
-///   Signatures require the private timestamp header `-70002` and name it in
+///   Signatures require the private timestamp header `-70002` and list it in
 ///   `crit`.
 /// - For signatures, the Sig_structure `external_aad` is the CBOR encoding of
 ///   `[bstr("dark-bio-v1:" || domain), msgToAuth]`. An embedded payload is the
@@ -81,16 +80,16 @@
 ///   puts the caller's message in the Sig_structure payload must be adapted to
 ///   this convention.
 /// - For encryption, the Enc_structure `external_aad` is the CBOR encoding of
-///   `msgToAuth`; the complete encoded Enc_structure is passed as HPKE AAD.
-///   HPKE key derivation uses `"dark-bio-v1:" || domain` as its info. The
-///   X-Wing encapsulated key is carried in unprotected header `-4`.
+///   `msgToAuth`. The complete encoded Enc_structure is the HPKE AAD. HPKE key
+///   derivation uses `"dark-bio-v1:" || domain` as its info. The X-Wing
+///   encapsulated key is carried in unprotected header `-4`.
 /// - The encrypted plaintext is the COSE_Sign1 followed by the zeros selected
 ///   by [Padding]. Receivers strip any number of zeros and reject a nonzero
 ///   padding byte. The sender's bucket sizes need not be shared with them.
 ///
 /// Here `bstr` denotes a CBOR byte string and `||` denotes byte concatenation.
-/// The domain and `msgToAuth` are not included in the returned envelope; both
-/// parties must know them or transmit them separately.
+/// The domain and `msgToAuth` are not included in the returned envelope, so
+/// both parties must know them or transmit them separately.
 library;
 
 import 'dart:typed_data';
@@ -124,12 +123,12 @@ Uint8List _encode(Object? value) => encoding.encode(value);
 /// Decodes CBOR bytes into a plain Dart value via `package:cbor`.
 Object? _decode(Uint8List bytes) => cbor.cbor.decode(bytes);
 
-/// How many zero bytes a sender appends to the signed envelope inside the
-/// encryption, so the ciphertext's length shows little about the message.
+/// Sender policy for zero padding appended to the signed envelope inside an
+/// encrypted envelope.
 ///
-/// Receivers strip any number of zeros, so the policy is the sender's alone and
-/// can change without them. A padded size beyond what the platform can address,
-/// which takes a message of gigabytes, surfaces as the bridge's panic exception.
+/// Receivers strip any number of zeros, so the policy belongs to the sender
+/// and can change independently. A padded size beyond what the platform can
+/// address surfaces as the bridge's panic exception.
 sealed class Padding {
   /// Creates a policy whose concrete variants belong to this library.
   const Padding._();
@@ -202,17 +201,17 @@ BigInt? _drift(int? maxDriftSecs) {
   return BigInt.from(maxDriftSecs);
 }
 
-/// Creates a COSE_Sign1 digital signature with an embedded payload.
+/// Creates a COSE_Sign1 signature with an embedded payload.
 ///
-/// Uses the current system time as the signature timestamp, and [signAt]
-/// takes it from the caller instead.
+/// Uses the current system time as the signature timestamp. Use [signAt] to
+/// supply the timestamp.
 ///
-/// - [msgToEmbed]: The message to sign (embedded in COSE_Sign1)
-/// - [msgToAuth]: Additional authenticated data (not embedded, but signed)
-/// - [signer]: The xDSA secret key to sign with
-/// - [domain]: Application domain for separating protocol purposes
+/// - [msgToEmbed] - The message to sign, embedded in the envelope
+/// - [msgToAuth] - Additional authenticated data, signed but not embedded
+/// - [signer] - The xDSA secret key to sign with
+/// - [domain] - Application domain for separating protocol purposes
 ///
-/// Returns the serialized COSE_Sign1 structure. Throws if [msgToEmbed] or
+/// Returns the serialized COSE_Sign1 envelope. Throws if [msgToEmbed] or
 /// [msgToAuth] does not encode into the supported CBOR subset.
 Uint8List sign({
   required Object? msgToEmbed,
@@ -226,16 +225,16 @@ Uint8List sign({
   domain: domain,
 );
 
-/// Creates a COSE_Sign1 digital signature with an embedded payload, stamped
-/// with a timestamp from the caller.
+/// Creates a COSE_Sign1 signature with an embedded payload and an explicit
+/// timestamp in the protected header.
 ///
-/// - [msgToEmbed]: The message to sign (embedded in COSE_Sign1)
-/// - [msgToAuth]: Additional authenticated data (not embedded, but signed)
-/// - [signer]: The xDSA secret key to sign with
-/// - [domain]: Application domain for separating protocol purposes
-/// - [timestamp]: Unix timestamp in seconds to embed in the protected header
+/// - [msgToEmbed] - The message to sign, embedded in the envelope
+/// - [msgToAuth] - Additional authenticated data, signed but not embedded
+/// - [signer] - The xDSA secret key to sign with
+/// - [domain] - Application domain for separating protocol purposes
+/// - [timestamp] - Signing time in Unix seconds to embed in the header
 ///
-/// Returns the serialized COSE_Sign1 structure. Throws if [msgToEmbed] or
+/// Returns the serialized COSE_Sign1 envelope. Throws if [msgToEmbed] or
 /// [msgToAuth] does not encode into the supported CBOR subset.
 Uint8List signAt({
   required Object? msgToEmbed,
@@ -251,21 +250,19 @@ Uint8List signAt({
   timestamp: timestamp,
 );
 
-/// Creates a COSE_Sign1 digital signature without an embedded payload (the
-/// envelope payload is null).
+/// Creates a COSE_Sign1 signature without an embedded payload, with a null
+/// envelope payload.
 ///
 /// The caller's message is included in `external_aad`, and the payload in the
 /// signature input is empty. See the library's wire profile for
-/// interoperability.
+/// interoperability. Uses the current system time as the signature timestamp.
+/// Use [signDetachedAt] to supply the timestamp.
 ///
-/// Uses the current system time as the signature timestamp, and
-/// [signDetachedAt] takes it from the caller instead.
+/// - [msgToAuth] - The message to sign, not embedded in the envelope
+/// - [signer] - The xDSA secret key to sign with
+/// - [domain] - Application domain for separating protocol purposes
 ///
-/// - [msgToAuth]: The message to sign (not embedded in COSE_Sign1)
-/// - [signer]: The xDSA secret key to sign with
-/// - [domain]: Application domain for separating protocol purposes
-///
-/// Returns the serialized COSE_Sign1 structure. Throws if [msgToAuth] does not
+/// Returns the serialized COSE_Sign1 envelope. Throws if [msgToAuth] does not
 /// encode into the supported CBOR subset.
 Uint8List signDetached({
   required Object? msgToAuth,
@@ -277,17 +274,17 @@ Uint8List signDetached({
   domain: domain,
 );
 
-/// Creates a COSE_Sign1 digital signature without an embedded payload, stamped
-/// with a timestamp from the caller.
+/// Creates a detached COSE_Sign1 signature with an explicit timestamp in the
+/// protected header.
 ///
 /// Uses the same `external_aad` convention as [signDetached].
 ///
-/// - [msgToAuth]: The message to sign (not embedded in COSE_Sign1)
-/// - [signer]: The xDSA secret key to sign with
-/// - [domain]: Application domain for separating protocol purposes
-/// - [timestamp]: Unix timestamp in seconds to embed in the protected header
+/// - [msgToAuth] - The message to sign, not embedded in the envelope
+/// - [signer] - The xDSA secret key to sign with
+/// - [domain] - Application domain for separating protocol purposes
+/// - [timestamp] - Signing time in Unix seconds to embed in the header
 ///
-/// Returns the serialized COSE_Sign1 structure. Throws if [msgToAuth] does not
+/// Returns the serialized COSE_Sign1 envelope. Throws if [msgToAuth] does not
 /// encode into the supported CBOR subset.
 Uint8List signDetachedAt({
   required Object? msgToAuth,
@@ -301,18 +298,18 @@ Uint8List signDetachedAt({
   timestamp: timestamp,
 );
 
-/// Validates a COSE_Sign1 digital signature and returns the embedded payload.
+/// Verifies a COSE_Sign1 signature and returns the embedded payload.
 ///
-/// Uses the current system time for drift checking, and [verifyAt] takes it
-/// from the caller instead.
+/// Uses the current system time for the drift check. Use [verifyAt] to supply
+/// the reference time.
 ///
-/// - [msgToCheck]: The serialized COSE_Sign1 structure
-/// - [msgToAuth]: The same additional authenticated data used during signing
-/// - [verifier]: The xDSA public key to verify against
-/// - [domain]: Application domain for separating protocol purposes
-/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
-///   future. A value of n accepts differences up to and including n; `null`
-///   skips the check.
+/// - [msgToCheck] - The serialized COSE_Sign1 envelope
+/// - [msgToAuth] - The same additional authenticated data used during signing
+/// - [verifier] - The xDSA public key to verify against
+/// - [domain] - Application domain for separating protocol purposes
+/// - [maxDriftSecs] - Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n. Passing
+///   `null` skips the check.
 ///
 /// Returns the embedded payload decoded by the `cbor` package, cast to [T].
 /// Throws if [maxDriftSecs] is negative, or if the envelope is malformed, has
@@ -337,17 +334,17 @@ T verify<T>({
         )
         as T;
 
-/// Validates a COSE_Sign1 digital signature against a time from the caller
-/// and returns the embedded payload.
+/// Verifies a COSE_Sign1 signature against an explicit reference time and
+/// returns the embedded payload.
 ///
-/// - [msgToCheck]: The serialized COSE_Sign1 structure
-/// - [msgToAuth]: The same additional authenticated data used during signing
-/// - [verifier]: The xDSA public key to verify against
-/// - [domain]: Application domain for separating protocol purposes
-/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
-///   future. A value of n accepts differences up to and including n; `null`
-///   skips the check.
-/// - [now]: Unix timestamp in seconds to measure the drift against
+/// - [msgToCheck] - The serialized COSE_Sign1 envelope
+/// - [msgToAuth] - The same additional authenticated data used during signing
+/// - [verifier] - The xDSA public key to verify against
+/// - [domain] - Application domain for separating protocol purposes
+/// - [maxDriftSecs] - Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n. Passing
+///   `null` skips the check.
+/// - [now] - Reference time in Unix seconds to measure the drift against
 ///
 /// Returns the embedded payload decoded by the `cbor` package, cast to [T].
 /// Throws as [verify] does, with the drift measured against [now].
@@ -371,18 +368,18 @@ T verifyAt<T>({
         )
         as T;
 
-/// Validates a COSE_Sign1 digital signature with a detached payload.
+/// Verifies a COSE_Sign1 signature with a detached payload.
 ///
-/// Uses the current system time for drift checking, and [verifyDetachedAt]
-/// takes it from the caller instead.
+/// Uses the current system time for the drift check. Use [verifyDetachedAt] to
+/// supply the reference time.
 ///
-/// - [msgToCheck]: The serialized COSE_Sign1 structure (with null payload)
-/// - [msgToAuth]: The same message used during signing (verified but not embedded)
-/// - [verifier]: The xDSA public key to verify against
-/// - [domain]: Application domain for separating protocol purposes
-/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
-///   future. A value of n accepts differences up to and including n; `null`
-///   skips the check.
+/// - [msgToCheck] - The serialized COSE_Sign1 envelope, with a null payload
+/// - [msgToAuth] - The same message used during signing
+/// - [verifier] - The xDSA public key to verify against
+/// - [domain] - Application domain for separating protocol purposes
+/// - [maxDriftSecs] - Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n. Passing
+///   `null` skips the check.
 ///
 /// Throws if [maxDriftSecs] is negative, or if the envelope is malformed,
 /// embeds a payload, was signed by another key or does not verify. Also throws
@@ -401,17 +398,16 @@ void verifyDetached({
   maxDriftSecs: _drift(maxDriftSecs),
 );
 
-/// Validates a COSE_Sign1 digital signature with a detached payload against a
-/// time from the caller.
+/// Verifies a detached COSE_Sign1 signature against an explicit reference time.
 ///
-/// - [msgToCheck]: The serialized COSE_Sign1 structure (with null payload)
-/// - [msgToAuth]: The same message used during signing (verified but not embedded)
-/// - [verifier]: The xDSA public key to verify against
-/// - [domain]: Application domain for separating protocol purposes
-/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
-///   future. A value of n accepts differences up to and including n; `null`
-///   skips the check.
-/// - [now]: Unix timestamp in seconds to measure the drift against
+/// - [msgToCheck] - The serialized COSE_Sign1 envelope, with a null payload
+/// - [msgToAuth] - The same message used during signing
+/// - [verifier] - The xDSA public key to verify against
+/// - [domain] - Application domain for separating protocol purposes
+/// - [maxDriftSecs] - Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n. Passing
+///   `null` skips the check.
+/// - [now] - Reference time in Unix seconds to measure the drift against
 ///
 /// Throws as [verifyDetached] does, with the drift measured against [now].
 void verifyDetachedAt({
@@ -430,26 +426,26 @@ void verifyDetachedAt({
   now: now,
 );
 
-/// Extracts the signer's fingerprint from a COSE_Sign1 signature without
+/// Extracts the signer's fingerprint from a COSE_Sign1 envelope without
 /// verifying it.
 ///
 /// This allows looking up the appropriate verification key before attempting
-/// full signature verification.
+/// full signature verification. The fingerprint is unauthenticated.
 ///
-/// - [signature]: The serialized COSE_Sign1 structure
+/// - [signature] - The serialized COSE_Sign1 envelope
 ///
 /// Returns the signer's fingerprint from the protected header's `kid` field.
 /// Throws if the envelope is malformed.
 xdsa.Fingerprint signer({required Uint8List signature}) =>
     xdsa.FingerprintInternal.wrap(ffi.coseSigner(signature: signature));
 
-/// Extracts the embedded payload from a COSE_Sign1 signature without
-/// verifying it.
+/// Extracts the embedded payload from a COSE_Sign1 envelope without verifying
+/// it.
 ///
 /// The payload is unauthenticated and must not be trusted until verified with
 /// [verify]. Use [signer] to extract the signer's fingerprint for key lookup.
 ///
-/// - [signature]: The serialized COSE_Sign1 structure
+/// - [signature] - The serialized COSE_Sign1 envelope
 ///
 /// Returns the embedded payload decoded by the `cbor` package, cast to [T].
 /// Throws if the envelope is malformed, has no embedded payload or its payload
@@ -457,32 +453,32 @@ xdsa.Fingerprint signer({required Uint8List signature}) =>
 T peek<T>({required Uint8List signature}) =>
     _decode(ffi.cosePeek(signature: signature)) as T;
 
-/// Extracts the recipient's fingerprint from a COSE_Encrypt0 message without
+/// Extracts the recipient's fingerprint from a COSE_Encrypt0 envelope without
 /// decrypting it.
 ///
 /// This allows looking up the appropriate decryption key before attempting
-/// full decryption.
+/// full decryption. The fingerprint is unauthenticated.
 ///
-/// - [ciphertext]: The serialized COSE_Encrypt0 structure
+/// - [ciphertext] - The serialized COSE_Encrypt0 envelope
 ///
 /// Returns the recipient's fingerprint from the protected header's `kid` field.
 /// Throws if the envelope is malformed.
 xhpke.Fingerprint recipient({required Uint8List ciphertext}) =>
     xhpke.FingerprintInternal.wrap(ffi.coseRecipient(ciphertext: ciphertext));
 
-/// Encrypts an already-signed COSE_Sign1 to a recipient.
+/// Encrypts an already signed COSE_Sign1 envelope to a recipient.
 ///
-/// For most use cases, prefer [seal] which signs and encrypts in one step.
-/// Use this only when re-encrypting a message (from [decrypt]) to a different
+/// For most use cases, prefer [seal], which signs and encrypts in one step.
+/// Use this only when re-encrypting a message from [decrypt] to a different
 /// recipient without access to the original signer's key.
 ///
-/// - [sign1]: The COSE_Sign1 structure (e.g., from [decrypt])
-/// - [msgToAuth]: The same additional authenticated data used during sealing
-/// - [recipient]: The xHPKE public key to encrypt to
-/// - [domain]: Application domain for HPKE key derivation
-/// - [padding]: Sender's policy for zeros after the signed envelope
+/// - [sign1] - The COSE_Sign1 envelope, such as one from [decrypt]
+/// - [msgToAuth] - The same additional authenticated data used during sealing
+/// - [recipient] - The xHPKE public key to encrypt to
+/// - [domain] - Application domain for HPKE key derivation
+/// - [padding] - Sender's policy for zeros after the signed envelope
 ///
-/// Returns the serialized COSE_Encrypt0 structure. Throws if [msgToAuth] does
+/// Returns the serialized COSE_Encrypt0 envelope. Throws if [msgToAuth] does
 /// not encode into the supported CBOR subset. A padded size beyond what the
 /// platform can address surfaces as the bridge's panic exception.
 Uint8List encrypt({
@@ -511,15 +507,15 @@ Uint8List encrypt({
 /// This allows inspecting the signer before verification. Use [signer] to
 /// extract the signer's fingerprint, then [verify] to verify.
 ///
-/// - [msgToOpen]: The serialized COSE_Encrypt0 structure
-/// - [msgToAuth]: The same additional authenticated data used during sealing
-/// - [recipient]: The xHPKE secret key to decrypt with
-/// - [domain]: Application domain for HPKE key derivation
+/// - [msgToOpen] - The serialized COSE_Encrypt0 envelope
+/// - [msgToAuth] - The same additional authenticated data used during sealing
+/// - [recipient] - The xHPKE secret key to decrypt with
+/// - [domain] - Application domain for HPKE key derivation
 ///
-/// Returns the decrypted COSE_Sign1 structure (not yet verified). Throws if
-/// the envelope is malformed, was encrypted to another key, or does not
-/// decrypt under [recipient], [msgToAuth] and [domain]. Strips trailing zeros
-/// after the signed envelope and throws if any padding byte is nonzero.
+/// Returns the decrypted COSE_Sign1 envelope, not yet verified. Throws if the
+/// envelope is malformed, was encrypted to another key, or does not decrypt
+/// under [recipient], [msgToAuth] and [domain]. Strips trailing zeros after
+/// the signed envelope and throws if any padding byte is nonzero.
 Uint8List decrypt({
   required Uint8List msgToOpen,
   required Object? msgToAuth,
@@ -534,18 +530,18 @@ Uint8List decrypt({
 
 /// Signs a message then encrypts it to a recipient.
 ///
-/// Uses the current system time as the signature timestamp, and [sealAt]
-/// takes it from the caller instead.
+/// Uses the current system time as the signature timestamp. Use [sealAt] to
+/// supply the timestamp.
 ///
-/// - [msgToSeal]: The message to sign and encrypt
-/// - [msgToAuth]: Additional authenticated data (signed and bound to encryption,
-///   but not embedded)
-/// - [signer]: The xDSA secret key to sign with
-/// - [recipient]: The xHPKE public key to encrypt to
-/// - [domain]: Application domain for HPKE key derivation
-/// - [padding]: Sender's policy for zeros after the signed envelope
+/// - [msgToSeal] - The message to sign and encrypt
+/// - [msgToAuth] - Additional authenticated data, signed and bound to the
+///   encryption but not embedded
+/// - [signer] - The xDSA secret key to sign with
+/// - [recipient] - The xHPKE public key to encrypt to
+/// - [domain] - Application domain for HPKE key derivation
+/// - [padding] - Sender's policy for zeros after the signed envelope
 ///
-/// Returns the serialized COSE_Encrypt0 structure containing the encrypted
+/// Returns the serialized COSE_Encrypt0 envelope holding the encrypted
 /// COSE_Sign1. Throws if [msgToSeal] or [msgToAuth] does not encode into the
 /// supported CBOR subset. A padded size beyond what the platform can address
 /// surfaces as the bridge's panic exception.
@@ -572,19 +568,19 @@ Uint8List seal({
   }
 }
 
-/// Signs a message with a timestamp from the caller, then encrypts it to a
+/// Signs a message with an explicit timestamp, then encrypts it to a
 /// recipient.
 ///
-/// - [msgToSeal]: The message to sign and encrypt
-/// - [msgToAuth]: Additional authenticated data (signed and bound to encryption,
-///   but not embedded)
-/// - [signer]: The xDSA secret key to sign with
-/// - [recipient]: The xHPKE public key to encrypt to
-/// - [domain]: Application domain for HPKE key derivation
-/// - [padding]: Sender's policy for zeros after the signed envelope
-/// - [timestamp]: Unix timestamp in seconds to embed in the signature
+/// - [msgToSeal] - The message to sign and encrypt
+/// - [msgToAuth] - Additional authenticated data, signed and bound to the
+///   encryption but not embedded
+/// - [signer] - The xDSA secret key to sign with
+/// - [recipient] - The xHPKE public key to encrypt to
+/// - [domain] - Application domain for HPKE key derivation
+/// - [padding] - Sender's policy for zeros after the signed envelope
+/// - [timestamp] - Signing time in Unix seconds to embed in the signature
 ///
-/// Returns the serialized COSE_Encrypt0 structure containing the encrypted
+/// Returns the serialized COSE_Encrypt0 envelope holding the encrypted
 /// COSE_Sign1. Throws if [msgToSeal] or [msgToAuth] does not encode into the
 /// supported CBOR subset. A padded size beyond what the platform can address
 /// surfaces as the bridge's panic exception.
@@ -615,17 +611,17 @@ Uint8List sealAt({
 
 /// Decrypts and verifies a sealed message.
 ///
-/// Uses the current system time for drift checking, and [openAt] takes it from
-/// the caller instead.
+/// Uses the current system time for the drift check. Use [openAt] to supply
+/// the reference time.
 ///
-/// - [msgToOpen]: The serialized COSE_Encrypt0 structure
-/// - [msgToAuth]: The same additional authenticated data used during sealing
-/// - [recipient]: The xHPKE secret key to decrypt with
-/// - [sender]: The xDSA public key to verify the signature against
-/// - [domain]: Application domain for HPKE key derivation
-/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
-///   future. A value of n accepts differences up to and including n; `null`
-///   skips the check.
+/// - [msgToOpen] - The serialized COSE_Encrypt0 envelope
+/// - [msgToAuth] - The same additional authenticated data used during sealing
+/// - [recipient] - The xHPKE secret key to decrypt with
+/// - [sender] - The xDSA public key to verify the signature against
+/// - [domain] - Application domain for HPKE key derivation
+/// - [maxDriftSecs] - Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n. Passing
+///   `null` skips the check.
 ///
 /// Returns the payload decoded by the `cbor` package, cast to [T]. Throws if
 /// [maxDriftSecs] is negative, if decryption fails as in [decrypt], or if
@@ -650,17 +646,17 @@ T open<T>({
         )
         as T;
 
-/// Decrypts and verifies a sealed message against a time from the caller.
+/// Decrypts and verifies a sealed message against an explicit reference time.
 ///
-/// - [msgToOpen]: The serialized COSE_Encrypt0 structure
-/// - [msgToAuth]: The same additional authenticated data used during sealing
-/// - [recipient]: The xHPKE secret key to decrypt with
-/// - [sender]: The xDSA public key to verify the signature against
-/// - [domain]: Application domain for HPKE key derivation
-/// - [maxDriftSecs]: Maximum allowed timestamp difference in seconds, past or
-///   future. A value of n accepts differences up to and including n; `null`
-///   skips the check.
-/// - [now]: Unix timestamp in seconds to measure the drift against
+/// - [msgToOpen] - The serialized COSE_Encrypt0 envelope
+/// - [msgToAuth] - The same additional authenticated data used during sealing
+/// - [recipient] - The xHPKE secret key to decrypt with
+/// - [sender] - The xDSA public key to verify the signature against
+/// - [domain] - Application domain for HPKE key derivation
+/// - [maxDriftSecs] - Maximum allowed timestamp difference in seconds, past or
+///   future. A value of n accepts differences up to and including n. Passing
+///   `null` skips the check.
+/// - [now] - Reference time in Unix seconds to measure the drift against
 ///
 /// Returns the payload decoded by the `cbor` package, cast to [T]. Throws as
 /// [open] does, with the drift measured against [now].

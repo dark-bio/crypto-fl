@@ -18,8 +18,8 @@ Uint8List encode(Object? value) =>
     Uint8List.fromList(cborEncode(_convert(value)));
 
 /// Converts a plain Dart value into its CBOR form, recursing into iterables
-/// and maps to fix their lengths and enforce value checks. Values that are
-/// already CBOR pass through unchanged, tags included.
+/// and maps to fix their lengths and enforce value checks. Existing CBOR
+/// values pass through unchanged, including tags.
 CborValue _convert(Object? value) => switch (value) {
   CborValue() => value,
   String() when !_isWellFormed(value) => throw ArgumentError(

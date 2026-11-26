@@ -124,8 +124,8 @@ fQIDAQAB
   });
 
   // Tests that a disposed secret key refuses every operation, that values
-  // derived from it earlier stay usable, and that disposing it again does
-  // nothing.
+  // derived from it earlier stay usable, and that repeated disposal is
+  // idempotent.
   test('dispose', () {
     final secret = rsa.SecretKey.generate();
     final message = utf8.encode('message');

@@ -173,7 +173,7 @@ void main() {
 
   // Tests that a disposed secret key refuses every operation, directly and
   // through COSE and CWT, that values derived from it earlier stay usable, and
-  // that disposing it again does nothing.
+  // that repeated disposal is idempotent.
   test('dispose', () {
     final secret = xdsa.SecretKey.generate();
     final domain = utf8.encode('dispose');

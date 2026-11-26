@@ -4,13 +4,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/// Argon2id cryptography wrappers and parametrization.
+/// Argon2id key derivation.
 ///
 /// https://datatracker.ietf.org/doc/html/rfc9106
 ///
-/// Turns a password and a salt into key material, made deliberately slow and
-/// memory hungry so guessing passwords is expensive. For stretching a secret
-/// that is already random, see the `hkdf` library instead.
+/// Derives key material from a password and a salt. The memory and time costs
+/// set the work required for each password guess. For deriving keys from an
+/// existing high-entropy secret, see the `hkdf` library.
 ///
 /// ```dart
 /// import 'dart:convert';
@@ -37,8 +37,8 @@ import 'dart:typed_data';
 
 import 'src/generated/api/argon2.dart' as ffi;
 
-/// Derives a key from the password, salt and cost parameters using Argon2id,
-/// returning [length] bytes that can be used as a cryptographic key.
+/// Derives a [length]-byte key from [password], [salt] and the cost parameters
+/// using Argon2id.
 ///
 /// [RFC 9106 Section 4](https://www.rfc-editor.org/rfc/rfc9106.html#section-4)
 /// recommends time 1, memory 2 GiB (2 * 1024 * 1024 KiB) and threads 4. Its
@@ -48,9 +48,9 @@ import 'src/generated/api/argon2.dart' as ffi;
 ///
 /// [time] is the number of passes and [memory] is the total working memory in
 /// KiB. [threads] is Argon2's lane count, an algorithm parameter that changes
-/// the derived key; it does not select how many threads run. Store the salt
-/// and all cost parameters so the same key can be derived on other devices.
-/// The derivation blocks the calling isolate until it finishes.
+/// the derived key. It does not select how many threads compute the key. Store
+/// the salt and all cost parameters so the same key can be derived on other
+/// devices. The derivation blocks the calling isolate until it finishes.
 ///
 /// Throws if any of these input limits are violated:
 ///

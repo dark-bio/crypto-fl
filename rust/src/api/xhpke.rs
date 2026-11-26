@@ -110,12 +110,8 @@ impl XhpkeSecretKey {
         Ok(XhpkeReceiver { inner: receiver })
     }
 
-    /// Decrypts a message that was encrypted to this key's public counterpart.
-    ///
-    /// - `session_key`: The 1120-byte encapsulated session key
-    /// - `msg_to_open`: The ciphertext to decrypt
-    /// - `msg_to_auth`: Additional authenticated data (not encrypted)
-    /// - `domain`: Application-specific domain separator
+    /// Decrypts a message sealed to this key's public counterpart using the
+    /// 1120-byte encapsulated `session_key`, `msg_to_auth` and `domain`.
     #[frb(sync)]
     pub fn open(
         &self,
@@ -208,13 +204,8 @@ impl XhpkePublicKey {
         Ok((XhpkeSender { inner: sender }, encap_key.to_vec()))
     }
 
-    /// Encrypts a message to this public key.
-    ///
-    /// Returns a tuple of (1120-byte session key, ciphertext).
-    ///
-    /// - `msg_to_seal`: The plaintext to encrypt
-    /// - `msg_to_auth`: Additional authenticated data (not encrypted)
-    /// - `domain`: Application-specific domain separator
+    /// Encrypts `msg_to_seal` to this public key under `msg_to_auth` and
+    /// `domain`, returning the 1120-byte session key and ciphertext.
     #[frb(sync)]
     pub fn seal(
         &self,

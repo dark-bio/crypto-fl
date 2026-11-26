@@ -1018,10 +1018,10 @@ void main() {
       now: now,
     );
     final cases = [
-      (timestamp + 60, true), // a signature 60 s old
-      (timestamp - 60, true), // a signature 60 s in the future
-      (timestamp + 61, false), // a signature 61 s old
-      (timestamp - 61, false), // a signature 61 s in the future
+      (timestamp + 60, true), // a signature 60s old
+      (timestamp - 60, true), // a signature 60s in the future
+      (timestamp + 61, false), // a signature 61s old
+      (timestamp - 61, false), // a signature 61s in the future
     ];
     for (final (i, (now, fresh)) in cases.indexed) {
       if (fresh) {
@@ -1064,7 +1064,7 @@ void main() {
       timestamp: timestamp,
     );
     final checks = <void Function(int now)>[
-      // the embedded signature
+      // Embedded signature
       (now) => cose.verifyAt<String>(
         msgToCheck: signed,
         msgToAuth: 'context',
@@ -1073,7 +1073,7 @@ void main() {
         maxDriftSecs: 0,
         now: now,
       ),
-      // the detached signature
+      // Detached signature
       (now) => cose.verifyDetachedAt(
         msgToCheck: detached,
         msgToAuth: 'payload',
@@ -1082,7 +1082,7 @@ void main() {
         maxDriftSecs: 0,
         now: now,
       ),
-      // the sealed message
+      // Sealed message
       (now) => cose.openAt<String>(
         msgToOpen: sealed,
         msgToAuth: 'context',

@@ -9,7 +9,7 @@
 /// https://datatracker.ietf.org/doc/html/rfc8392
 ///
 /// Tokens carry a set of [Claims] encoded as a CBOR map. Standard CWT and EAT
-/// claims have typed accessors; custom claims use integer keys via
+/// claims have typed accessors. Custom claims use integer keys via
 /// `operator[]`.
 ///
 /// [verify] checks the signature against the supplied key and, when requested,
@@ -129,7 +129,7 @@ class Claims {
   set tokenId(Uint8List? value) => _set(7, value);
 
   /// Binds an xDSA public key to the token via the Confirm claim (key 8,
-  /// RFC 8747), replacing any key bound before.
+  /// RFC 8747), replacing any existing binding.
   void setConfirmXdsa(xdsa.PublicKey key) {
     _map[8] = {
       1: {1: _algorithmIdXdsa, -2: key.toBytes()},
@@ -137,7 +137,7 @@ class Claims {
   }
 
   /// Binds an xHPKE public key to the token via the Confirm claim (key 8,
-  /// RFC 8747), replacing any key bound before.
+  /// RFC 8747), replacing any existing binding.
   void setConfirmXhpke(xhpke.PublicKey key) {
     _map[8] = {
       1: {1: _algorithmIdXhpke, -2: key.toBytes()},
@@ -184,11 +184,10 @@ class Claims {
     return (kty, x);
   }
 
-  /// Reads a byte-string claim, normalizing to [Uint8List].
+  /// Normalizes a byte-string claim to [Uint8List].
   ///
-  /// Workaround for https://github.com/shamblett/cbor/issues/88:
-  /// package:cbor decodes CBOR byte strings (major type 2) as `Uint8Buffer`
-  /// (a `List<int>`) instead of [Uint8List].
+  /// `package:cbor` decodes CBOR byte strings (major type 2) as `Uint8Buffer`
+  /// instead of [Uint8List] (https://github.com/shamblett/cbor/issues/88).
   static Uint8List? _asBytes(Object? v) {
     if (v is Uint8List) return v;
     if (v is List<int>) return Uint8List.fromList(v);
@@ -210,8 +209,8 @@ class Claims {
   /// by a random ID, an IEEE OUI or an IANA PEN.
   ///
   /// Use [setOemidRandom], [setOemidIeee], or [setOemidPen] to set it. The
-  /// getter returns the raw CBOR value, the ID bytes as a `List<int>` or the
-  /// PEN as an `int`.
+  /// getter returns the raw CBOR value, the ID bytes as [Uint8List] or the PEN
+  /// as an `int`.
   Object? get oemid => _map[258];
 
   /// Sets OEMID to a 16-byte random manufacturer identifier.
@@ -391,11 +390,11 @@ enum DebugState {
 
   /// All debug has been disabled since boot. End users and developers cannot
   /// re-enable it, but the manufacturer identified by `oemid` may do so. The
-  /// `oemid` claim must be present; the application must enforce this.
+  /// `oemid` claim must be present, and the application must enforce this.
   disabledPermanently,
 
-  /// All debug facilities are permanently disabled, including manufacturer
-  /// facilities; none can be re-enabled.
+  /// All debug facilities are permanently disabled, including the
+  /// manufacturer's.
   disabledFullyPermanently,
 }
 
@@ -422,9 +421,9 @@ enum IntendedUse {
 /// Uses the current system time as the COSE signature timestamp. Use
 /// [issueAt] to supply the timestamp.
 ///
-/// - [claims]: The claims to include in the token
-/// - [signer]: The xDSA secret key to sign with
-/// - [domain]: Application domain for separating protocol purposes
+/// - [claims] - The claims to include in the token
+/// - [signer] - The xDSA secret key to sign with
+/// - [domain] - Application domain for separating protocol purposes
 ///
 /// Throws if the claims do not encode into the supported CBOR subset.
 Uint8List issue({
@@ -443,10 +442,10 @@ Uint8List issue({
 /// The [timestamp] belongs to the COSE signature header. Set [Claims.issuedAt]
 /// and the other temporal claims separately on [claims].
 ///
-/// - [claims]: The claims to include in the token
-/// - [signer]: The xDSA secret key to sign with
-/// - [domain]: Application domain for separating protocol purposes
-/// - [timestamp]: Unix timestamp in seconds to embed in the COSE signature
+/// - [claims] - The claims to include in the token
+/// - [signer] - The xDSA secret key to sign with
+/// - [domain] - Application domain for separating protocol purposes
+/// - [timestamp] - Signing time in Unix seconds to embed in the COSE header
 ///
 /// Throws if [claims] cannot be encoded as a canonical CBOR map or if [signer]
 /// has been disposed.
@@ -465,21 +464,22 @@ Uint8List issueAt({
 /// Verifies a CWT's COSE signature and temporal validity, then returns the
 /// decoded claims.
 ///
-/// When [now] is provided, temporal claims are validated. The nbf claim (key
-/// 5, [Claims.notBefore]) must be present and `nbf <= now`, and if the exp
+/// When [now] is provided, temporal claims are validated. The `nbf` claim (key
+/// 5, [Claims.notBefore]) must be present and `nbf <= now`, and if the `exp`
 /// claim (key 4, [Claims.expiration]) is present then `now < exp`. When [now]
-/// is null, temporal validation is skipped entirely.
+/// is null, temporal validation is skipped.
 ///
-/// The COSE signature timestamp is not checked; temporal validity comes from
-/// the CWT claims. Successful verification does not establish issuer trust,
-/// enforce an audience, evaluate attestation policy or EAT claim
+/// The COSE signature timestamp is not checked, since temporal validity comes
+/// from the CWT claims. Successful verification does not establish issuer
+/// trust, enforce an audience, evaluate attestation policy or EAT claim
 /// relationships, or prove possession of a Confirm key. The application must
 /// perform those checks.
 ///
-/// - [token]: The serialized CWT
-/// - [verifier]: The xDSA public key to verify against
-/// - [domain]: Application domain for separating protocol purposes
-/// - [now]: Unix timestamp in seconds for temporal validation (null to skip)
+/// - [token] - The serialized CWT
+/// - [verifier] - The xDSA public key to verify against
+/// - [domain] - Application domain for separating protocol purposes
+/// - [now] - Reference time in Unix seconds for temporal checks, or null to
+///   skip them
 ///
 /// Throws if [now] is negative, if the token is malformed, was signed by
 /// another key or does not verify, or if it fails the temporal checks. Also
@@ -518,7 +518,7 @@ xdsa.Fingerprint signer({required Uint8List token}) =>
 ///
 /// The claims are unauthenticated and must not be trusted until verified with
 /// [verify]. Use [signer] to extract the signer's fingerprint for key lookup.
-/// The single case for this method is self-signed key discovery.
+/// The one intended use of this function is self-signed key discovery.
 ///
 /// Throws if the token is malformed or its claims fall outside the supported
 /// CBOR subset.

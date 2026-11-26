@@ -25,8 +25,8 @@ impl RsaSecretKey {
         }
     }
 
-    /// Creates a private key from a 520-byte array.
-    /// Format: p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes).
+    /// Creates a private key from a 520-byte big-endian encoding of
+    /// `p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes)`.
     #[frb(sync)]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
         let bytes = Zeroizing::new(bytes);
@@ -109,8 +109,8 @@ pub struct RsaPublicKey {
 }
 
 impl RsaPublicKey {
-    /// Creates a public key from a 264-byte array.
-    /// Format: n (256 bytes) || e (8 bytes).
+    /// Creates a public key from a 264-byte big-endian encoding of
+    /// `n (256 bytes) || e (8 bytes)`.
     #[frb(sync)]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
         let bytes_array: [u8; 264] = bytes

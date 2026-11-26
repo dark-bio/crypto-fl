@@ -21,8 +21,8 @@ abstract class RsaPublicKey implements RustOpaqueInterface {
   /// Returns a 32-byte fingerprint uniquely identifying this key.
   RsaFingerprint fingerprint();
 
-  /// Creates a public key from a 264-byte array.
-  /// Format: n (256 bytes) || e (8 bytes).
+  /// Creates a public key from a 264-byte big-endian encoding of
+  /// `n (256 bytes) || e (8 bytes)`.
   static RsaPublicKey fromBytes({required List<int> bytes}) =>
       RustLib.instance.api.crateApiRsaRsaPublicKeyFromBytes(bytes: bytes);
 
@@ -52,8 +52,8 @@ abstract class RsaSecretKey implements RustOpaqueInterface {
   /// Returns a 32-byte fingerprint uniquely identifying this key.
   RsaFingerprint fingerprint();
 
-  /// Creates a private key from a 520-byte array.
-  /// Format: p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes).
+  /// Creates a private key from a 520-byte big-endian encoding of
+  /// `p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes)`.
   static RsaSecretKey fromBytes({required List<int> bytes}) =>
       RustLib.instance.api.crateApiRsaRsaSecretKeyFromBytes(bytes: bytes);
 

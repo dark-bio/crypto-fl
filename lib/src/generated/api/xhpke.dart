@@ -41,13 +41,8 @@ abstract class XhpkePublicKey implements RustOpaqueInterface {
   /// by the corresponding receiver context.
   (XhpkeSender, Uint8List) newSender({required List<int> domain});
 
-  /// Encrypts a message to this public key.
-  ///
-  /// Returns a tuple of (1120-byte session key, ciphertext).
-  ///
-  /// - `msg_to_seal`: The plaintext to encrypt
-  /// - `msg_to_auth`: Additional authenticated data (not encrypted)
-  /// - `domain`: Application-specific domain separator
+  /// Encrypts `msg_to_seal` to this public key under `msg_to_auth` and
+  /// `domain`, returning the 1120-byte session key and ciphertext.
   (Uint8List, Uint8List) seal({
     required List<int> msgToSeal,
     required List<int> msgToAuth,
@@ -99,12 +94,8 @@ abstract class XhpkeSecretKey implements RustOpaqueInterface {
     required List<int> domain,
   });
 
-  /// Decrypts a message that was encrypted to this key's public counterpart.
-  ///
-  /// - `session_key`: The 1120-byte encapsulated session key
-  /// - `msg_to_open`: The ciphertext to decrypt
-  /// - `msg_to_auth`: Additional authenticated data (not encrypted)
-  /// - `domain`: Application-specific domain separator
+  /// Decrypts a message sealed to this key's public counterpart using the
+  /// 1120-byte encapsulated `session_key`, `msg_to_auth` and `domain`.
   Uint8List open({
     required List<int> sessionKey,
     required List<int> msgToOpen,

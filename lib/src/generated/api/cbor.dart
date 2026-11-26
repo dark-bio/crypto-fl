@@ -6,13 +6,10 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// Validates that the given bytes are well-formed CBOR.
+/// Validates that `data` is one complete canonical CBOR item in the restricted
+/// subset.
 ///
-/// This performs strict validation including:
-/// - Valid CBOR structure (headers, nesting)
-/// - UTF-8 validation for text strings
-/// - Integer map keys in deterministic order
-///
-/// Returns an error if the bytes are not valid CBOR.
+/// Checks structure, nesting depth, UTF-8 text strings, and deterministic
+/// integer map key order without duplicates.
 void cborVerify({required List<int> data}) =>
     RustLib.instance.api.crateApiCborCborVerify(data: data);

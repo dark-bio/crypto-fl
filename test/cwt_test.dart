@@ -119,7 +119,7 @@ void main() {
     final issuer = xdsa.SecretKey.generate();
     addTearDown(issuer.dispose);
 
-    // Control: ordered nested map succeeds under both issuance methods
+    // An ordered nested map succeeds under both issuance methods
     final ordered = cwt.Claims()..[-1] = {1: 0, 2: 0};
     cwt.issue(claims: ordered, signer: issuer, domain: domain);
     cwt.issueAt(claims: ordered, signer: issuer, domain: domain, timestamp: 0);

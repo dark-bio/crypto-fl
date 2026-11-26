@@ -192,7 +192,7 @@ void main() {
 
   // Tests that disposed secret keys, senders and receivers refuse every
   // operation, directly and through COSE, that a receiver created from a key
-  // before its disposal stays usable, and that disposing again does nothing.
+  // before its disposal stays usable, and that repeated disposal is idempotent.
   test('dispose', () {
     final secret = xhpke.SecretKey.generate();
     final signer = xdsa.SecretKey.generate();

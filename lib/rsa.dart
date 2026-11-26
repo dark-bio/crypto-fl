@@ -4,14 +4,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/// RSA cryptography wrappers and parametrization.
+/// RSA-2048 signatures with SHA-256.
 ///
 /// https://datatracker.ietf.org/doc/html/rfc8017
 ///
-/// RSA-2048 with PKCS#1 v1.5 padding over SHA-256, the classical scheme kept
-/// for places where a boot ROM or a legacy system dictates it. New designs
-/// should use the `xdsa` library. Only 2048-bit moduli with the exponent 65537
-/// are accepted, and encryption is deliberately not exposed.
+/// RSA-2048 with PKCS #1 v1.5 padding over SHA-256, kept for compatibility
+/// with boot ROMs and legacy systems. New designs should use the `xdsa`
+/// library. Only 2048-bit moduli with exponent 65537 are accepted, and
+/// encryption is omitted.
 ///
 /// ```dart
 /// import 'dart:convert';
@@ -40,8 +40,7 @@ class SecretKey {
   /// Wraps a native RSA secret key.
   SecretKey._(this._inner);
 
-  /// The native key, refused once disposed, before the bridge allocates
-  /// anything for a call on it.
+  /// Returns the live native key or throws after disposal.
   ffi.RsaSecretKey get _live {
     if (_inner.isDisposed) {
       throw StateError('secret key used after dispose');
@@ -54,57 +53,57 @@ class SecretKey {
 
   /// Parses a 520-byte array into a private key.
   ///
-  /// Format: p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes),
-  /// all in big-endian.
+  /// The bytes encode `p (128 bytes) || q (128 bytes) || d (256 bytes) ||
+  /// e (8 bytes)` in big-endian order.
   ///
   /// Throws if [bytes] is not 520 bytes long, or does not hold a valid key
-  /// with a 2048-bit modulus and the exponent 65537.
+  /// with a 2048-bit modulus and exponent 65537.
   static SecretKey fromBytes(Uint8List bytes) =>
       SecretKey._(ffi.RsaSecretKey.fromBytes(bytes: bytes));
 
   /// Parses a DER buffer into a private key.
   ///
   /// Throws if [der] is not the canonical PKCS #8 v1 encoding of an RSA
-  /// private key with a 2048-bit modulus and the exponent 65537.
+  /// private key with a 2048-bit modulus and exponent 65537.
   static SecretKey fromDer(Uint8List der) =>
       SecretKey._(ffi.RsaSecretKey.fromDer(der: der));
 
-  /// Parses a PEM string into a private key.
+  /// Parses one `PRIVATE KEY` PEM block starting at the first character.
   ///
-  /// Throws if [pem] is not a single `PRIVATE KEY` block holding such a DER
-  /// key. The block starts at the first byte, uses strict base64 and ends all
-  /// its lines in LF or all in CRLF.
+  /// The strict base64 body requires nonempty lines and consistent LF or CRLF
+  /// line endings. Throws if [pem] is malformed or does not hold a valid
+  /// 2048-bit RSA private key with exponent 65537.
   static SecretKey fromPem(String pem) =>
       SecretKey._(ffi.RsaSecretKey.fromPem(pem: pem));
 
   /// Retrieves the public counterpart of the secret key.
   PublicKey publicKey() => PublicKey._(_live.publicKey());
 
-  /// Returns a 256-bit unique identifier for this key. For RSA, that is the
-  /// SHA256 hash of the raw (le modulus || le exponent) public key.
+  /// Returns a 256-bit unique identifier for this key, the SHA-256 hash of its
+  /// little-endian modulus and exponent.
   Fingerprint fingerprint() => Fingerprint._(_live.fingerprint());
 
-  /// Creates a digital signature of the message.
+  /// Creates a digital signature of [message].
   Signature sign(Uint8List message) =>
       Signature._(_live.sign(message: message));
 
-  /// Serializes a private key into a 520-byte array.
+  /// Serializes the private key into a 520-byte array.
   ///
-  /// Format: p (128 bytes) || q (128 bytes) || d (256 bytes) || e (8 bytes),
-  /// all in big-endian.
+  /// The bytes encode `p (128 bytes) || q (128 bytes) || d (256 bytes) ||
+  /// e (8 bytes)` in big-endian order.
   Uint8List toBytes() => _live.toBytes();
 
-  /// Serializes a private key into a DER buffer.
+  /// Serializes the private key into a DER buffer.
   Uint8List toDer() => _live.toDer();
 
-  /// Serializes a private key into a PEM string.
+  /// Serializes the private key into a `PRIVATE KEY` PEM block with LF line
+  /// endings.
   String toPem() => _live.toPem();
 
-  /// Wipes the secret key held in Rust memory. Every later use of this key
-  /// throws a [StateError], and disposing it again does nothing. Copies already
-  /// exported, such as by [toBytes], are not affected. Without a dispose, the
-  /// key is only wiped if the garbage collector finalizes it, which is not
-  /// guaranteed.
+  /// Wipes the signing key in Rust memory. Subsequent key operations throw a
+  /// [StateError]. Disposal is idempotent. Exported copies, such as from
+  /// [toBytes], remain owned by the caller. Without explicit disposal, cleanup
+  /// depends on garbage collection.
   void dispose() => _inner.dispose();
 }
 
@@ -118,47 +117,48 @@ class PublicKey {
 
   /// Parses a 264-byte array into a public key.
   ///
-  /// Format: n (256 bytes) || e (8 bytes), all in big-endian.
+  /// The bytes encode `n (256 bytes) || e (8 bytes)` in big-endian order.
   ///
-  /// Throws if [bytes] is not 264 bytes long, if the modulus is not 2048 bits
+  /// Throws if [bytes] is not 264 bytes long, if the modulus is not 2048 bits,
   /// or if the exponent is not 65537.
   static PublicKey fromBytes(Uint8List bytes) =>
       PublicKey._(ffi.RsaPublicKey.fromBytes(bytes: bytes));
 
   /// Parses a DER buffer into a public key.
   ///
-  /// Throws if [der] is not a SubjectPublicKeyInfo encoded RSA public key with
-  /// a 2048-bit modulus and the exponent 65537.
+  /// Throws if [der] is not a SubjectPublicKeyInfo-encoded RSA public key with
+  /// a 2048-bit modulus and exponent 65537.
   static PublicKey fromDer(Uint8List der) =>
       PublicKey._(ffi.RsaPublicKey.fromDer(der: der));
 
-  /// Parses a PEM string into a public key.
+  /// Parses one `PUBLIC KEY` PEM block starting at the first character.
   ///
-  /// Throws if [pem] is not a single `PUBLIC KEY` block holding such a DER key.
-  /// The block starts at the first byte, uses strict base64 and ends all its
-  /// lines in LF or all in CRLF.
+  /// The strict base64 body requires nonempty lines and consistent LF or CRLF
+  /// line endings. Throws if [pem] is malformed or does not hold a valid
+  /// 2048-bit RSA public key with exponent 65537.
   static PublicKey fromPem(String pem) =>
       PublicKey._(ffi.RsaPublicKey.fromPem(pem: pem));
 
-  /// Returns a 256-bit unique identifier for this key. For RSA, that is the
-  /// SHA256 hash of the raw (le modulus || le exponent) public key.
+  /// Returns a 256-bit unique identifier for this key, the SHA-256 hash of its
+  /// little-endian modulus and exponent.
   Fingerprint fingerprint() => Fingerprint._(_inner.fingerprint());
 
-  /// Verifies a signature against a message.
+  /// Verifies [signature] against [message].
   ///
   /// Throws if the signature does not verify under this key for [message].
   void verify(Uint8List message, Signature signature) =>
       _inner.verify(message: message, signature: signature._inner);
 
-  /// Serializes a public key into a 264-byte array.
+  /// Serializes the public key into a 264-byte array.
   ///
-  /// Format: n (256 bytes) || e (8 bytes), all in big-endian.
+  /// The bytes encode `n (256 bytes) || e (8 bytes)` in big-endian order.
   Uint8List toBytes() => _inner.toBytes();
 
-  /// Serializes a public key into a DER buffer.
+  /// Serializes the public key into a DER buffer.
   Uint8List toDer() => _inner.toDer();
 
-  /// Serializes a public key into a PEM string.
+  /// Serializes the public key into a `PUBLIC KEY` PEM block with LF line
+  /// endings.
   String toPem() => _inner.toPem();
 
   /// Whether [other] is an RSA public key with the same modulus and exponent.
@@ -190,8 +190,8 @@ class Signature {
   Uint8List toBytes() => _inner.toBytes();
 }
 
-/// A 256-bit unique identifier for an RSA key, the SHA256 hash of its raw
-/// public key in little-endian format (modulus || exponent).
+/// A 256-bit unique identifier for an RSA key, the SHA-256 hash of its
+/// little-endian modulus and exponent.
 class Fingerprint {
   /// Native RSA fingerprint handle.
   final ffi.RsaFingerprint _inner;

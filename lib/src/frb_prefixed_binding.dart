@@ -24,9 +24,8 @@ export 'package:flutter_rust_bridge/src/main_components/port_manager.dart'
 /// Prefix applied to shared FRB symbols in the packaged Apple archives.
 const String _prefix = 'darkbio_crypto_';
 
-/// All FRB symbols that need prefixed lookup.
-/// These symbols are renamed post-build using llvm-objcopy
-/// (see scripts/prefix_frb_symbols.sh).
+/// Shared FRB C symbols renamed post-build by `scripts/prefix_frb_symbols.sh`
+/// using `llvm-objcopy`.
 const List<String> _symbolsToPrefix = [
   // Core dispatcher symbols
   'frb_pde_ffi_dispatcher_primary',
