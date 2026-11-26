@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.21.2
+
+- Add light and dark variants of the overview diagram with automatic theme switching in the README
+
 ## 0.21.0
 
 - Wrap darkbio-crypto v0.21.0, with RSA 0.10 and hedged xDSA signatures
