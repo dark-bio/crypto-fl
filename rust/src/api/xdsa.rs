@@ -4,12 +4,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use flutter_rust_bridge::frb;
+//! Composite ML-DSA-65 and Ed25519 signatures for the Dart bindings.
 
-/// XdsaSecretKey is a composite ML-DSA-65 + Ed25519 private key for creating
-/// quantum-resistant digital signatures.
+use flutter_rust_bridge::frb;
+use zeroize::Zeroizing;
+
+/// A composite ML-DSA-65 and Ed25519 private key for post-quantum digital
+/// signatures.
 #[frb(opaque)]
 pub struct XdsaSecretKey {
+    /// Wrapped upstream xDSA secret key.
     pub(crate) inner: darkbio_crypto::xdsa::SecretKey,
 }
 
@@ -25,11 +29,13 @@ impl XdsaSecretKey {
     /// Creates a private key from a 64-byte seed.
     #[frb(sync)]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
-        let bytes_array: [u8; 64] = bytes
+        let bytes = Zeroizing::new(bytes);
+        let seed = bytes
+            .as_slice()
             .try_into()
             .map_err(|_| "Invalid key length, expected 64 bytes".to_string())?;
         Ok(Self {
-            inner: darkbio_crypto::xdsa::SecretKey::from_bytes(&bytes_array),
+            inner: darkbio_crypto::xdsa::SecretKey::from_bytes(seed),
         })
     }
 
@@ -37,7 +43,8 @@ impl XdsaSecretKey {
     #[frb(sync)]
     pub fn from_der(der: Vec<u8>) -> Result<Self, String> {
         Ok(Self {
-            inner: darkbio_crypto::xdsa::SecretKey::from_der(&der).map_err(|e| e.to_string())?,
+            inner: darkbio_crypto::xdsa::SecretKey::from_der(&Zeroizing::new(der))
+                .map_err(|e| e.to_string())?,
         })
     }
 
@@ -45,7 +52,8 @@ impl XdsaSecretKey {
     #[frb(sync)]
     pub fn from_pem(pem: String) -> Result<Self, String> {
         Ok(Self {
-            inner: darkbio_crypto::xdsa::SecretKey::from_pem(&pem).map_err(|e| e.to_string())?,
+            inner: darkbio_crypto::xdsa::SecretKey::from_pem(&Zeroizing::new(pem))
+                .map_err(|e| e.to_string())?,
         })
     }
 
@@ -83,7 +91,7 @@ impl XdsaSecretKey {
         }
     }
 
-    /// Signs a message, returning a composite signature.
+    /// Signs a message with hedged ML-DSA-65 and Ed25519.
     #[frb(sync)]
     pub fn sign(&self, message: Vec<u8>) -> XdsaSignature {
         XdsaSignature {
@@ -92,10 +100,11 @@ impl XdsaSecretKey {
     }
 }
 
-/// XdsaPublicKey is a composite ML-DSA-65 + Ed25519 public key for verifying
-/// quantum-resistant digital signatures.
+/// A composite ML-DSA-65 and Ed25519 public key for verifying post-quantum
+/// digital signatures.
 #[frb(opaque)]
 pub struct XdsaPublicKey {
+    /// Wrapped upstream xDSA public key.
     pub(crate) inner: darkbio_crypto::xdsa::PublicKey,
 }
 
@@ -163,9 +172,10 @@ impl XdsaPublicKey {
     }
 }
 
-/// XdsaSignature is a composite ML-DSA-65 + Ed25519 digital signature.
+/// A composite ML-DSA-65 and Ed25519 digital signature.
 #[frb(opaque)]
 pub struct XdsaSignature {
+    /// Wrapped upstream xDSA signature.
     pub(crate) inner: darkbio_crypto::xdsa::Signature,
 }
 
@@ -188,9 +198,10 @@ impl XdsaSignature {
     }
 }
 
-/// XdsaFingerprint is a 32-byte unique identifier for an xDSA key.
+/// A 32-byte unique identifier for an xDSA key.
 #[frb(opaque)]
 pub struct XdsaFingerprint {
+    /// Wrapped upstream xDSA fingerprint.
     pub(crate) inner: darkbio_crypto::xdsa::Fingerprint,
 }
 

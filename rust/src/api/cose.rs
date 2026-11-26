@@ -6,15 +6,27 @@
 
 //! COSE signatures and sealed envelopes for the Dart bindings.
 
+use darkbio_crypto::cbor;
 use flutter_rust_bridge::frb;
+use zeroize::Zeroizing;
 
 use super::xdsa::{XdsaFingerprint, XdsaPublicKey, XdsaSecretKey};
 use super::xhpke::{XhpkeFingerprint, XhpkePublicKey, XhpkeSecretKey};
 
-/// CosePadding is a sender's policy for the zero bytes appended to the signed
-/// envelope inside the encryption.
+/// Pre-encoded CBOR payload cleared from memory when dropped.
+struct SecretRaw(Zeroizing<Vec<u8>>);
+
+impl cbor::Encode for SecretRaw {
+    fn encode_cbor_to(&self, buf: &mut Vec<u8>) -> Result<(), cbor::Error> {
+        buf.extend_from_slice(&self.0);
+        Ok(())
+    }
+}
+
+/// Sender policy for zero padding appended to a signed envelope before encryption.
 #[frb(opaque)]
 pub struct CosePadding {
+    /// Wrapped upstream COSE padding policy.
     inner: darkbio_crypto::cose::Padding,
 }
 
@@ -303,11 +315,12 @@ pub fn cose_encrypt(
     domain: Vec<u8>,
     padding: &CosePadding,
 ) -> Result<Vec<u8>, String> {
-    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+    let sign1 = Zeroizing::new(sign1);
+    cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
     darkbio_crypto::cose::encrypt(
         &sign1,
-        darkbio_crypto::cbor::Raw(msg_to_auth),
+        cbor::Raw(msg_to_auth),
         &recipient.inner,
         &domain,
         &padding.inner,
@@ -362,12 +375,13 @@ pub fn cose_seal(
     domain: Vec<u8>,
     padding: &CosePadding,
 ) -> Result<Vec<u8>, String> {
-    darkbio_crypto::cbor::verify(&msg_to_seal).map_err(|e| e.to_string())?;
-    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+    let msg_to_seal = SecretRaw(Zeroizing::new(msg_to_seal));
+    cbor::verify(&msg_to_seal.0).map_err(|e| e.to_string())?;
+    cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
     darkbio_crypto::cose::seal(
-        darkbio_crypto::cbor::Raw(msg_to_seal),
-        darkbio_crypto::cbor::Raw(msg_to_auth),
+        msg_to_seal,
+        cbor::Raw(msg_to_auth),
         &signer.inner,
         &recipient.inner,
         &domain,
@@ -396,12 +410,13 @@ pub fn cose_seal_at(
     padding: &CosePadding,
     timestamp: i64,
 ) -> Result<Vec<u8>, String> {
-    darkbio_crypto::cbor::verify(&msg_to_seal).map_err(|e| e.to_string())?;
-    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+    let msg_to_seal = SecretRaw(Zeroizing::new(msg_to_seal));
+    cbor::verify(&msg_to_seal.0).map_err(|e| e.to_string())?;
+    cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
     darkbio_crypto::cose::seal_at(
-        darkbio_crypto::cbor::Raw(msg_to_seal),
-        darkbio_crypto::cbor::Raw(msg_to_auth),
+        msg_to_seal,
+        cbor::Raw(msg_to_auth),
         &signer.inner,
         &recipient.inner,
         &domain,
@@ -428,19 +443,20 @@ pub fn cose_open(
     domain: Vec<u8>,
     max_drift_secs: Option<u64>,
 ) -> Result<Vec<u8>, String> {
-    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+    cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
-    let raw: darkbio_crypto::cbor::Raw = darkbio_crypto::cose::open(
+    let raw: cbor::Raw = darkbio_crypto::cose::open(
         &msg_to_open,
-        darkbio_crypto::cbor::Raw(msg_to_auth),
+        cbor::Raw(msg_to_auth),
         &recipient.inner,
         &sender.inner,
         &domain,
         max_drift_secs,
     )
     .map_err(|e| e.to_string())?;
-    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
-    Ok(raw.0)
+    let mut payload = Zeroizing::new(raw.0);
+    cbor::verify(&payload).map_err(|err| err.to_string())?;
+    Ok(std::mem::take(&mut *payload))
 }
 
 /// Decrypts and verifies a sealed message against an explicit current time.
@@ -462,11 +478,11 @@ pub fn cose_open_at(
     max_drift_secs: Option<u64>,
     now: i64,
 ) -> Result<Vec<u8>, String> {
-    darkbio_crypto::cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
+    cbor::verify(&msg_to_auth).map_err(|e| e.to_string())?;
 
-    let raw: darkbio_crypto::cbor::Raw = darkbio_crypto::cose::open_at(
+    let raw: cbor::Raw = darkbio_crypto::cose::open_at(
         &msg_to_open,
-        darkbio_crypto::cbor::Raw(msg_to_auth),
+        cbor::Raw(msg_to_auth),
         &recipient.inner,
         &sender.inner,
         &domain,
@@ -474,6 +490,7 @@ pub fn cose_open_at(
         now,
     )
     .map_err(|e| e.to_string())?;
-    darkbio_crypto::cbor::verify(&raw.0).map_err(|err| err.to_string())?;
-    Ok(raw.0)
+    let mut payload = Zeroizing::new(raw.0);
+    cbor::verify(&payload).map_err(|err| err.to_string())?;
+    Ok(std::mem::take(&mut *payload))
 }

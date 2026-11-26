@@ -32,11 +32,12 @@ import 'package:flutter/foundation.dart' show listEquals;
 
 import 'src/generated/api/rsa.dart' as ffi;
 
-/// A 2048-bit RSA private key usable for signing, with SHA256 as the underlying
-/// hash algorithm. Whilst RSA could also be used for encryption, that is not
-/// exposed on the API as it's not required by the project.
+/// A 2048-bit RSA private key for PKCS #1 v1.5 signing with SHA-256.
 class SecretKey {
+  /// Native RSA secret key handle.
   final ffi.RsaSecretKey _inner;
+
+  /// Wraps a native RSA secret key.
   SecretKey._(this._inner);
 
   /// The native key, refused once disposed, before the bridge allocates
@@ -107,11 +108,12 @@ class SecretKey {
   void dispose() => _inner.dispose();
 }
 
-/// A 2048-bit RSA public key usable for verification, with SHA256 as the
-/// underlying hash algorithm. Whilst RSA could also be used for decryption,
-/// that is not exposed on the API as it's not required by the project.
+/// A 2048-bit RSA public key for verifying PKCS #1 v1.5 signatures with SHA-256.
 class PublicKey {
+  /// Native RSA public key handle.
   final ffi.RsaPublicKey _inner;
+
+  /// Wraps a native RSA public key.
   PublicKey._(this._inner);
 
   /// Parses a 264-byte array into a public key.
@@ -158,11 +160,24 @@ class PublicKey {
 
   /// Serializes a public key into a PEM string.
   String toPem() => _inner.toPem();
+
+  /// Whether [other] is an RSA public key with the same modulus and exponent.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicKey && listEquals(toBytes(), other.toBytes()));
+
+  /// A hash of the encoded public key.
+  @override
+  int get hashCode => Object.hashAll(toBytes());
 }
 
 /// A 256-byte RSA-2048 digital signature.
 class Signature {
+  /// Native RSA signature handle.
   final ffi.RsaSignature _inner;
+
+  /// Wraps a native RSA signature.
   Signature._(this._inner);
 
   /// Creates a signature from a 256-byte array.
@@ -178,7 +193,10 @@ class Signature {
 /// A 256-bit unique identifier for an RSA key, the SHA256 hash of its raw
 /// public key in little-endian format (modulus || exponent).
 class Fingerprint {
+  /// Native RSA fingerprint handle.
   final ffi.RsaFingerprint _inner;
+
+  /// Wraps a native RSA fingerprint.
   Fingerprint._(this._inner);
 
   /// Creates a fingerprint from a 32-byte array.
@@ -193,8 +211,10 @@ class Fingerprint {
   /// Whether [other] is an RSA fingerprint with the same bytes.
   @override
   bool operator ==(Object other) =>
-      other is Fingerprint && listEquals(toBytes(), other.toBytes());
+      identical(this, other) ||
+      (other is Fingerprint && listEquals(toBytes(), other.toBytes()));
 
+  /// A hash of the fingerprint bytes.
   @override
   int get hashCode => Object.hashAll(toBytes());
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.0
+
+- Wrap darkbio-crypto v0.21.0, with RSA 0.10 and hedged xDSA signatures
+- Add `cwt.issueAt` to set the COSE signature timestamp when issuing a token
+- Reject Dart map keys that encode as the same CBOR key, including inside iterables
+- Reject blank lines in the base64 body of PEM keys
+- Compare xDSA, xHPKE and RSA public keys by value
+- Clear native buffers used to import secret keys, derive keys, and seal or decrypt plaintext
+
 ## 0.20.1
 
 - Wrap darkbio-crypto v0.20.1

@@ -7,6 +7,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:darkbio_crypto/cose.dart' as cose;
 import 'package:darkbio_crypto/cwt.dart' as cwt;
 import 'package:darkbio_crypto/src/generated/frb_generated.dart';
 import 'package:darkbio_crypto/xdsa.dart' as xdsa;
@@ -82,6 +83,62 @@ void main() {
     expect(got.intendedUse, cwt.IntendedUse.registration);
     expect(got[-1], 'minus one');
     expect(got[-2], 'minus two');
+  });
+
+  // Tests that the signature timestamp is independent of the issued-at claim.
+  test('explicit signature timestamp', () {
+    final issuer = xdsa.SecretKey.generate();
+    addTearDown(issuer.dispose);
+    final verifier = issuer.publicKey();
+    final token = cwt.issueAt(
+      claims: cwt.Claims()..issuedAt = 100,
+      signer: issuer,
+      domain: domain,
+      timestamp: -1,
+    );
+
+    // Zero allowed drift requires the signed timestamp to match exactly
+    final payload = cose.verifyAt<Map>(
+      msgToCheck: token,
+      msgToAuth: null,
+      verifier: verifier,
+      domain: domain,
+      maxDriftSecs: 0,
+      now: -1,
+    );
+    expect(payload, {6: 100});
+    expect(
+      cwt.verify(token: token, verifier: verifier, domain: domain).issuedAt,
+      100,
+    );
+  });
+
+  // Tests that both issuance methods accept canonical nested maps and reject
+  // unordered ones.
+  test('noncanonical claim values', () {
+    final issuer = xdsa.SecretKey.generate();
+    addTearDown(issuer.dispose);
+
+    // Control: ordered nested map succeeds under both issuance methods
+    final ordered = cwt.Claims()..[-1] = {1: 0, 2: 0};
+    cwt.issue(claims: ordered, signer: issuer, domain: domain);
+    cwt.issueAt(claims: ordered, signer: issuer, domain: domain, timestamp: 0);
+
+    // Reversed key order in the nested map must be rejected by both
+    final unordered = cwt.Claims()..[-1] = {2: 0, 1: 0};
+    expect(
+      () => cwt.issue(claims: unordered, signer: issuer, domain: domain),
+      throwsRejection(),
+    );
+    expect(
+      () => cwt.issueAt(
+        claims: unordered,
+        signer: issuer,
+        domain: domain,
+        timestamp: 0,
+      ),
+      throwsRejection(),
+    );
   });
 
   // Tests that an xHPKE confirmation key round trips and is not mistaken for
@@ -229,18 +286,20 @@ void main() {
     final signer = xdsa.SecretKey.fromBytes(hex(fx['xdsa_seed'] as String));
     final token = hex(fx['token'] as String);
 
-    final cases = <void Function()>[
-      () => cwt.verify(
-        token: token,
-        verifier: signer.publicKey(),
-        domain: hex(fx['domain'] as String),
-        now: 0,
-      ),
-      () => cwt.peek(token: token),
-    ];
-    for (final (i, run) in cases.indexed) {
-      expect(run, throwsRejection(), reason: '$i');
+    // Both clock modes must reject the duplicate subject before using the claims
+    for (final now in <int?>[null, 0]) {
+      expect(
+        () => cwt.verify(
+          token: token,
+          verifier: signer.publicKey(),
+          domain: hex(fx['domain'] as String),
+          now: now,
+        ),
+        throwsRejection('duplicate map key'),
+        reason: 'now=$now',
+      );
     }
+    expect(() => cwt.peek(token: token), throwsRejection());
   });
 
   // Tests that the signer and the claims can be read without verifying.

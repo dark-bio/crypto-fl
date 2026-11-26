@@ -4,12 +4,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use flutter_rust_bridge::frb;
+//! X-Wing hybrid public-key encryption for the Dart bindings.
 
-/// XhpkeSecretKey is an X-Wing (X25519 + ML-KEM-768) private key for
-/// post-quantum hybrid public-key encryption.
+use flutter_rust_bridge::frb;
+use zeroize::Zeroizing;
+
+/// An X-Wing (X25519 and ML-KEM-768) private key for post-quantum hybrid
+/// public-key encryption.
 #[frb(opaque)]
 pub struct XhpkeSecretKey {
+    /// Wrapped upstream xHPKE secret key.
     pub(crate) inner: darkbio_crypto::xhpke::SecretKey,
 }
 
@@ -25,11 +29,13 @@ impl XhpkeSecretKey {
     /// Creates a private key from a 32-byte seed.
     #[frb(sync)]
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
-        let bytes_array: [u8; 32] = bytes
+        let bytes = Zeroizing::new(bytes);
+        let seed = bytes
+            .as_slice()
             .try_into()
             .map_err(|_| "Invalid key length, expected 32 bytes".to_string())?;
         Ok(Self {
-            inner: darkbio_crypto::xhpke::SecretKey::from_bytes(&bytes_array),
+            inner: darkbio_crypto::xhpke::SecretKey::from_bytes(seed),
         })
     }
 
@@ -37,7 +43,8 @@ impl XhpkeSecretKey {
     #[frb(sync)]
     pub fn from_der(der: Vec<u8>) -> Result<Self, String> {
         Ok(Self {
-            inner: darkbio_crypto::xhpke::SecretKey::from_der(&der).map_err(|e| e.to_string())?,
+            inner: darkbio_crypto::xhpke::SecretKey::from_der(&Zeroizing::new(der))
+                .map_err(|e| e.to_string())?,
         })
     }
 
@@ -45,7 +52,8 @@ impl XhpkeSecretKey {
     #[frb(sync)]
     pub fn from_pem(pem: String) -> Result<Self, String> {
         Ok(Self {
-            inner: darkbio_crypto::xhpke::SecretKey::from_pem(&pem).map_err(|e| e.to_string())?,
+            inner: darkbio_crypto::xhpke::SecretKey::from_pem(&Zeroizing::new(pem))
+                .map_err(|e| e.to_string())?,
         })
     }
 
@@ -125,10 +133,11 @@ impl XhpkeSecretKey {
     }
 }
 
-/// XhpkePublicKey is an X-Wing (X25519 + ML-KEM-768) public key for
-/// post-quantum hybrid public-key encryption.
+/// An X-Wing (X25519 and ML-KEM-768) public key for post-quantum hybrid
+/// public-key encryption.
 #[frb(opaque)]
 pub struct XhpkePublicKey {
+    /// Wrapped upstream xHPKE public key.
     pub(crate) inner: darkbio_crypto::xhpke::PublicKey,
 }
 
@@ -215,21 +224,20 @@ impl XhpkePublicKey {
     ) -> Result<(Vec<u8>, Vec<u8>), String> {
         let (session_key, ciphertext) = self
             .inner
-            .seal(&msg_to_seal, &msg_to_auth, &domain)
+            .seal(&Zeroizing::new(msg_to_seal), &msg_to_auth, &domain)
             .map_err(|e| e.to_string())?;
         Ok((session_key.to_vec(), ciphertext))
     }
 }
 
-/// XhpkeSender wraps an HPKE sender encryption context for multi-message
-/// communication. Each call to `seal` encrypts a message using an
-/// auto-incrementing nonce, ensuring unique ciphertexts even for identical
-/// plaintexts.
+/// Stateful HPKE sender encryption context for multi-message communication.
 ///
-/// The corresponding `XhpkeReceiver` must process messages in the same order
-/// they were sealed.
+/// Each call to `seal` encrypts a message using an auto-incrementing nonce,
+/// ensuring unique ciphertexts even for identical plaintexts. The corresponding
+/// receiver must process messages in the same order they were sealed.
 #[frb(opaque)]
 pub struct XhpkeSender {
+    /// Wrapped upstream xHPKE sender context.
     inner: darkbio_crypto::xhpke::Sender,
 }
 
@@ -238,19 +246,18 @@ impl XhpkeSender {
     #[frb(sync)]
     pub fn seal(&mut self, msg_to_seal: Vec<u8>, msg_to_auth: Vec<u8>) -> Result<Vec<u8>, String> {
         self.inner
-            .seal(&msg_to_seal, &msg_to_auth)
+            .seal(&Zeroizing::new(msg_to_seal), &msg_to_auth)
             .map_err(|e| e.to_string())
     }
 }
 
-/// XhpkeReceiver wraps an HPKE receiver decryption context for multi-message
-/// communication. Each call to `open` decrypts a message using an
-/// auto-incrementing nonce.
+/// Stateful HPKE receiver decryption context for multi-message communication.
 ///
-/// Messages must be provided in the same order they were sealed by the
-/// corresponding `XhpkeSender`.
+/// Each call to `open` decrypts a message using an auto-incrementing nonce.
+/// Messages must be provided in the same order they were sealed by the sender.
 #[frb(opaque)]
 pub struct XhpkeReceiver {
+    /// Wrapped upstream xHPKE receiver context.
     inner: darkbio_crypto::xhpke::Receiver,
 }
 
@@ -264,9 +271,10 @@ impl XhpkeReceiver {
     }
 }
 
-/// XhpkeFingerprint is a 32-byte unique identifier for an XHPKE key.
+/// A 32-byte unique identifier for an xHPKE key.
 #[frb(opaque)]
 pub struct XhpkeFingerprint {
+    /// Wrapped upstream xHPKE fingerprint.
     pub(crate) inner: darkbio_crypto::xhpke::Fingerprint,
 }
 

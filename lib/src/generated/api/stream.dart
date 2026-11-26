@@ -6,8 +6,9 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// Encrypts plaintext using the STREAM construction with ChaCha20-Poly1305.
-/// The key must be exactly 32 bytes and should never be reused across streams.
+// These functions are ignored because they are not marked as `pub`: `payload_key`
+
+/// Encrypts plaintext with a 32-byte key unique to this stream.
 Uint8List streamEncrypt({
   required List<int> key,
   required List<int> plaintext,
@@ -16,8 +17,7 @@ Uint8List streamEncrypt({
   plaintext: plaintext,
 );
 
-/// Decrypts ciphertext using the STREAM construction with ChaCha20-Poly1305.
-/// The key must be exactly 32 bytes and must match the key used for encryption.
+/// Returns the plaintext once every chunk authenticates under the 32-byte key.
 Uint8List streamDecrypt({
   required List<int> key,
   required List<int> ciphertext,

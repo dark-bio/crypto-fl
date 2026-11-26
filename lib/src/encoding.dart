@@ -4,6 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/// CBOR encoding helpers for plain Dart values.
+library;
+
 import 'dart:typed_data';
 
 import 'package:cbor/cbor.dart';
@@ -14,26 +17,33 @@ import 'package:cbor/cbor.dart';
 Uint8List encode(Object? value) =>
     Uint8List.fromList(cborEncode(_convert(value)));
 
-/// Converts a plain Dart value into its CBOR form, recursing into lists and
-/// maps to fix their lengths. Values that are already CBOR pass through
-/// unchanged, tags included.
+/// Converts a plain Dart value into its CBOR form, recursing into iterables
+/// and maps to fix their lengths and enforce value checks. Values that are
+/// already CBOR pass through unchanged, tags included.
 CborValue _convert(Object? value) => switch (value) {
   CborValue() => value,
-  String() when !_isWellFormed(value) => throw ArgumentError.value(
-    value,
-    'value',
-    'holds a lone surrogate, which has no UTF-8 form',
+  String() when !_isWellFormed(value) => throw ArgumentError(
+    'Text contains a lone surrogate, which has no UTF-8 form',
   ),
   Uint8List() => CborBytes(value),
-  List() => CborList([
+  Iterable() => CborList([
     for (final item in value) _convert(item),
   ], type: CborLengthType.definite),
-  Map() => CborMap({
-    for (final entry in value.entries)
-      _convert(entry.key): _convert(entry.value),
-  }, type: CborLengthType.definite),
+  Map() => _convertMap(value),
   _ => CborValue(value),
 };
+
+/// Converts a map to CBOR and rejects Dart keys that become the same CBOR key.
+CborMap _convertMap(Map<Object?, Object?> value) {
+  final entries = {
+    for (final entry in value.entries)
+      _convert(entry.key): _convert(entry.value),
+  };
+  if (entries.length != value.length) {
+    throw ArgumentError('Duplicate CBOR map key');
+  }
+  return CborMap(entries, type: CborLengthType.definite);
+}
 
 /// Reports whether [text] is well-formed UTF-16. The `cbor` package would
 /// silently encode a lone surrogate as U+FFFD, signing a different string.

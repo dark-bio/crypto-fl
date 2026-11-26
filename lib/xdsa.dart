@@ -40,7 +40,10 @@ import 'src/generated/api/xdsa.dart' as ffi;
 /// An ML-DSA-65 private key paired with an Ed25519 private key for creating
 /// and verifying quantum resistant digital signatures.
 class SecretKey {
+  /// Native xDSA secret key handle.
   final ffi.XdsaSecretKey _inner;
+
+  /// Wraps a native xDSA secret key.
   SecretKey._(this._inner);
 
   /// The native key, refused once disposed, before the bridge allocates
@@ -83,7 +86,8 @@ class SecretKey {
   /// Returns a 256-bit unique identifier for this key.
   Fingerprint fingerprint() => Fingerprint._(_live.fingerprint());
 
-  /// Creates a digital signature of the message.
+  /// Signs [message] with hedged ML-DSA-65 and Ed25519. Signing the same
+  /// message again uses fresh randomness for the ML-DSA-65 signature.
   Signature sign(Uint8List message) =>
       Signature._(_live.sign(message: message));
 
@@ -107,7 +111,10 @@ class SecretKey {
 /// An ML-DSA-65 public key paired with an Ed25519 public key for verifying
 /// quantum resistant digital signatures.
 class PublicKey {
+  /// Native xDSA public key handle.
   final ffi.XdsaPublicKey _inner;
+
+  /// Wraps a native xDSA public key.
   PublicKey._(this._inner);
 
   /// Converts a 1984-byte array into a public key, the ML-DSA-65 key (1952
@@ -138,7 +145,7 @@ class PublicKey {
   /// Verifies a signature against a message.
   ///
   /// Throws if the signature does not verify under this key for [message].
-  /// Either half failing is enough, and the two cases are not told apart.
+  /// Either half failing is enough, and the two failures are not distinguished.
   void verify(Uint8List message, Signature signature) =>
       _inner.verify(message: message, signature: signature._inner);
 
@@ -150,12 +157,25 @@ class PublicKey {
 
   /// Serializes a public key into a PEM string.
   String toPem() => _inner.toPem();
+
+  /// Whether [other] is an xDSA public key with the same bytes.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicKey && listEquals(toBytes(), other.toBytes()));
+
+  /// A hash of the encoded public key.
+  @override
+  int get hashCode => Object.hashAll(toBytes());
 }
 
 /// An ML-DSA-65 signature (3309 bytes) paired with an Ed25519 signature (64
 /// bytes), 3373 bytes in total.
 class Signature {
+  /// Native xDSA signature handle.
   final ffi.XdsaSignature _inner;
+
+  /// Wraps a native xDSA signature.
   Signature._(this._inner);
 
   /// Creates a signature from a 3373-byte array.
@@ -170,7 +190,10 @@ class Signature {
 
 /// A 256-bit unique identifier for an xDSA key.
 class Fingerprint {
+  /// Native xDSA fingerprint handle.
   final ffi.XdsaFingerprint _inner;
+
+  /// Wraps a native xDSA fingerprint.
   Fingerprint._(this._inner);
 
   /// Creates a fingerprint from a 32-byte array.
@@ -185,8 +208,10 @@ class Fingerprint {
   /// Whether [other] is an xDSA fingerprint with the same bytes.
   @override
   bool operator ==(Object other) =>
-      other is Fingerprint && listEquals(toBytes(), other.toBytes());
+      identical(this, other) ||
+      (other is Fingerprint && listEquals(toBytes(), other.toBytes()));
 
+  /// A hash of the fingerprint bytes.
   @override
   int get hashCode => Object.hashAll(toBytes());
 }

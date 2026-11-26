@@ -4,6 +4,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//! Canonical CBOR subset validation for the Dart bindings.
+
 use flutter_rust_bridge::frb;
 
 /// Validates that the given bytes are well-formed CBOR.

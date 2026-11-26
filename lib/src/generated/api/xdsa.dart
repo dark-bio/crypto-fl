@@ -70,7 +70,7 @@ abstract class XdsaSecretKey implements RustOpaqueInterface {
   /// Returns the public key corresponding to this private key.
   XdsaPublicKey publicKey();
 
-  /// Signs a message, returning a composite signature.
+  /// Signs a message with hedged ML-DSA-65 and Ed25519.
   XdsaSignature sign({required List<int> message});
 
   /// Serializes the private key to a 64-byte seed.

@@ -49,7 +49,10 @@ import 'src/generated/api/xhpke.dart' as ffi;
 
 /// An X-Wing private key for decrypting HPKE messages.
 class SecretKey {
+  /// Native xHPKE secret key handle.
   final ffi.XhpkeSecretKey _inner;
+
+  /// Wraps a native xHPKE secret key.
   SecretKey._(this._inner);
 
   /// The native key, refused once disposed, before the bridge allocates
@@ -156,7 +159,10 @@ class SecretKey {
 
 /// An X-Wing public key for encrypting HPKE messages.
 class PublicKey {
+  /// Native xHPKE public key handle.
   final ffi.XhpkePublicKey _inner;
+
+  /// Wraps a native xHPKE public key.
   PublicKey._(this._inner);
 
   /// Converts a 1216-byte array into a public key.
@@ -192,8 +198,8 @@ class PublicKey {
   ///
   /// Messages encrypted with the returned context must be decrypted in order
   /// by the corresponding receiver. X-Wing is used in HPKE's base mode, which
-  /// does not authenticate the sender, so the recipient cannot tell who sent
-  /// them from the context alone.
+  /// does not authenticate the sender, so the recipient cannot identify who
+  /// sent them from the context alone.
   ///
   /// - [domain]: Application domain, the same as the recipient's
   (Sender, Uint8List) newSender({required Uint8List domain}) {
@@ -209,8 +215,8 @@ class PublicKey {
   /// Returns the 1120-byte encapsulated session key and the ciphertext.
   /// Opening them with [SecretKey.open] needs both, along with [msgToAuth] and
   /// [domain]. X-Wing is used in HPKE's base mode, which does not authenticate
-  /// the sender, so the recipient cannot tell who sent the ciphertext from it
-  /// alone.
+  /// the sender, so the recipient cannot identify who sent the ciphertext from
+  /// it alone.
   ///
   /// - [msgToSeal]: The plaintext to encrypt
   /// - [msgToAuth]: Additional authenticated data (not encrypted, but bound)
@@ -229,11 +235,24 @@ class PublicKey {
 
   /// Serializes a public key into a PEM string.
   String toPem() => _inner.toPem();
+
+  /// Whether [other] is an xHPKE public key with the same bytes.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PublicKey && listEquals(toBytes(), other.toBytes()));
+
+  /// A hash of the encoded public key.
+  @override
+  int get hashCode => Object.hashAll(toBytes());
 }
 
 /// A 256-bit unique identifier for an xHPKE key.
 class Fingerprint {
+  /// Native xHPKE fingerprint handle.
   final ffi.XhpkeFingerprint _inner;
+
+  /// Wraps a native xHPKE fingerprint.
   Fingerprint._(this._inner);
 
   /// Creates a fingerprint from a 32-byte array.
@@ -248,8 +267,10 @@ class Fingerprint {
   /// Whether [other] is an xHPKE fingerprint with the same bytes.
   @override
   bool operator ==(Object other) =>
-      other is Fingerprint && listEquals(toBytes(), other.toBytes());
+      identical(this, other) ||
+      (other is Fingerprint && listEquals(toBytes(), other.toBytes()));
 
+  /// A hash of the fingerprint bytes.
   @override
   int get hashCode => Object.hashAll(toBytes());
 }
@@ -262,7 +283,10 @@ class Fingerprint {
 /// The corresponding [Receiver] must process messages in the same order
 /// they were sealed.
 class Sender {
+  /// Native xHPKE sender context handle.
   final ffi.XhpkeSender _inner;
+
+  /// Wraps a native xHPKE sender context.
   Sender._(this._inner);
 
   /// The native context, refused once disposed, before the bridge allocates
@@ -296,7 +320,10 @@ class Sender {
 /// Messages must be provided in the same order they were sealed by the
 /// corresponding [Sender].
 class Receiver {
+  /// Native xHPKE receiver context handle.
   final ffi.XhpkeReceiver _inner;
+
+  /// Wraps a native xHPKE receiver context.
   Receiver._(this._inner);
 
   /// The native context, refused once disposed, before the bridge allocates

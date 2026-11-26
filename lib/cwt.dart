@@ -62,8 +62,10 @@ import 'xdsa.dart'
         FingerprintInternal;
 import 'xhpke.dart' as xhpke show PublicKey;
 
-// COSE algorithm identifiers used in Confirm claim encoding.
+/// COSE algorithm identifier for xDSA keys in Confirm claims.
 const int _algorithmIdXdsa = -70000;
+
+/// COSE algorithm identifier for xHPKE keys in Confirm claims.
 const int _algorithmIdXhpke = -70001;
 
 /// A CWT claims set with typed accessors for standard CWT (RFC 8392) and
@@ -83,11 +85,13 @@ const int _algorithmIdXhpke = -70001;
 /// `swversion` requires `swname`. [DebugState.disabledPermanently] also
 /// requires `oemid`. These relationships are not checked by [verify].
 class Claims {
+  /// Backing map of integer claim keys to Dart values.
   final Map<int, Object?> _map;
 
   /// Creates an empty claims set.
   Claims() : _map = {};
 
+  /// Wraps an already decoded claim map.
   Claims._(this._map);
 
   /// Identifies the principal that issued the token (key 1), a URI or any
@@ -313,6 +317,7 @@ class Claims {
   /// Sets a custom claim by its integer key, or removes it if [value] is null.
   void operator []=(int key, Object? value) => _set(key, value);
 
+  /// Stores [value] under [key], or deletes [key] when [value] is null.
   void _set(int key, Object? value) {
     if (value != null) {
       _map[key] = value;
@@ -414,7 +419,8 @@ enum IntendedUse {
 
 /// Issues a CWT by signing the [claims] with COSE Sign1.
 ///
-/// Uses the current system time as the COSE signature timestamp.
+/// Uses the current system time as the COSE signature timestamp. Use
+/// [issueAt] to supply the timestamp.
 ///
 /// - [claims]: The claims to include in the token
 /// - [signer]: The xDSA secret key to sign with
@@ -429,6 +435,31 @@ Uint8List issue({
   claimsCbor: claims._encode(),
   signer: signer.inner,
   domain: domain,
+);
+
+/// Issues a CWT by signing the [claims] with COSE Sign1 using an explicit
+/// COSE signature timestamp.
+///
+/// The [timestamp] belongs to the COSE signature header. Set [Claims.issuedAt]
+/// and the other temporal claims separately on [claims].
+///
+/// - [claims]: The claims to include in the token
+/// - [signer]: The xDSA secret key to sign with
+/// - [domain]: Application domain for separating protocol purposes
+/// - [timestamp]: Unix timestamp in seconds to embed in the COSE signature
+///
+/// Throws if [claims] cannot be encoded as a canonical CBOR map or if [signer]
+/// has been disposed.
+Uint8List issueAt({
+  required Claims claims,
+  required xdsa.SecretKey signer,
+  required Uint8List domain,
+  required int timestamp,
+}) => ffi.cwtIssueAt(
+  claimsCbor: claims._encode(),
+  signer: signer.inner,
+  domain: domain,
+  timestamp: timestamp,
 );
 
 /// Verifies a CWT's COSE signature and temporal validity, then returns the

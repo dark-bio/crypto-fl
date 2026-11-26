@@ -6,16 +6,14 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// Derives a cryptographic key from a password using Argon2id.
+/// Derives `key_length` bytes with Argon2id and clears the native password
+/// buffer after use.
 ///
-/// - `password`: The password to derive the key from
-/// - `salt`: The salt (should be random, at least 16 bytes)
-/// - `time`: Number of iterations (RFC 9106 recommends 1)
-/// - `memory`: Memory size in KiB (RFC 9106 recommends 2048*1024 for 2GB)
-/// - `threads`: Degree of parallelism
-/// - `key_length`: Desired output key length in bytes
+/// `time` counts passes, `memory` is in KiB, and `threads` counts lanes.
 ///
-/// Returns the derived key of the specified length.
+/// # Panics
+///
+/// Panics if the parameters exceed Argon2id's limits or allocation fails.
 Uint8List argon2Key({
   required List<int> password,
   required List<int> salt,

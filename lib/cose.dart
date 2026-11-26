@@ -118,7 +118,10 @@ import 'xhpke.dart'
         PublicKeyInternal,
         FingerprintInternal;
 
+/// Encodes a plain Dart value into definite-length CBOR bytes.
 Uint8List _encode(Object? value) => encoding.encode(value);
+
+/// Decodes CBOR bytes into a plain Dart value via `package:cbor`.
 Object? _decode(Uint8List bytes) => cbor.cbor.decode(bytes);
 
 /// How many zero bytes a sender appends to the signed envelope inside the

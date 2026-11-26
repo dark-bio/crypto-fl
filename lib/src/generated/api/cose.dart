@@ -8,6 +8,9 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'xdsa.dart';
 import 'xhpke.dart';
 
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `SecretRaw`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `encode_cbor_to`
+
 /// Creates a COSE_Sign1 signature with an embedded payload.
 ///
 /// - `msg_to_embed`: The payload to embed and sign
